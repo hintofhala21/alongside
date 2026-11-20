@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "alongside-api",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-20",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": {
+    "AI_ENABLED": "false",
+    "OPENAI_MODEL": "gpt-6-luna",
+    "ALLOWED_ORIGIN": "https://hintofhala21.github.io",
+    "MAX_MONTHLY_REQUESTS": "500",
+    "MAX_DAILY_REQUESTS": "60",
+    "MAX_SESSION_REQUESTS": "30"
+  },
+  "durable_objects": { "bindings": [{ "name": "HUB", "class_name": "AlongsideHub" }] },
+  "exports": { "AlongsideHub": { "type": "durable-object", "storage": "sqlite" } }
+}
