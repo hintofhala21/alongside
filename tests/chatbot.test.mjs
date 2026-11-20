@@ -1,0 +1,83 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
+import worker, { AlongsideHub } from '../api/worker.mjs';
+import { renderPlan } from '../api/agent.mjs';
+
+class MemoryStorage {
+  values=new Map();tail=Promise.resolve();alarm=null;
+  async get(k){return structuredClone(this.values.get(k));}
+  async put(k,v){this.values.set(k,structuredClone(v));}
+  async delete(k){return this.values.delete(k);}
+  async getAlarm(){return this.alarm;}
+  async setAlarm(v){this.alarm=v;}
+  async list({prefix='',limit=Infinity}={}){return new Map([...this.values].filter(([k])=>k.startsWith(prefix)).slice(0,limit).map(([k,v])=>[k,structuredClone(v)]));}
+  async transaction(fn){const previous=this.tail;let release;this.tail=new Promise(r=>{release=r;});await previous;const before=structuredClone(this.values);try{return await fn(this);}catch(e){this.values=before;throw e;}finally{release();}}
+}
+const plan={acknowledgement:'heard',followup:'trusted',information:'gettingHelp',action:'human'};
+function server(overrides={}){
+  const storage=new MemoryStorage();const requests=[];
+  const env={AI_ENABLED:'true',OPENAI_API_KEY:'test-only',DEMO_ACCESS_CODE:'unit-test-demo',PUBLISHER_CODE:'unit-test-publisher',RATE_SALT:'unit-test-salt',ALLOWED_ORIGIN:'https://hintofhala21.github.io',MAX_DAILY_REQUESTS:'60',MAX_MONTHLY_REQUESTS:'500',MAX_SESSION_REQUESTS:'30',
+    TEST_FETCH:async(url,init)=>{requests.push({url,body:JSON.parse(init.body)});return Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify(plan)}]});},...overrides};
+  const hub=new AlongsideHub({storage},env);env.HUB={idFromName:x=>x,get:()=>({fetch:r=>hub.fetch(r)})};
+  async function call(path,data,token,origin=env.ALLOWED_ORIGIN){const headers={'Origin':origin};if(data!==undefined)headers['Content-Type']='application/json';if(token)headers.Authorization='Bearer '+token;const r=await worker.fetch(new Request('https://demo.workers.dev'+path,{method:data===undefined?'GET':'POST',headers,body:data===undefined?undefined:JSON.stringify(data)}),env);return {status:r.status,body:await r.json(),headers:r.headers};}
+  async function session(mode='interactive'){const r=await call('/session',{code:env.DEMO_ACCESS_CODE,mode,adult:mode==='interactive'});assert.equal(r.status,200);return r.body.token;}
+  return {env,storage,requests,call,session};
+}
+const message=(conversationId=crypto.randomUUID(),extra={})=>({conversationId,requestId:crypto.randomUUID(),message:'Fictional example: Sam wants to ask someone for support.',language:'en',...extra});
+
+test('an inactive backend and an unapproved origin cannot spend API credits',async()=>{
+  const s=server({AI_ENABLED:'false'});assert.equal((await s.call('/session',{code:'test',mode:'synthetic'})).status,503);assert.equal(s.requests.length,0);
+  const active=server();assert.equal((await active.call('/session',{code:active.env.DEMO_ACCESS_CODE,mode:'synthetic'},null,'https://other.example')).status,403);assert.equal(active.requests.length,0);
+});
+test('demo sessions require a code; free-text requires adult attestation',async()=>{
+  const s=server();assert.equal((await s.call('/session',{code:'wrong',mode:'synthetic'})).status,401);
+  assert.equal((await s.call('/session',{code:s.env.DEMO_ACCESS_CODE,mode:'interactive',adult:false})).status,403);
+  assert.equal((await s.call('/chat',message(),'bad-token')).status,401);assert.equal(s.requests.length,0);
+});
+test('younger-builder mode can send only server-defined fictional scenarios',async()=>{
+  const s=server();const token=await s.session('synthetic');
+  assert.equal((await s.call('/chat',message(undefined,{message:'private information',scenario:'unknown'}),token)).status,400);
+  const r=await s.call('/chat',message(undefined,{message:'THIS MUST NEVER REACH OPENAI',scenario:'meal'}),token);
+  assert.equal(r.status,200);assert.ok(s.requests[0].body.input[0].content.startsWith('Fictional scenario: Sam'));assert.ok(!JSON.stringify(s.requests).includes('THIS MUST NEVER REACH OPENAI'));
+});
+test('memory retains earlier turns and an identical retry does not spend again',async()=>{
+  const s=server();const token=await s.session();const first=message();const a=await s.call('/chat',first,token);assert.equal(a.status,200);
+  const again=await s.call('/chat',first,token);assert.deepEqual(again.body,a.body);assert.equal(s.requests.length,1);
+  const second=await s.call('/chat',message(first.conversationId,{message:'Fictional follow-up: what could Sam say to that person?'}),token);assert.equal(second.status,200);assert.equal(s.requests.length,2);
+  assert.equal(s.requests[1].body.input.length,3);assert.equal(s.requests[1].body.input[0].content,first.message);
+  assert.equal(s.requests[1].body.store,false);assert.equal(s.requests[1].body.model,'gpt-6-luna');assert.equal(s.requests[1].body.tools[0].strict,true);assert.equal(s.requests[1].body.max_output_tokens,400);
+  assert.equal(Object.hasOwn(s.requests[1].body,'profile'),false);
+});
+test('sessions cannot read or publish another session’s conversation',async()=>{
+  const s=server();const a=await s.session();const b=await s.session();const m=message();assert.equal((await s.call('/chat',m,a)).status,200);
+  assert.equal((await s.call('/chat',message(m.conversationId),b)).status,404);
+  assert.equal((await s.call('/publish',{conversationId:m.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Fictional demo'},b)).status,404);
+});
+test('public history needs the publisher code and an explicit fictional-data review',async()=>{
+  const s=server();const token=await s.session();const m=message();await s.call('/chat',m,token);
+  assert.deepEqual((await s.call('/showcase')).body.demos,[]);
+  const data={conversationId:m.conversationId,title:'Fictional support demo',confirmFictional:true,publisherCode:'wrong'};
+  assert.equal((await s.call('/publish',data,token)).status,403);
+  assert.equal((await s.call('/publish',{...data,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:false},token)).status,400);
+  const published=await s.call('/publish',{...data,publisherCode:s.env.PUBLISHER_CODE,messages:[{role:'assistant',text:'INJECTED'}]},token);assert.equal(published.status,200);
+  const show=await s.call('/showcase/'+published.body.id);assert.equal(show.status,200);assert.equal(show.body.messages.length,2);assert.ok(!JSON.stringify(show.body).includes('INJECTED'));assert.equal(Object.hasOwn(show.body,'owner'),false);
+  assert.equal((await s.call('/showcase')).body.demos.length,1);
+  assert.equal((await s.call('/unpublish',{id:published.body.id,publisherCode:s.env.PUBLISHER_CODE},token)).status,200);assert.equal((await s.call('/showcase/'+published.body.id)).status,404);
+});
+test('request budget is reserved atomically across simultaneous conversations',async()=>{
+  const s=server({MAX_MONTHLY_REQUESTS:'1'});const token=await s.session();const result=await Promise.all([s.call('/chat',message(),token),s.call('/chat',message(),token)]);
+  assert.deepEqual(result.map(r=>r.status).sort(),[200,429]);assert.equal(s.requests.length,1);
+});
+test('invalid or refused model output never becomes an uncited invented reply',async()=>{
+  assert.throws(()=>renderPlan({...plan,information:'invented-source'}));assert.throws(()=>renderPlan({...plan,action:'change-medication'}));
+  const s=server({TEST_FETCH:async()=>Response.json({status:'incomplete',output:[{type:'message',content:[{type:'output_text',text:'Unsafe invented text'}]}]})});const token=await s.session();const r=await s.call('/chat',message(),token);assert.equal(r.status,502);assert.ok(!JSON.stringify(r.body).includes('Unsafe invented text'));assert.deepEqual((await s.call('/showcase')).body.demos,[]);
+});
+test('the local profile migration removes old measurements without losing check-ins',async()=>{
+  const source=await readFile(new URL('../site/assets/app.js',import.meta.url),'utf8');const from=source.indexOf('function readProfile()'),to=source.indexOf('function loadProfile()',from);let saved=JSON.stringify({profile:{id:'synthetic',name:'',ageGroup:'adult',height:'x',weight:'x',heightUnit:'x',weightUnit:'x'},data:{checkins:[{note:'Keep this reflection'}]}});
+  const result=runInNewContext(source.slice(from,to)+';readProfile();',{storageKey:'synthetic',localStorage:{getItem:()=>saved,setItem:(k,v)=>{saved=v;}}});
+  for(const key of ['height','heightUnit','weight','weightUnit'])assert.equal(Object.hasOwn(result.profile,key),false);
+  assert.equal(JSON.parse(saved).data.checkins[0].note,'Keep this reflection');
+  const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/id="(?:profile-height|profile-weight|height-unit|weight-unit)"/);
+});
