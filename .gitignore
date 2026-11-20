@@ -1,0 +1,20 @@
+# Secrets belong on a future private server, never in the published website.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+*.p12
+credentials*.json
+service-account*.json
+
+# Generated files and local-only data
+build/
+node_modules/
+.wrangler/
+.DS_Store
+*.log
+coverage/
+outputs/
+.openai/
