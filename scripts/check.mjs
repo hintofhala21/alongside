@@ -1,0 +1,58 @@
+import { readdir, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve, relative, extname } from 'node:path';
+import { Script } from 'node:vm';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const skipped = new Set(['.git', 'node_modules', 'build', '.wrangler', 'outputs']);
+const allowedPublic = new Set(['index.html', 'privacy.html', '404.html', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/styles.css', 'assets/favicon.svg']);
+
+export function assertNoSecret(contents, name) {
+  // Detect common credential formats without printing the value or matching line.
+  const patterns = [
+    /sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20,}/,
+    /(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}/,
+    /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
+    /"private_key"\s*:\s*"-----BEGIN/,
+    /(?:OPENAI_API_KEY|CLOUDFLARE_API_TOKEN)\s*[:=]\s*["']?(?!["']?(?:$|[\s<]|your_|replace_|example|process\.|env\.))[A-Za-z0-9_-]{16,}/m
+  ];
+  if (patterns.some(pattern => pattern.test(contents))) throw new Error(`Possible secret in ${name}. Remove it before publishing; value withheld.`);
+}
+
+async function files(directory) {
+  const found = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (skipped.has(entry.name)) continue;
+    const path = resolve(directory, entry.name);
+    if (entry.isSymbolicLink()) throw new Error(`Symbolic link not allowed: ${relative(root, path)}`);
+    if (entry.isDirectory()) found.push(...await files(path));
+    else found.push(path);
+  }
+  return found;
+}
+
+export async function check() {
+  const all = await files(root);
+  for (const file of all) {
+    const name = relative(root, file);
+    if (/(?:^|\/)\.(?:env|dev\.vars)(?:\.|$)|\.(?:pem|key|p12)$/.test(name)) throw new Error(`Secret file found: ${name}. Move it out of this static project.`);
+    const contents = await readFile(file, 'utf8');
+    assertNoSecret(contents, name);
+    if (extname(file) === '.js') new Script(contents, { filename: name });
+    if (name.startsWith('site/')) {
+      const publicName = name.slice(5);
+      if (!allowedPublic.has(publicName)) throw new Error(`Unexpected public file: ${publicName}. Review and explicitly allow it.`);
+      if (extname(file) === '.html') {
+        if (/\son[a-z]+\s*=|\sstyle\s*=|javascript:/i.test(contents)) throw new Error(`Inline execution or styles in ${name}.`);
+        if (!contents.includes('Content-Security-Policy')) throw new Error(`Missing security policy in ${name}.`);
+        for (const match of contents.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
+          if (match[1].includes('application/json')) JSON.parse(match[2]);
+          else if (!match[1].includes('src="./assets/app.js"') || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
+        }
+      }
+    }
+  }
+  console.log('Checks passed: JavaScript, embedded JSON, public-file allowlist and credential scan.');
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await check();
