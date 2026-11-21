@@ -12,6 +12,7 @@ The system prompt tells Luna how to select a supportive reply, a cited library t
 | [v6](v6.mjs) | 2026-11-21 | Personal and adult judge chats answer everyday messages directly. Health questions use approved summaries. Two-turn conversation and health routing covered by tests. |
 | [v7](v7.mjs) | 2026-11-21 | Recognize social comparison, belonging and ambivalence in context. Live comparison recorded in the [evaluation](../../docs/LUNA-EVALUATION.md). |
 | [v8](v8.mjs) | 2026-11-21 | Honor the requested kind of help and avoid adding unspoken feelings to a draft. |
+| [v9](v9.mjs) | 2026-11-21 | Ask what happened when context is missing, then follow the visitor’s description of eating distress. |
 
 The archived templates include placeholders. The listed project revision preserves the exact menus and library used to fill them.
 
@@ -24,3 +25,5 @@ Create the next numbered file. Keep previous versions and record the date, reaso
 Kids prompt v1 (November 2026) runs in the browser. It uses a child-oriented writer and a separate review of original text before display. Medical questions use local library material. The original kids instructions are preserved in revision 1d9c38f. Version 2 adds social-comparison and help-seeking guidance to the writer and reviewer. The current instructions are kept in [kids-chat.js](../../site/assets/kids-chat.js).
 
 Kids v3 asks the writer for a message addressed to the recipient when it recognizes a request for a draft. The same safety review still applies. A real on-device test of v2 had responded to the child instead.
+
+Kids v4 updates the writer and reviewer to distinguish a disclosure about eating distress from a request for clinical advice.
