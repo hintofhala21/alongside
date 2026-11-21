@@ -722,5 +722,14 @@
   "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "你可以询问资料库中的主题，或开始一次日常记录。",
   "Type your own message…": "输入你想说的话…",
   "Choose how to chat": "选择聊天方式",
-  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "输入消息或选择一个推荐话题。发送前，你可以选择实时聊天或本机聊天。"
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "输入消息或选择一个推荐话题。发送前，你可以选择实时聊天或本机聊天。",
+  "Kids’ chat": "儿童聊天",
+  "This browser cannot run kids’ AI chat in this language. You can use the library here.": "此浏览器不支持这种语言的儿童 AI 聊天。你可以使用资料库。",
+  "This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.": "这个 AI 在你的设备上运行，有时会出错。关闭聊天后，对话就会清除。请不要透露姓名、地址和电话号码。",
+  "A trusted adult can help with this. You could say, “I want to talk about something. Can you listen?”": "你可以找信任的大人帮忙。你可以说：“我有件事想聊聊。你能听我说吗？”",
+  "Start on-device AI": "启动设备上的 AI",
+  "Luna · on-device AI": "Luna · 本机 AI",
+  "Getting the AI ready on this device…": "正在本设备上准备 AI…",
+  "Download AI and start": "下载 AI 并开始",
+  "Luna could not reply. You can try again or use the library.": "Luna 没能回复。你可以重试或使用资料库。"
 }

@@ -255,3 +255,7 @@ h1 { font-size:clamp(2rem,7vw,3.8rem); }
 @media(max-width:1049px) { .sidebar #workspace-nav {display:none;} .sidebar.menu-open #workspace-nav {display:block;overflow:visible;} .sidebar.menu-open .nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:auto;} .sidebar.menu-open .nav a {white-space:normal;} .chat-view .topbar {margin-bottom:15px;} }
 @media(max-width:600px) { .chat-welcome {min-height:190px;padding:22px;}.welcome-copy h2 {font-size:2.15rem;}.welcome-copy .eyebrow {margin-bottom:10px;}.welcome-copy p:last-child {margin-top:12px;font-size:.85rem;}.chat-toolbar {margin-bottom:14px;} }
 @media(min-width:1050px) { .menu-toggle {display:none;} }
+
+#kids-dialog {width:min(38rem,94vw);max-height:90dvh;overflow:auto;}
+.kids-log {max-height:40dvh;overflow:auto;}
+.kids-log:empty {display:none;}

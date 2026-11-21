@@ -722,5 +722,14 @@
   "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "Você pode perguntar sobre um tema da biblioteca ou iniciar um registro.",
   "Type your own message…": "Escreva sua mensagem…",
   "Choose how to chat": "Escolha como conversar",
-  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "Escreva uma mensagem ou escolha uma sugestão. Antes de enviar, você pode escolher o chat ao vivo ou neste dispositivo."
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "Escreva uma mensagem ou escolha uma sugestão. Antes de enviar, você pode escolher o chat ao vivo ou neste dispositivo.",
+  "Kids’ chat": "Conversa para crianças",
+  "This browser cannot run kids’ AI chat in this language. You can use the library here.": "Este navegador não consegue usar a IA para crianças neste idioma. Você pode usar a biblioteca.",
+  "This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.": "Esta IA funciona no seu dispositivo e pode errar. Fechar a conversa apaga as mensagens. Guarde seu nome, endereço e telefone para você.",
+  "A trusted adult can help with this. You could say, “I want to talk about something. Can you listen?”": "Um adulto de confiança pode ajudar. Você pode dizer: “Quero conversar sobre uma coisa. Você pode me ouvir?”",
+  "Start on-device AI": "Iniciar IA no dispositivo",
+  "Luna · on-device AI": "Luna · IA no dispositivo",
+  "Getting the AI ready on this device…": "Preparando a IA neste dispositivo…",
+  "Download AI and start": "Baixar a IA e começar",
+  "Luna could not reply. You can try again or use the library.": "Luna não conseguiu responder. Você pode tentar de novo ou usar a biblioteca."
 }

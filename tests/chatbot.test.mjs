@@ -133,7 +133,7 @@ test('a first draft awaits consent and a younger profile stays on-device even af
   runInNewContext(src,vm);
   const chat=Object.create(vm.AlongsideChat.prototype);
   let age,consentPrompts=0,localReplies=0;
-  Object.assign(chat,{options:{getAgeGroup:()=>age},openPersonal:async()=>{consentPrompts++;},append:()=>{},render:()=>{},libraryReply:()=>{localReplies++;return {text:'local'};}});
+  Object.assign(chat,{options:{getAgeGroup:()=>age},openPersonal:async()=>{consentPrompts++;},openKids:()=>{localReplies++;},append:()=>{},render:()=>{},libraryReply:()=>{localReplies++;return {text:'local'};}});
   await chat.send(input.value);assert.equal(consentPrompts,1);assert.equal(input.value,'My unsent draft');assert.equal(localReplies,0);
   age='teen';chat.session={mode:'personal',expires:Date.now()+10000};
   await chat.send(input.value);assert.equal(chat.session,null);assert.equal(localReplies,1);assert.equal(input.value,'');

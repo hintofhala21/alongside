@@ -722,5 +722,14 @@
   "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "आप लाइब्रेरी के किसी विषय पर सवाल पूछ सकते हैं या चेक-इन शुरू कर सकते हैं।",
   "Type your own message…": "अपना संदेश लिखें…",
   "Choose how to chat": "चैट का तरीका चुनें",
-  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "अपना संदेश लिखें या कोई सुझाया हुआ सवाल चुनें। भेजने से पहले आप लाइव चैट या इसी डिवाइस पर चैट चुन सकते हैं।"
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "अपना संदेश लिखें या कोई सुझाया हुआ सवाल चुनें। भेजने से पहले आप लाइव चैट या इसी डिवाइस पर चैट चुन सकते हैं।",
+  "Kids’ chat": "बच्चों की चैट",
+  "This browser cannot run kids’ AI chat in this language. You can use the library here.": "इस ब्राउज़र में इस भाषा में बच्चों की एआई चैट नहीं चल सकती। आप लाइब्रेरी इस्तेमाल कर सकते हैं।",
+  "This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.": "यह एआई आपके डिवाइस पर चलता है और गलती कर सकता है। चैट बंद करने पर बातचीत मिट जाती है। अपना नाम, पता और फ़ोन नंबर न लिखें।",
+  "A trusted adult can help with this. You could say, “I want to talk about something. Can you listen?”": "किसी भरोसेमंद बड़े से मदद माँग सकते हैं। कहें, “मुझे कुछ बात करनी है। क्या आप सुनेंगे?”",
+  "Start on-device AI": "डिवाइस पर एआई शुरू करें",
+  "Luna · on-device AI": "लूना · डिवाइस पर एआई",
+  "Getting the AI ready on this device…": "इस डिवाइस पर एआई तैयार हो रहा है…",
+  "Download AI and start": "एआई डाउनलोड करके शुरू करें",
+  "Luna could not reply. You can try again or use the library.": "लूना जवाब नहीं दे पाई। फिर कोशिश करें या लाइब्रेरी इस्तेमाल करें।"
 }

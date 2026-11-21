@@ -722,5 +722,14 @@
   "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "يمكنك هنا طرح سؤال عن أحد مواضيع المكتبة أو بدء متابعة.",
   "Type your own message…": "اكتب رسالتك…",
   "Choose how to chat": "اختر طريقة المحادثة",
-  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "اكتب رسالة أو اختر سؤالًا مقترحًا. قبل الإرسال يمكنك اختيار المحادثة المباشرة أو المحادثة على جهازك."
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "اكتب رسالة أو اختر سؤالًا مقترحًا. قبل الإرسال يمكنك اختيار المحادثة المباشرة أو المحادثة على جهازك.",
+  "Kids’ chat": "محادثة للصغار",
+  "This browser cannot run kids’ AI chat in this language. You can use the library here.": "لا يدعم هذا المتصفح محادثة الصغار بالذكاء الاصطناعي بهذه اللغة. يمكنك استخدام المكتبة.",
+  "This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.": "يعمل الذكاء الاصطناعي على جهازك وقد يخطئ. تُمسح المحادثة عند إغلاقها. احتفظ باسمك وعنوانك ورقم هاتفك لنفسك.",
+  "A trusted adult can help with this. You could say, “I want to talk about something. Can you listen?”": "يمكن لشخص بالغ تثق به مساعدتك. يمكنك أن تقول: «أريد أن أتحدث عن شيء. هل تسمعني؟»",
+  "Start on-device AI": "تشغيل الذكاء الاصطناعي على الجهاز",
+  "Luna · on-device AI": "لونا · ذكاء اصطناعي على جهازك",
+  "Getting the AI ready on this device…": "جارٍ تجهيز الذكاء الاصطناعي على جهازك…",
+  "Download AI and start": "تنزيل الذكاء الاصطناعي والبدء",
+  "Luna could not reply. You can try again or use the library.": "تعذّر على لونا الرد. حاول مجددًا أو استخدم المكتبة."
 }

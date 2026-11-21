@@ -16,3 +16,7 @@ The archived templates include placeholders. The listed project revision preserv
 ## For the next change
 
 Create the next numbered file. Keep previous versions and record the date, reason, and test result in a new row. Import the new version in the agent and run the chat tests before release. For a live trial, record the version and outcome with a fictional scenario. Keep private messages and access codes out of this log.
+
+## On-device kids’ chat
+
+Kids prompt v1 (November 2026) runs in the browser. It uses a child-oriented writer and a separate review of original text before display. Medical questions use local library material. The two instructions are kept in [kids-chat.js](../../site/assets/kids-chat.js).

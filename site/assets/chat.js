@@ -58,14 +58,16 @@
       if(!id('conversation')) return;
       if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic'))) {this.cancel();this.disconnect();}
       const personal=this.session?.mode==='personal';
+      const kids=!this.session && (this.younger() || sessionStorage.getItem(localChoice)==='kids');
       const choosing=!this.session && !this.younger() && !sessionStorage.getItem(localChoice);
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
       id('chat-welcome').hidden=hasMessages; id('chat-options').hidden=hasMessages || this.session?.mode==='synthetic';
-      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : choosing ? 'Choose how to chat' : 'Approved library';
+      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : kids ? 'Kids’ chat' : choosing ? 'Choose how to chat' : 'Approved library';
       id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Luna';
       id('connect-demo').hidden=this.younger() && !this.session;
       id('connect-demo').disabled=this.busy;
-      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : choosing ? 'Type a message or choose a starter. You can pick live or on-device chat before sending.' : 'Library replies stay on this device. No profile details are sent.';
+      id('kids-chat').disabled=this.busy;
+      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : kids ? 'This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.' : choosing ? 'Type a message or choose a starter. You can pick live or on-device chat before sending.' : 'Library replies stay on this device. No profile details are sent.';
       id('chat-message').disabled=this.busy || this.session?.mode==='synthetic'; id('send-chat').disabled=this.busy || this.session?.mode==='synthetic';
       id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'Type your own message…';
       const out=id('conversation'); out.replaceChildren();
@@ -103,6 +105,13 @@
       const r=await fetch(this.apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.session.token},body:JSON.stringify(body),signal});
       const data=await r.json().catch(()=>({})); if(!r.ok) {if(r.status===401)this.disconnect();throw Error(data.error||'The private demo server could not respond. Please try again.');}return data;
     }
+    openKids(message='',hint) {
+      if(this.busy)return;
+      this.disconnect();
+      sessionStorage.setItem(localChoice,'kids');
+      this.render();
+      globalThis.AlongsideKidsChat.open(this.options,(text,topic)=>this.libraryReply(text,topic),message,hint);
+    }
     async openPersonal(message='', hint) {
       await this.ready;
       if(this.busy || id('personal-connection')?.open)return;
@@ -137,7 +146,11 @@
     async send(message,hint,scenario) {
       if(this.busy)return;await this.ready;if(this.busy)return;
       if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic')))this.disconnect();
-      if(!this.session && !this.younger() && !sessionStorage.getItem(localChoice))return this.openPersonal(message,hint);
+      if(!this.session && (this.younger() || sessionStorage.getItem(localChoice)==='kids')){
+        if(id('chat-message').value.trim()===message)id('chat-message').value='';
+        return this.openKids(message,hint);
+      }
+      if(!this.session && !sessionStorage.getItem(localChoice))return this.openPersonal(message,hint);
       const input=id('chat-message');if(input.value.trim()===message)input.value='';
       if(!this.session) {
         if(!message)return;

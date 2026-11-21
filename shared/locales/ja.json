@@ -722,5 +722,14 @@
   "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "ライブラリの項目について質問したり、チェックインを始めたりできます。",
   "Type your own message…": "自由にメッセージを入力…",
   "Choose how to chat": "チャット方法を選ぶ",
-  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "メッセージを入力するか、候補を選んでください。送信前にライブチャットか端末内のチャットを選べます。"
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "メッセージを入力するか、候補を選んでください。送信前にライブチャットか端末内のチャットを選べます。",
+  "Kids’ chat": "子ども向けチャット",
+  "This browser cannot run kids’ AI chat in this language. You can use the library here.": "このブラウザでは、この言語の子ども向けAIチャットは使えません。ライブラリは使えます。",
+  "This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.": "このAIは端末の中で動き、まちがえることもあります。閉じると会話は消えます。名前や住所、電話番号は書かないでください。",
+  "A trusted adult can help with this. You could say, “I want to talk about something. Can you listen?”": "信頼できる大人に相談できます。「話したいことがあるんだけど、聞いてくれる？」と伝えてみてください。",
+  "Start on-device AI": "端末のAIを起動",
+  "Luna · on-device AI": "Luna · 端末のAI",
+  "Getting the AI ready on this device…": "この端末でAIを準備しています…",
+  "Download AI and start": "AIをダウンロードして開始",
+  "Luna could not reply. You can try again or use the library.": "Lunaは返事ができませんでした。もう一度試すか、ライブラリを使えます。"
 }

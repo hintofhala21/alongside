@@ -31,7 +31,7 @@ On this Mac, the guide can use the Node runtime included with the ChatGPT app. I
 
 In live chat, Luna writes an original reply to a typed message or a suggested question. It uses the recent conversation for follow-ups. Everyday subjects can stand on their own. For a medical question, the server displays an approved library answer with its sources or explains that the topic is outside the library. Luna can also offer to open a check-in, a routine or the care directory.
 
-Younger visitors can explore local check-ins, routines and library topics. Personal sessions cannot publish to the public history. The pilot offers general support and has no clinical validation.
+Younger visitors can open **Kids’ chat** without a profile. On compatible devices and languages, it runs the browser’s own language model for original replies and follow-ups. This chat exists only in the open dialog. The browser may need a model download first. When local AI is unavailable, the dialog offers the on-device library. Personal sessions cannot publish to the public history. The pilot offers general support and has no clinical validation.
 
 Younger builders can test Luna using server-defined fictional scenarios. Free-text competition testing requires an adult judge’s attestation and an invitation code. This is not a verified patient account or a children’s medical service.
 

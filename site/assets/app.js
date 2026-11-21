@@ -738,6 +738,7 @@ byId("toggle-menu").addEventListener("click", () => {
   const opened = document.querySelector(".sidebar").classList.toggle("menu-open");
   byId("toggle-menu").setAttribute("aria-expanded", String(opened));
 });
+byId("kids-chat").addEventListener("click", () => chatController.openKids());
 byId("connect-demo").addEventListener("click", () => chatController.openPersonal());
 byId("chat-message").addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing && matchMedia("(pointer: fine)").matches) { event.preventDefault(); byId("chat-form").requestSubmit(); }
