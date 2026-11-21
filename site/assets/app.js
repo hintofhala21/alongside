@@ -23,6 +23,8 @@ function normalizeLanguageName(value) {
 for (const [code, name, aliases] of languageRegistry) {
   for (const alias of [code, name, ...aliases]) languageAliases.set(normalizeLanguageName(alias), code);
 }
+languageAliases.set("español", "es");
+languageAliases.set("espanol", "es");
 languageAliases.set("français", "fr");
 languageAliases.set("francais", "fr");
 languageAliases.set("العربية", "ar");
@@ -111,6 +113,9 @@ function refreshLanguage() {
     document.getElementById(id).setCustomValidity("");
   }
   populateLanguageOptions();
+  const codes = ["en", "ar", ...Object.keys(localeTools.packs)];
+  const languageList = new Intl.ListFormat(interfaceLocale(), {type:"conjunction"}).format(codes.map(languageName));
+  for (const label of document.querySelectorAll("[data-language-list]")) label.textContent = languageList;
   const notice = document.getElementById("language-notice");
   const available = interfaceLocale() === selectedLanguage.split("-")[0];
   notice.hidden = available;

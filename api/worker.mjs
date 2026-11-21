@@ -1,3 +1,4 @@
+import { supportedLanguage } from '../shared/languages.mjs';
 import { runAgent, scenarios } from './agent.mjs';
 
 const DAY=86400000;
@@ -61,7 +62,7 @@ export class AlongsideHub {
           await this.counter([['budget-month:'+month,cap(this.env.MAX_MONTHLY_REQUESTS,500,1000),now+35*DAY],['budget-day:'+today,cap(this.env.MAX_DAILY_REQUESTS,60,100),now+2*DAY],['budget-session:'+session.key,cap(this.env.MAX_SESSION_REQUESTS,30,50),session.expires]]);
           conversation ||= {id:data.conversationId,owner:session.key,title:message.slice(0,58),created:new Date(now).toISOString(),messages:[],expires:session.expires};
           const user={role:'user',text:message,id:crypto.randomUUID(),created:new Date(now).toISOString()};
-          const reply=await runAgent([...conversation.messages,user],this.env,['ar','fr'].includes(data.language)?data.language:'en',this.env.TEST_FETCH||fetch);
+          const reply=await runAgent([...conversation.messages,user],this.env,supportedLanguage(data.language),this.env.TEST_FETCH||fetch);
           const assistant={...reply,role:'assistant',mode:'luna',id:crypto.randomUUID(),created:new Date().toISOString()};
           conversation.messages.push(user,assistant);conversation.messages=conversation.messages.slice(-40);
           const result={reply:assistant,conversationId:conversation.id,mode:'luna'};

@@ -75,11 +75,21 @@
         const matches = [[/ostéoporose|santé des os/, 'boneHealth'], [/signes|symptômes/, 'warningSigns'], [/\bfer\b/, 'ironFood'], [/vitamine d/, 'vitaminDFood'], [/hyperphagie/, 'bingeEating'], [/diagnostic|évaluation/, 'assessment'], [/soutien|aide|équipe/, 'team'], [/repas|collation/, 'after']];
         topic = matches.find(([pattern]) => pattern.test(q))?.[1];
       }
+      if (this.options.getLanguage() === 'es' && !topic) {
+        const matches = [
+          [/\barfid\b/, 'arfid'], [/\bosfed\b/, 'osfed'], [/osteoporosis|salud ósea/, 'boneHealth'],
+          [/hierro/, 'ironFood'], [/vitamina d/, 'vitaminDFood'], [/zinc|\bcinc\b/, 'zincFood'],
+          [/diagn[oó]stic|evaluaci[oó]n|cuestionario/, 'assessment'], [/atrac[oó]n/, 'bingeEating'],
+          [/señales|s[ií]ntomas/, 'warningSigns'], [/apoyo|ayuda|equipo/, 'team'],
+          [/comida|colaci[oó]n|merienda/, 'after']
+        ];
+        topic = matches.find(([pattern]) => pattern.test(q))?.[1];
+      }
       if(!this.options.answers[topic]) {
         if(/\barfid\b/.test(q))topic='arfid';else if(/\bosfed\b/.test(q))topic='osfed';else if(/iron|حديد/.test(q))topic='ironFood';else if(/vitamin d|فيتامين د/.test(q))topic='vitaminDFood';else if(/zinc|زنك/.test(q))topic='zincFood';else if(/diagnos|questionnaire|تشخيص/.test(q))topic='assessment';else if(/support|team|help|مساعدة|دعم/.test(q))topic='team';else if(/meal|أكل|وجبة/.test(q))topic='after';
       }
       const a=this.options.answers[topic];
-      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|عيادة/.test(q)?'care':null;
+      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|clínica|atención médica|عيادة/.test(q)?'care':null;
       return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. Connect the competition demo to try Luna.')),sources:a?.sources||[],action,mode:'library'};
     }
     async request(path,body,signal) {

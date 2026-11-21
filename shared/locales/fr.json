@@ -697,7 +697,6 @@
   "Method not allowed.": "Méthode non autorisée.",
   "The private AI demo has not been activated yet.": "La démo privée avec l’IA n’est pas encore activée.",
   "The private demo server is temporarily unavailable.": "Le serveur privé de la démo est temporairement indisponible.",
-  "Available interface languages: English, Arabic and French. You can save other language preferences.": "L’interface est disponible en anglais, en arabe et en français. Vous pouvez aussi enregistrer une autre langue préférée.",
   "Test nudge": "Rappel de test",
   "A reminder from your sample plan": "Un rappel de votre programme type",
   "Open Alongside for your reminder. Time zone": "Ouvrez Alongside pour consulter votre rappel. Fuseau horaire",
@@ -706,5 +705,7 @@
   "Question {current} / {total}": "Question {current} sur {total}",
   "Selected fictional Luna demo · expires {date}": "Démo fictive Luna sélectionnée · expiration le {date}",
   "Food": "Alimentation",
-  "13–17": "13 à 17 ans"
+  "13–17": "13 à 17 ans",
+  "Available languages": "Langues disponibles",
+  "You can also save another language preference.": "Vous pouvez aussi enregistrer une autre langue préférée."
 }

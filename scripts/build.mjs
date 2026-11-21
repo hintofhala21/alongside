@@ -1,6 +1,7 @@
 import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { languagePacks } from '../shared/languages.mjs';
 import { check } from './check.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -11,10 +12,9 @@ await mkdir(resolve(root, 'build'), { recursive: true });
 await cp(resolve(root, 'site'), resolve(root, 'build/site'), { recursive: true });
 const library = JSON.parse(await readFile(resolve(root, 'shared/library.json'), 'utf8'));
 await writeFile(resolve(root, 'build/site/assets/library.js'), '"use strict";\nglobalThis.AlongsideLibrary = ' + JSON.stringify(library).replaceAll('<', '\\u003c') + ';\n');
-const french = JSON.parse(await readFile(resolve(root, 'shared/locales/fr.json'), 'utf8'));
 const runtime = await readFile(resolve(root, 'shared/locale-client.js'), 'utf8');
 await writeFile(resolve(root, 'build/site/assets/locales.js'),
-  'globalThis.AlongsideLanguagePacks = ' + JSON.stringify({fr: french}) + ';\n' + runtime);
+  'globalThis.AlongsideLanguagePacks = ' + JSON.stringify(languagePacks) + ';\n' + runtime);
 const config = JSON.parse(await readFile(resolve(root, 'site/config.json'), 'utf8'));
 let connect = "'self'";
 if (config.apiBase) {

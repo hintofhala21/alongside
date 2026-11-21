@@ -25,7 +25,7 @@ Luna chooses the conversational support, follow-up question, reviewed informatio
 
 Clinical review and real-user evaluations; verified identity/age and guardian consent; a reviewed privacy and retention policy for each intended market; appropriate provider arrangements; production access controls; abuse monitoring; and emergency escalation design remain required. An adult checkbox plus invitation code is for a closed competition demo, not patient consent verification.
 
-No automatic WhatsApp service is connected. Local profiles and check-ins are not a cross-device patient database. Only English and Arabic interfaces are prepared; other language preferences can be saved but do not translate the whole app. Care directories are selected resources, not a complete global clinic database.
+No automatic WhatsApp service is connected. Local profiles and check-ins are not a cross-device patient database. English, Arabic, French and Spanish interfaces are prepared; other language preferences can be saved but do not translate the whole app. Care directories are selected resources, not a complete global clinic database.
 
 ## Hosting and rollback
 
