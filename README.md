@@ -6,9 +6,9 @@ A chat-first, mobile-first recovery support competition prototype in cream and s
 
 ## Start here
 
-The website works in **approved-library mode** immediately. The real Luna backend is prepared separately and stays off until its owner adds a key privately.
+The public link opens the chat in approved-library mode. The private judge invitation opens the competition sign-in for live Luna chat. On 21 November 2026 the private server, judge access and one fictional OpenAI reply all passed the connection test.
 
-To connect Luna, run this in the project folder:
+For first-time setup on a new deployment, run this in the project folder:
 
 ```sh
 python3 scripts/setup-ai.py

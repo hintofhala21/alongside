@@ -15,7 +15,7 @@ Alongside is a deployable competition prototype. It is not yet a clinical produc
 - A hidden terminal key prompt and Cloudflare secrets. The public build never inserts environment variables.
 - Automated checks, simulated-provider tests, a successful Wrangler deployment dry run, and GitHub Pages CI.
 
-Live API calls still require the owner's Cloudflare account and OpenAI key. The backend is disabled and the public `apiBase` is empty until setup. Do not describe library mode as a live LLM. Automated tests use a simulated provider; passing them is not evidence of clinical quality or a successful live-key call.
+On 21 November 2026, the deployed Cloudflare Worker authenticated a competition session and returned a validated OpenAI reply to one fictional scenario using prompt v4. The public configuration contains the Worker address. The restricted demo key has a 30-day expiration. The authorized owner can renew it privately before expiry. Automated tests use a simulated provider.
 
 ## Deliberate LLM boundary
 
