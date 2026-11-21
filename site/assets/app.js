@@ -203,196 +203,7 @@ function initializeLanguageControls() {
 }
 
 
-const medicalSources = {
- ironNutrition: {organization:"NIH Office of Dietary Supplements",region:"United States",title:"Iron — fact sheet for consumers",url:"https://ods.od.nih.gov/factsheets/iron-consumer/",scope:"Food sources of iron and the role of vitamin C in absorption."},
- zincNutrition: {organization:"NIH Office of Dietary Supplements",region:"United States",title:"Zinc — fact sheet for consumers",url:"https://ods.od.nih.gov/factsheets/Zinc-Consumer/",scope:"General information about food sources of zinc."},
- vitaminDNutrition: {organization:"NIH Office of Dietary Supplements",region:"United States",title:"Vitamin D — fact sheet for consumers",url:"https://ods.od.nih.gov/factsheets/VitaminD-Consumer/",scope:"General information about vitamin D and food sources."},
- nhsBone: {organization:"NHS",region:"United Kingdom",title:"Osteoporosis",url:"https://www.nhs.uk/conditions/osteoporosis/",scope:"Bone health, possible symptoms, and when to seek an assessment."},
-  saudiMoh: {
-    organization: "Saudi Ministry of Health",
-    region: "Saudi Arabia",
-    title: "Eating disorders",
-    url: "https://www.moh.gov.sa/healthawareness/educationalcontent/diseases/mental/pages/eating-disorders.aspx",
-    scope: "Arabic patient information, treatment overview and guidance for parents."
-  },
-  nimh: {
-    organization: "National Institute of Mental Health (NIH)",
-    region: "United States",
-    title: "Eating Disorders: What You Need to Know",
-    url: "https://www.nimh.nih.gov/health/publications/eating-disorders",
-    scope: "General information about eating disorders, ARFID and treatment."
-  },
-  nhs: {
-    organization: "NHS",
-    region: "United Kingdom",
-    title: "Overview – Eating disorders",
-    url: "https://www.nhs.uk/mental-health/feelings-symptoms-behaviours/behaviours/eating-disorders/overview/",
-    scope: "Patient information about getting help and recovery."
-  },
-  nice: {
-    organization: "NICE",
-    region: "United Kingdom",
-    title: "Eating disorders: recognition and treatment (NG69)",
-    url: "https://www.nice.org.uk/guidance/ng69/chapter/Recommendations",
-    scope: "Clinical guidance for assessment and coordinated treatment."
-  },
-  who: {
-    organization: "World Health Organization",
-    region: "International",
-    title: "Mental disorders · Eating disorders section",
-    url: "https://www.who.int/news-room/fact-sheets/detail/mental-disorders",
-    scope: "The eating-disorders section of WHO’s mental disorders fact sheet."
-  },
-  niddk: {
-    organization: "NIDDK · National Institutes of Health",
-    region: "United States",
-    title: "Definition & Facts for Binge Eating Disorder",
-    url: "https://www.niddk.nih.gov/health-information/weight-management/binge-eating-disorder/definition-facts",
-    scope: "Definitions and experiences associated with binge eating."
-  },
-  medlinePlus: {
-    organization: "MedlinePlus · National Library of Medicine",
-    region: "United States",
-    title: "Eating Disorders",
-    url: "https://medlineplus.gov/eatingdisorders.html",
-    scope: "The page’s medical summary, including assessment and treatment. Linked articles require separate approval."
-  },
-  hse: {
-    organization: "Health Service Executive (HSE)",
-    region: "Ireland",
-    title: "Eating disorders",
-    url: "https://www2.hse.ie/conditions/eating-disorders/",
-    scope: "Patient information about types of eating disorders, including OSFED, and seeking help."
-  },
-  healthdirect: {
-    organization: "Healthdirect Australia",
-    region: "Australia",
-    title: "Eating disorders – an overview",
-    url: "https://www.healthdirect.gov.au/conditions/eating-disorders/eating-disorders",
-    scope: "The article’s assessment and recovery information. External resource listings require separate approval."
-  },
-  samhsa: {
-    organization: "Substance Abuse and Mental Health Services Administration",
-    region: "United States",
-    title: "Eating Disorders",
-    url: "https://www.samhsa.gov/mental-health/what-is-mental-health/conditions/eating-disorders",
-    scope: "General information about who can be affected and the range of eating disorders."
-  }
-};
-
-const medicalAnswers = {
- warningSigns: {title:"Signs to discuss with a professional",text:"Eating concerns can involve restrictive eating, strong worries about weight or shape, changes noticed by family, or avoiding situations involving food. Physical concerns can include dizziness, fainting, or palpitations. An assessment considers the whole situation; a checklist or body size alone cannot diagnose an eating disorder. If you are fainting or feel seriously unwell, seek urgent medical help.",sources:["nice"]},
- boneHealth: {title:"Bone health and osteoporosis",text:"Osteoporosis weakens bones and often has no obvious symptoms until a bone breaks. Back pain, changes in posture, or getting shorter can occur. A clinician can assess concerns and decide whether tests are needed. Seek medical help for a possible broken bone.",sources:["nhsBone"]},
- ironFood: {title:"Foods that provide iron",text:"Iron is found in foods such as meat, seafood, fortified cereals, beans, and lentils. Vitamin C helps the body absorb iron from plant foods. One idea to discuss is lentils and rice with sweet peppers or tomatoes. This is a food idea, not a complete meal plan or treatment for low iron.",sources:["ironNutrition"]},
- zincFood: {title:"Foods that provide zinc",text:"Meat, fish, poultry, seafood, and fortified cereals provide zinc. Beans, nuts, whole grains, eggs, and dairy also provide some zinc. One idea to discuss is beans with bread and an egg, if suitable for your allergies and care plan. A clinician can advise on a confirmed deficiency.",sources:["zincNutrition"]},
- vitaminDFood: {title:"Foods that provide vitamin D",text:"Fatty fish and foods fortified with vitamin D can provide this nutrient. Check labels, because fortification varies. One idea to discuss is salmon with potatoes, or a fortified milk or plant drink alongside a meal. Food suggestions do not determine whether you need supplements or a particular dose.",sources:["vitaminDNutrition"]},
-  basics: {
-    title: "About eating disorders",
-    text: "Eating disorders affect mental and physical health and can occur at any body size. Professional treatment can help people recover.",
-    sources: ["nimh"]
-  },
-  arfid: {
-    title: "About ARFID",
-    text: "ARFID can involve avoiding foods because of sensory qualities, fear of unpleasant consequences, or limited interest in eating. A health professional can assess these concerns.",
-    sources: ["nimh"]
-  },
-  treatment: {
-    title: "Treatment",
-    text: "Care can combine psychological therapy, medical monitoring and nutritional support. The combination is chosen for the individual.",
-    sources: ["saudiMoh", "nimh"]
-  },
-  supportChild: {
-    title: "Supporting a child",
-    text: "Parents can listen calmly, focus on feelings and avoid blame. Saudi Ministry of Health guidance advises families to avoid mealtime discussion of calories or portion sizes.",
-    sources: ["saudiMoh"]
-  },
-  gettingHelp: {
-    title: "Asking for help",
-    text: "If eating concerns are worrying you, arrange an assessment with a health professional. Bringing a trusted person can make asking for help easier.",
-    sources: ["nhs"]
-  },
-  recovery: {
-    title: "Recovery",
-    text: "Recovery is possible. Its pace and treatment can differ between people, and a specialist team can help plan ongoing support.",
-    sources: ["nhs"]
-  },
-  mealPlanning: {
-    title: "Meal planning",
-    text: "Dietary counselling for anorexia is part of coordinated care. Food and meal planning for young people can involve their family or carers.",
-    sources: ["nice"]
-  },
-  assessment: {
-    title: "Assessment",
-    text: "Screening questionnaires can support an assessment. NICE advises using broader clinical assessment when deciding whether someone has an eating disorder.",
-    sources: ["nice"]
-  },
-  effectiveCare: {
-    title: "Established treatments",
-    text: "WHO describes effective eating-disorder treatments that include family-based approaches and cognitive therapies.",
-    sources: ["who"]
-  },
-  bingeEating: {
-    title: "About binge eating",
-    text: "Binge eating involves eating a large amount in a short time while feeling a loss of control. It can be accompanied by shame or secrecy.",
-    sources: ["niddk"]
-  },
-  physicalChecks: {
-    title: "What assessment can include",
-    text: "An assessment can include a medical history, a physical examination and tests selected by the clinician. These help assess health concerns as well as eating difficulties.",
-    sources: ["medlinePlus"]
-  },
-  osfed: {
-    title: "About OSFED",
-    text: "OSFED describes eating-disorder symptoms that do not fit another specific diagnosis. It is serious and needs appropriate treatment.",
-    sources: ["hse"]
-  },
-  recoveryChanges: {
-    title: "Changes during recovery",
-    text: "Recovery can have ups and downs. Support needs can change over time, and a professional team can adapt care to the person’s situation.",
-    sources: ["healthdirect"]
-  },
-  whoAffected: {
-    title: "Who can be affected",
-    text: "Eating disorders can affect people across body sizes, ages, genders, ethnic backgrounds and income levels.",
-    sources: ["samhsa"]
-  },
-  after: {
-    title: "After a meal",
-    text: "That sounds hard. You can bring a trusted person when asking a professional for help.",
-    sources: ["nhs"]
-  },
-  missed: {
-    title: "A missed meal",
-    text: "I hear that you’re worried. A health professional can assess eating concerns and help you work out appropriate care.",
-    sources: ["nhs"]
-  },
-  snack: {
-    title: "Snack worries",
-    text: "You can reach out to your support team and use the plan agreed with them.",
-    sources: ["nice"]
-  },
-  shame: {
-    title: "Feeling ashamed",
-    text: "You deserve support. Eating disorders are illnesses, and treatment can help.",
-    sources: ["nimh"]
-  },
-  plan: {
-    title: "Support note",
-    text: "Your support note is on My plan. You can also save a question for your team in Check-ins.",
-    sources: []
-  },
-  team: {
-    title: "Talking to the team",
-    text: "You could bring someone you trust to an appointment to make asking for help easier.",
-    sources: ["nhs"]
-  }
-};
-
-const uncoveredAnswer = {
-  title: "Outside the approved library",
-  text: "I don’t have an approved answer for that message. You can choose a topic from the library or discuss the question with your care team. For immediate danger, contact local emergency services.",
-  sources: []
-};
+const { medicalSources, medicalAnswers, uncoveredAnswer } = globalThis.AlongsideLibrary;
 
 const stages = {
   start: {
@@ -435,6 +246,7 @@ let previewIndex = 0;
 let showTestPreview = false;
 let feeling = "";
 let conversationState = { recent: [], current: null };
+let chatController;
 
 function emptyData() {
   return {
@@ -449,6 +261,10 @@ function emptyData() {
 function readProfile() {
   const saved = JSON.parse(localStorage.getItem(storageKey));
   if (!saved?.profile || typeof saved.profile.id !== "string") return null;
+  const oldFields = ["height", "heightUnit", "weight", "weightUnit"];
+  const hadMeasurements = oldFields.some(key => Object.hasOwn(saved.profile, key));
+  for (const key of oldFields) delete saved.profile[key];
+  if (hadMeasurements) { try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch {} }
   return saved;
 }
 
@@ -594,16 +410,6 @@ function renderPlan() {
 }
 
 
-function addBubble(speaker, message, sourceIds = []) {
-  const bubble = element("div", "", speaker === "You" ? "bubble user" : "bubble");
-  const paragraph = element("p", message);
-  if (speaker === "You") paragraph.dataset.userContent = "";
-  bubble.append(element("small", speaker), paragraph);
-  if (sourceIds.length) bubble.append(sourceLinks(sourceIds));
-  byId("conversation").append(bubble);
-  byId("conversation").scrollTop = byId("conversation").scrollHeight;
-}
-
 function sourceLinks(sourceIds) {
   const links = element("div", "", "source-links");
   links.setAttribute("aria-label", "Sources for this answer");
@@ -636,45 +442,8 @@ function renderSources() {
   }
 }
 
-function chatState() {
-  return conversationState;
-}
-
-function renderChat() {
-  const state = chatState();
-  byId("conversation").replaceChildren();
-  addBubble("Alongside", "I’m here with you. You can choose a support starter or an approved information topic.");
-  for (const [speaker, message, sources] of state.current?.messages ?? []) addBubble(speaker, message, sources);
-  byId("conversation").scrollTop = byId("conversation").scrollHeight;
-  byId("empty-chats").hidden = state.recent.length > 0;
-  byId("recent-chats").replaceChildren(...state.recent.map((chat) => {
-    const row = element("li", "");
-    const button = element("button", "Sample chat " + chat.number + " · " + chat.title, "action outline");
-    button.type = "button";
-    button.setAttribute("aria-pressed", String(state.current === chat));
-    button.addEventListener("click", () => {
-      state.current = chat;
-      byId("chat-form").reset();
-      renderChat();
-      byId("recent-chats").querySelector('[aria-pressed="true"]').focus();
-    });
-    row.append(button);
-    return row;
-  }));
-}
-
-function sendApproved(message, answerId) {
-  const answer = Object.hasOwn(medicalAnswers, answerId) ? medicalAnswers[answerId] : uncoveredAnswer;
-  const validSources = answer.sources.every((id) => Object.hasOwn(medicalSources, id));
-  const approved = validSources ? answer : uncoveredAnswer;
-  const state = chatState();
-  if (!state.current) {
-    state.current = { number: state.recent.length + 1, title: approved.title, messages: [] };
-    state.recent.unshift(state.current);
-  }
-  state.current.messages.push(["You", message, []], ["Alongside", approved.text, approved.sources]);
-  renderChat();
-}
+function renderChat() { chatController?.render(); }
+function sendApproved(message, answerId) { chatController?.sendApproved(message, answerId); }
 
 function renderHistory() {
   const history = byId("checkin-history");
@@ -811,7 +580,7 @@ function resetTransientState() {
 }
 
 function renderProfile() {
-  byId("workspace-nav").hidden = !hasAgeGroup();
+  byId("workspace-nav").hidden = false;
   byId("profile-link").hidden = !profile;
   byId("delete-section").hidden = !profile;
   byId("settings-empty").hidden = Boolean(profile);
@@ -844,10 +613,13 @@ function renderProfile() {
   renderReminders();
 }
 
-const pageNames = { profile: "Profile", today: "Today", plan: "My plan", support: "Support chat", checkins: "Check-ins", reminders: "Reminders", sources: "Medical sources", settings: "Settings", care: "Find care", learn: "Learn" };
+const pageNames = { profile: "Profile", today: "Today", plan: "My plan", support: "Chat with Alongside", checkins: "Check-ins", reminders: "Reminders", sources: "Medical sources", settings: "Settings", care: "Find care", learn: "Learn" };
 function renderRoute(moveFocus) {
   const requested = location.hash.slice(1);
-  const page = ["sources", "settings", "care", "learn"].includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "today") : "profile";
+  document.querySelector(".sidebar").classList.remove("menu-open");
+  byId("toggle-menu").setAttribute("aria-expanded", "false");
+  const openPages = ["support", "profile", "sources", "settings", "care", "learn"];
+  const page = !requested ? "support" : openPages.includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "support") : "profile";
   if (location.hash !== "#" + page) history.replaceState(null, "", "#" + page);
   for (const section of document.querySelectorAll("[data-page]")) section.hidden = section.dataset.page !== page;
   for (const link of document.querySelectorAll(".nav a")) {
@@ -859,6 +631,9 @@ function renderRoute(moveFocus) {
   if (page === "settings") byId("settings-link").setAttribute("aria-current", "page");
   else byId("settings-link").removeAttribute("aria-current");
   byId("section-label").textContent = pageNames[page];
+  document.body.classList.toggle("chat-view", page === "support");
+  for (const link of document.querySelectorAll(".mobile-dock a")) { if (link.hash === "#" + page) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current"); }
+  if (page === "support") renderChat();
   if (page === "today") { renderToday(); renderTasks(); }
   if (page === "care") renderCare();
   if (page === "learn") renderLearning();
@@ -922,7 +697,7 @@ byId("profile-form").addEventListener("submit", (event) => {
     useLanguage(language);
     renderProfile();
     byId("profile-status").textContent = "Profile saved.";
-    if (completingSetup) location.hash = "#today";
+    if (completingSetup) location.hash = "#support";
   } catch {
     byId("profile-status").textContent = "Your profile couldn’t be saved. Allow browser storage and try again.";
   }
@@ -948,6 +723,7 @@ byId("delete-dialog").addEventListener("close", (event) => {
     localStorage.removeItem(legacyStorageKey);
     localStorage.removeItem(languageStorageKey);
     localStorage.removeItem(storageKey);
+    chatController?.clearLocal();
   } catch {
     byId("settings-status").textContent = "Your profile couldn’t be deleted. Please try again.";
     return;
@@ -1013,7 +789,7 @@ byId("reset-dialog").addEventListener("close", (event) => {
 byId("chat-options").addEventListener("click", (event) => {
   const button = event.target.closest("[data-chat]");
   if (!button) return;
-  sendApproved(button.textContent, button.dataset.chat);
+  void chatController.send(button.textContent, button.dataset.chat);
 });
 
 byId("learn-form").addEventListener("submit", (event) => {
@@ -1022,25 +798,23 @@ byId("learn-form").addEventListener("submit", (event) => {
   sendApproved(select.selectedOptions[0].textContent, select.value);
 });
 
-byId("new-chat").addEventListener("click", () => {
-  chatState().current = null;
-  byId("chat-form").reset();
-  byId("learn-form").reset();
-  renderChat();
-  byId("chat-message").focus();
-});
-
+byId("new-chat").addEventListener("click", () => chatController.newChat());
 byId("chat-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const input = byId("chat-message");
   const message = input.value.trim();
-  if (!message) {
-    input.focus();
-    return;
-  }
-  sendApproved(message, null);
-  event.currentTarget.reset();
-  input.focus();
+  if (!message) { input.focus(); return; }
+  if (chatController.busy) return;
+  input.value = "";
+  void chatController.send(message);
+});
+byId("toggle-menu").addEventListener("click", () => {
+  const opened = document.querySelector(".sidebar").classList.toggle("menu-open");
+  byId("toggle-menu").setAttribute("aria-expanded", String(opened));
+});
+byId("connect-demo").addEventListener("click", () => chatController.openConnection());
+byId("chat-message").addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing && matchMedia("(pointer: fine)").matches) { event.preventDefault(); byId("chat-form").requestSubmit(); }
 });
 
 for (const key of settings) {
@@ -1138,7 +912,7 @@ function prepareCountryOptions() {
 function resolveCountry(value) { return countryAliases.get(normalizeLanguageName(value)) || value.trim().slice(0,100); }
 function populateProfileExtras() {
  prepareCountryOptions();
- const values={ 'profile-country':countryLabel(profile?.country), 'profile-city':profile?.city || '', 'profile-timezone':zone(), 'diagnosis':profile?.diagnosis || 'unknown', 'diagnosis-other':profile?.diagnosisOther || '', 'care-team':profile?.careTeam || '', 'profile-height':profile?.height || '', 'height-unit':profile?.heightUnit || 'cm', 'profile-weight':profile?.weight || '', 'weight-unit':profile?.weightUnit || 'kg', 'profile-gender':profile?.gender || '', 'other-needs':profile?.otherNeeds || '', 'allergies':profile?.allergies || '', 'fluid-note':profile?.fluidNote || '', 'care-plan-note':profile?.carePlanNote || '' };
+ const values={ 'profile-country':countryLabel(profile?.country), 'profile-city':profile?.city || '', 'profile-timezone':zone(), 'diagnosis':profile?.diagnosis || 'unknown', 'diagnosis-other':profile?.diagnosisOther || '', 'care-team':profile?.careTeam || '', 'profile-gender':profile?.gender || '', 'other-needs':profile?.otherNeeds || '', 'allergies':profile?.allergies || '', 'fluid-note':profile?.fluidNote || '', 'care-plan-note':profile?.carePlanNote || '' };
  for (const [id,value] of Object.entries(values)) byId(id).value=value;
  for(const id of ['iron','zinc','vitaminD']) byId('need-'+id).checked=Boolean(profile?.needs?.includes(id));
  byId('guardian-note').hidden=byId('age-group').value!=='child';
@@ -1151,7 +925,7 @@ function populateProfileExtras() {
 function readProfileExtras() {
  const input=byId('profile-timezone');
  try { new Intl.DateTimeFormat('en',{timeZone:input.value.trim()}); input.setCustomValidity(''); } catch { input.setCustomValidity(translate('Choose a valid time zone, such as Asia/Riyadh.')); input.reportValidity(); return null; }
- return {country:resolveCountry(byId('profile-country').value),city:byId('profile-city').value.trim(),timeZone:input.value.trim(),diagnosis:byId('diagnosis').value,diagnosisOther:byId('diagnosis-other').value.trim(),careTeam:byId('care-team').value,height:byId('profile-height').value,heightUnit:byId('height-unit').value,weight:byId('profile-weight').value,weightUnit:byId('weight-unit').value,gender:byId('profile-gender').value.trim(),needs:['iron','zinc','vitaminD'].filter(id=>byId('need-'+id).checked),otherNeeds:byId('other-needs').value.trim(),allergies:byId('allergies').value.trim(),fluidNote:byId('fluid-note').value.trim(),carePlanNote:byId('care-plan-note').value.trim()};
+ return {country:resolveCountry(byId('profile-country').value),city:byId('profile-city').value.trim(),timeZone:input.value.trim(),diagnosis:byId('diagnosis').value,diagnosisOther:byId('diagnosis-other').value.trim(),careTeam:byId('care-team').value,gender:byId('profile-gender').value.trim(),needs:['iron','zinc','vitaminD'].filter(id=>byId('need-'+id).checked),otherNeeds:byId('other-needs').value.trim(),allergies:byId('allergies').value.trim(),fluidNote:byId('fluid-note').value.trim(),carePlanNote:byId('care-plan-note').value.trim()};
 }
 function renderCare() {
  const country=resolveCountry(byId('care-country').value); const city=byId('care-city').value.trim(); const out=byId('care-results'); out.replaceChildren();
@@ -1302,6 +1076,11 @@ function initializeRecoveryUpdate() {
   byId('recovery-update-form').addEventListener('submit', event => { event.preventDefault(); saveRecoveryUpdate(); });
 }
 
+chatController = new globalThis.AlongsideChat({
+  sources: medicalSources, answers: medicalAnswers, getLanguage: () => interfaceLocale(),
+  getAgeGroup: () => profile?.ageGroup, translateText: text => translate(text),
+  onAction: (action) => { if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile"}[action] || "support"); }
+});
 initializeRecoveryUpdate();
 initializeFreeFeatures();
 renderSources();

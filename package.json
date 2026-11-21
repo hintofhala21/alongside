@@ -1,6 +1,6 @@
 {
   "name": "alongside",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Alongside browser-local recovery support pilot",
   "type": "module",
@@ -9,6 +9,7 @@
     "check": "node scripts/check.mjs",
     "test": "node --test",
     "build": "node scripts/build.mjs",
-    "preview": "node scripts/preview.mjs"
+    "preview": "node scripts/preview.mjs",
+    "setup:ai": "python3 scripts/setup-ai.py"
   }
 }

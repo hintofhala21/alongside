@@ -24,17 +24,17 @@ test('credential scan detects keys without exposing their values', () => {
   assert.doesNotThrow(() => assertNoSecret('OPENAI_API_KEY is a future server secret name.', 'documentation'));
 });
 
-test('static pilot cannot send profiles to an API or execute injected HTML', () => {
+test('profile code stays offline and pages reject inline execution', () => {
   assert.doesNotMatch(source, /\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|innerHTML|outerHTML|insertAdjacentHTML|document\.write\s*\(/);
-  assert.ok(html.includes("connect-src 'none'"));
+  assert.ok(html.includes("connect-src 'self'"));
   assert.ok(html.includes("script-src 'self'"));
   assert.ok(html.includes("form-action 'none'"));
   assert.doesNotMatch(html, /unsafe-inline|unsafe-eval|https:\/\/[^"\s]+\.(?:js|css)["\s]/);
   assert.ok(html.includes('src="./assets/app.js" defer'));
 });
 
-test('every cited answer points to the approved HTTPS authorities', () => {
-  const library = runInNewContext(section('const medicalSources =', 'const stages =') + ';({ medicalSources, medicalAnswers });');
+test('every cited answer points to the approved HTTPS authorities', async () => {
+  const library = JSON.parse(await readFile(new URL('../shared/library.json', import.meta.url), 'utf8'));
   const allowed = new Set(['www.nimh.nih.gov', 'www.nhs.uk', 'www.nice.org.uk', 'www.moh.gov.sa', 'www.who.int', 'www.niddk.nih.gov', 'www.healthdirect.gov.au', 'www2.hse.ie', 'ods.od.nih.gov', 'www.samhsa.gov', 'medlineplus.gov']);
   for (const item of Object.values(library.medicalSources)) {
     const url = new URL(item.url);

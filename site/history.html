@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f9f6ef">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://alongside-api.invalid; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Chat history · Alongside</title>
+<link rel="stylesheet" href="./assets/styles.css">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<script src="./assets/library.js" defer></script>
+<script src="./assets/chat.js" defer></script>
+<script src="./assets/history.js" defer></script>
+</head>
+<body>
+<main class="history-shell">
+<header class="history-header"><a class="brand" href="./#support"><span class="brand-text">Alongside</span></a><a class="action outline" href="./#support">Back to chat</a></header>
+<section class="history-hero"><p class="eyebrow">A conversation, at your pace</p><h1>Room to look back.</h1><p>Revisit your conversations, or explore the fictional demos selected for the competition.</p></section>
+<div class="history-tabs" role="tablist" aria-label="History view"><button class="action outline" role="tab" id="private-tab" aria-selected="true" aria-controls="history-content">On this device</button><button class="action outline" role="tab" id="showcase-tab" aria-selected="false" aria-controls="history-content">For the judges</button></div>
+<p class="status" role="status" id="history-status"></p>
+<section id="history-content" role="tabpanel" aria-labelledby="private-tab"><div class="history-actions"><button class="action outline" id="copy-judges-link" type="button">Copy judges’ page link</button></div><p class="muted" id="history-description"></p><div class="history-grid"><div class="history-list" id="history-list"></div><article class="history-transcript" id="history-transcript" aria-live="polite"></article></div></section>
+<details class="history-help"><summary>Who can see these conversations?</summary><p>“On this device” reads this browser’s saved chats. It does not publish them. “For the judges” shows only Luna demos explicitly selected with the publisher code, after a review confirming fictional details only. Anyone with the judges’ link can read those selected demos. They expire after seven days and can be unpublished earlier.</p><p>No profiles, check-ins, phone numbers or recovery details are included automatically. Live demos are for fictional competition testing, not patient care.</p></details>
+<footer><a href="./privacy.html">Privacy and pilot limits</a><a href="./credits.html">Photo credits</a></footer>
+</main>
+</body>
+</html>

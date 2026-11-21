@@ -1,0 +1,312 @@
+{
+  "medicalSources": {
+    "ironNutrition": {
+      "organization": "NIH Office of Dietary Supplements",
+      "region": "United States",
+      "title": "Iron — fact sheet for consumers",
+      "url": "https://ods.od.nih.gov/factsheets/iron-consumer/",
+      "scope": "Food sources of iron and the role of vitamin C in absorption."
+    },
+    "zincNutrition": {
+      "organization": "NIH Office of Dietary Supplements",
+      "region": "United States",
+      "title": "Zinc — fact sheet for consumers",
+      "url": "https://ods.od.nih.gov/factsheets/Zinc-Consumer/",
+      "scope": "General information about food sources of zinc."
+    },
+    "vitaminDNutrition": {
+      "organization": "NIH Office of Dietary Supplements",
+      "region": "United States",
+      "title": "Vitamin D — fact sheet for consumers",
+      "url": "https://ods.od.nih.gov/factsheets/VitaminD-Consumer/",
+      "scope": "General information about vitamin D and food sources."
+    },
+    "nhsBone": {
+      "organization": "NHS",
+      "region": "United Kingdom",
+      "title": "Osteoporosis",
+      "url": "https://www.nhs.uk/conditions/osteoporosis/",
+      "scope": "Bone health, possible symptoms, and when to seek an assessment."
+    },
+    "saudiMoh": {
+      "organization": "Saudi Ministry of Health",
+      "region": "Saudi Arabia",
+      "title": "Eating disorders",
+      "url": "https://www.moh.gov.sa/healthawareness/educationalcontent/diseases/mental/pages/eating-disorders.aspx",
+      "scope": "Arabic patient information, treatment overview and guidance for parents."
+    },
+    "nimh": {
+      "organization": "National Institute of Mental Health (NIH)",
+      "region": "United States",
+      "title": "Eating Disorders: What You Need to Know",
+      "url": "https://www.nimh.nih.gov/health/publications/eating-disorders",
+      "scope": "General information about eating disorders, ARFID and treatment."
+    },
+    "nhs": {
+      "organization": "NHS",
+      "region": "United Kingdom",
+      "title": "Overview – Eating disorders",
+      "url": "https://www.nhs.uk/mental-health/feelings-symptoms-behaviours/behaviours/eating-disorders/overview/",
+      "scope": "Patient information about getting help and recovery."
+    },
+    "nice": {
+      "organization": "NICE",
+      "region": "United Kingdom",
+      "title": "Eating disorders: recognition and treatment (NG69)",
+      "url": "https://www.nice.org.uk/guidance/ng69/chapter/Recommendations",
+      "scope": "Clinical guidance for assessment and coordinated treatment."
+    },
+    "who": {
+      "organization": "World Health Organization",
+      "region": "International",
+      "title": "Mental disorders · Eating disorders section",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/mental-disorders",
+      "scope": "The eating-disorders section of WHO’s mental disorders fact sheet."
+    },
+    "niddk": {
+      "organization": "NIDDK · National Institutes of Health",
+      "region": "United States",
+      "title": "Definition & Facts for Binge Eating Disorder",
+      "url": "https://www.niddk.nih.gov/health-information/weight-management/binge-eating-disorder/definition-facts",
+      "scope": "Definitions and experiences associated with binge eating."
+    },
+    "medlinePlus": {
+      "organization": "MedlinePlus · National Library of Medicine",
+      "region": "United States",
+      "title": "Eating Disorders",
+      "url": "https://medlineplus.gov/eatingdisorders.html",
+      "scope": "The page’s medical summary, including assessment and treatment. Linked articles require separate approval."
+    },
+    "hse": {
+      "organization": "Health Service Executive (HSE)",
+      "region": "Ireland",
+      "title": "Eating disorders",
+      "url": "https://www2.hse.ie/conditions/eating-disorders/",
+      "scope": "Patient information about types of eating disorders, including OSFED, and seeking help."
+    },
+    "healthdirect": {
+      "organization": "Healthdirect Australia",
+      "region": "Australia",
+      "title": "Eating disorders – an overview",
+      "url": "https://www.healthdirect.gov.au/conditions/eating-disorders/eating-disorders",
+      "scope": "The article’s assessment and recovery information. External resource listings require separate approval."
+    },
+    "samhsa": {
+      "organization": "Substance Abuse and Mental Health Services Administration",
+      "region": "United States",
+      "title": "Eating Disorders",
+      "url": "https://www.samhsa.gov/mental-health/what-is-mental-health/conditions/eating-disorders",
+      "scope": "General information about who can be affected and the range of eating disorders."
+    }
+  },
+  "medicalAnswers": {
+    "warningSigns": {
+      "title": "Signs to discuss with a professional",
+      "text": "Eating concerns can involve restrictive eating, strong worries about weight or shape, changes noticed by family, or avoiding situations involving food. Physical concerns can include dizziness, fainting, or palpitations. An assessment considers the whole situation; a checklist or body size alone cannot diagnose an eating disorder. If you are fainting or feel seriously unwell, seek urgent medical help.",
+      "sources": [
+        "nice"
+      ]
+    },
+    "boneHealth": {
+      "title": "Bone health and osteoporosis",
+      "text": "Osteoporosis weakens bones and often has no obvious symptoms until a bone breaks. Back pain, changes in posture, or getting shorter can occur. A clinician can assess concerns and decide whether tests are needed. Seek medical help for a possible broken bone.",
+      "sources": [
+        "nhsBone"
+      ]
+    },
+    "ironFood": {
+      "title": "Foods that provide iron",
+      "text": "Iron is found in foods such as meat, seafood, fortified cereals, beans, and lentils. Vitamin C helps the body absorb iron from plant foods. One idea to discuss is lentils and rice with sweet peppers or tomatoes. This is a food idea, not a complete meal plan or treatment for low iron.",
+      "sources": [
+        "ironNutrition"
+      ]
+    },
+    "zincFood": {
+      "title": "Foods that provide zinc",
+      "text": "Meat, fish, poultry, seafood, and fortified cereals provide zinc. Beans, nuts, whole grains, eggs, and dairy also provide some zinc. One idea to discuss is beans with bread and an egg, if suitable for your allergies and care plan. A clinician can advise on a confirmed deficiency.",
+      "sources": [
+        "zincNutrition"
+      ]
+    },
+    "vitaminDFood": {
+      "title": "Foods that provide vitamin D",
+      "text": "Fatty fish and foods fortified with vitamin D can provide this nutrient. Check labels, because fortification varies. One idea to discuss is salmon with potatoes, or a fortified milk or plant drink alongside a meal. Food suggestions do not determine whether you need supplements or a particular dose.",
+      "sources": [
+        "vitaminDNutrition"
+      ]
+    },
+    "basics": {
+      "title": "About eating disorders",
+      "text": "Eating disorders affect mental and physical health and can occur at any body size. Professional treatment can help people recover.",
+      "sources": [
+        "nimh"
+      ]
+    },
+    "arfid": {
+      "title": "About ARFID",
+      "text": "ARFID can involve avoiding foods because of sensory qualities, fear of unpleasant consequences, or limited interest in eating. A health professional can assess these concerns.",
+      "sources": [
+        "nimh"
+      ]
+    },
+    "treatment": {
+      "title": "Treatment",
+      "text": "Care can combine psychological therapy, medical monitoring and nutritional support. The combination is chosen for the individual.",
+      "sources": [
+        "saudiMoh",
+        "nimh"
+      ]
+    },
+    "supportChild": {
+      "title": "Supporting a child",
+      "text": "Parents can listen calmly, focus on feelings and avoid blame. Saudi Ministry of Health guidance advises families to avoid mealtime discussion of calories or portion sizes.",
+      "sources": [
+        "saudiMoh"
+      ]
+    },
+    "gettingHelp": {
+      "title": "Asking for help",
+      "text": "If eating concerns are worrying you, arrange an assessment with a health professional. Bringing a trusted person can make asking for help easier.",
+      "sources": [
+        "nhs"
+      ]
+    },
+    "recovery": {
+      "title": "Recovery",
+      "text": "Recovery is possible. Its pace and treatment can differ between people, and a specialist team can help plan ongoing support.",
+      "sources": [
+        "nhs"
+      ]
+    },
+    "mealPlanning": {
+      "title": "Meal planning",
+      "text": "Dietary counselling for anorexia is part of coordinated care. Food and meal planning for young people can involve their family or carers.",
+      "sources": [
+        "nice"
+      ]
+    },
+    "assessment": {
+      "title": "Assessment",
+      "text": "Screening questionnaires can support an assessment. NICE advises using broader clinical assessment when deciding whether someone has an eating disorder.",
+      "sources": [
+        "nice"
+      ]
+    },
+    "effectiveCare": {
+      "title": "Established treatments",
+      "text": "WHO describes effective eating-disorder treatments that include family-based approaches and cognitive therapies.",
+      "sources": [
+        "who"
+      ]
+    },
+    "bingeEating": {
+      "title": "About binge eating",
+      "text": "Binge eating involves eating a large amount in a short time while feeling a loss of control. It can be accompanied by shame or secrecy.",
+      "sources": [
+        "niddk"
+      ]
+    },
+    "physicalChecks": {
+      "title": "What assessment can include",
+      "text": "An assessment can include a medical history, a physical examination and tests selected by the clinician. These help assess health concerns as well as eating difficulties.",
+      "sources": [
+        "medlinePlus"
+      ]
+    },
+    "osfed": {
+      "title": "About OSFED",
+      "text": "OSFED describes eating-disorder symptoms that do not fit another specific diagnosis. It is serious and needs appropriate treatment.",
+      "sources": [
+        "hse"
+      ]
+    },
+    "recoveryChanges": {
+      "title": "Changes during recovery",
+      "text": "Recovery can have ups and downs. Support needs can change over time, and a professional team can adapt care to the person’s situation.",
+      "sources": [
+        "healthdirect"
+      ]
+    },
+    "whoAffected": {
+      "title": "Who can be affected",
+      "text": "Eating disorders can affect people across body sizes, ages, genders, ethnic backgrounds and income levels.",
+      "sources": [
+        "samhsa"
+      ]
+    },
+    "after": {
+      "title": "After a meal",
+      "text": "That sounds hard. You can bring a trusted person when asking a professional for help.",
+      "sources": [
+        "nhs"
+      ]
+    },
+    "missed": {
+      "title": "A missed meal",
+      "text": "I hear that you’re worried. A health professional can assess eating concerns and help you work out appropriate care.",
+      "sources": [
+        "nhs"
+      ]
+    },
+    "snack": {
+      "title": "Snack worries",
+      "text": "You can reach out to your support team and use the plan agreed with them.",
+      "sources": [
+        "nice"
+      ]
+    },
+    "shame": {
+      "title": "Feeling ashamed",
+      "text": "You deserve support. Eating disorders are illnesses, and treatment can help.",
+      "sources": [
+        "nimh"
+      ]
+    },
+    "plan": {
+      "title": "Support note",
+      "text": "Your support note is on My plan. You can also save a question for your team in Check-ins.",
+      "sources": []
+    },
+    "team": {
+      "title": "Talking to the team",
+      "text": "You could bring someone you trust to an appointment to make asking for help easier.",
+      "sources": [
+        "nhs"
+      ]
+    }
+  },
+  "uncoveredAnswer": {
+    "title": "Outside the approved library",
+    "text": "I don’t have an approved answer for that message. You can choose a topic from the library or discuss the question with your care team. For immediate danger, contact local emergency services.",
+    "sources": []
+  },
+  "translations": {
+    "ar": {
+      "warningSigns": "قد تتضمن مخاوف الأكل تقييد الطعام أو قلقًا شديدًا بشأن الوزن أو شكل الجسم أو تغيرات تلاحظها الأسرة أو تجنب مواقف تتعلق بالطعام. وقد تشمل المخاوف الجسدية الدوخة أو الإغماء أو الخفقان. ينظر التقييم إلى الوضع كاملًا؛ ولا تكفي قائمة أسئلة أو حجم الجسم وحده لتشخيص اضطراب أكل. إذا كنت تتعرض للإغماء أو تشعر بتوعك شديد، فاطلب مساعدة طبية عاجلة.",
+      "boneHealth": "تُضعف هشاشة العظام العظام وغالبًا لا تظهر أعراض واضحة حتى يحدث كسر. وقد يحدث ألم في الظهر أو تغير في وضعية الجسم أو نقص في الطول. يمكن للمختص تقييم المخاوف وتحديد الحاجة إلى فحوصات. اطلب المساعدة الطبية عند احتمال وجود كسر.",
+      "ironFood": "يوجد الحديد في أطعمة مثل اللحوم والمأكولات البحرية والحبوب المدعمة والفاصوليا والعدس. يساعد فيتامين ج الجسم على امتصاص الحديد من الأطعمة النباتية. من الأفكار التي يمكن مناقشتها العدس والأرز مع الفلفل الحلو أو الطماطم. هذه فكرة غذائية وليست خطة وجبات متكاملة أو علاجًا لنقص الحديد.",
+      "zincFood": "توفر اللحوم والأسماك والدواجن والمأكولات البحرية والحبوب المدعمة الزنك. كما توفر الفاصوليا والمكسرات والحبوب الكاملة والبيض ومنتجات الألبان بعض الزنك. من الأفكار التي يمكن مناقشتها الفاصوليا مع الخبز وبيضة إذا كان ذلك مناسبًا لحساسيتك وخطة رعايتك. يمكن للمختص تقديم المشورة بشأن نقص مؤكد.",
+      "vitaminDFood": "يمكن أن توفر الأسماك الدهنية والأطعمة المدعمة بفيتامين د هذا المغذي. راجع الملصقات لأن التدعيم يختلف. من الأفكار التي يمكن مناقشتها السلمون مع البطاطس أو الحليب أو مشروب نباتي مدعم مع وجبة. لا تحدد الاقتراحات الغذائية حاجتك إلى المكملات أو إلى جرعة معينة.",
+      "basics": "تؤثر اضطرابات الأكل في الصحة النفسية والجسدية، وقد تحدث مع أي حجم للجسم. وقد يساعد العلاج المتخصص على التعافي.",
+      "arfid": "قد يشمل اضطراب تجنّب أو تقييد تناول الطعام تجنّب أطعمة بسبب خصائصها الحسية أو الخوف من عواقب مزعجة أو قلة الاهتمام بالأكل. ويمكن لمختص صحي تقييم هذه المخاوف.",
+      "treatment": "قد تجمع الرعاية بين العلاج النفسي والمتابعة الطبية والدعم الغذائي. ويُختار هذا المزيج بحسب الشخص.",
+      "supportChild": "يمكن للوالدين الاستماع بهدوء والتركيز على المشاعر وتجنّب اللوم. وتوصي إرشادات وزارة الصحة السعودية بتجنّب الحديث عن السعرات الحرارية أو أحجام الحصص أثناء الوجبات.",
+      "gettingHelp": "إذا كانت المخاوف المتعلقة بالأكل تقلقك، فرتّب تقييمًا لدى مختص صحي. وقد يسهّل اصطحاب شخص موثوق طلب المساعدة.",
+      "recovery": "التعافي ممكن. وقد تختلف وتيرته وعلاجه من شخص لآخر، ويمكن لفريق متخصص المساعدة في التخطيط للدعم المستمر.",
+      "mealPlanning": "الإرشاد الغذائي لفقدان الشهية جزء من رعاية منسقة. وقد يشارك أفراد الأسرة أو مقدمو الرعاية في التخطيط للطعام والوجبات لصغار السن.",
+      "assessment": "قد تساعد استبيانات الفحص في التقييم. ويوصي المعهد الوطني للتميّز في الصحة والرعاية باستخدام تقييم سريري أشمل عند تحديد وجود اضطراب أكل.",
+      "effectiveCare": "تذكر منظمة الصحة العالمية علاجات فعالة لاضطرابات الأكل، تشمل مناهج تعتمد على الأسرة وعلاجات معرفية.",
+      "bingeEating": "يتضمن نهم الطعام تناول كمية كبيرة خلال وقت قصير مع الشعور بفقدان السيطرة. وقد يصاحبه الخجل أو إخفاء الأمر.",
+      "physicalChecks": "قد يشمل التقييم التاريخ الطبي والفحص الجسدي وفحوصًا يختارها المختص. وتساعد هذه الخطوات في تقييم المخاوف الصحية وصعوبات الأكل.",
+      "osfed": "تصف اضطرابات التغذية والأكل المحددة الأخرى أعراضًا لا تطابق تشخيصًا محددًا آخر لاضطرابات الأكل. وهي حالة خطيرة تحتاج إلى علاج مناسب.",
+      "recoveryChanges": "قد يمر التعافي بتقدم وانتكاسات. وقد تتغير احتياجات الدعم مع الوقت، ويمكن لفريق متخصص تكييف الرعاية بحسب وضع الشخص.",
+      "whoAffected": "يمكن أن تؤثر اضطرابات الأكل في أشخاص من مختلف أحجام الأجسام والأعمار والأنواع والخلفيات العرقية ومستويات الدخل.",
+      "after": "يبدو ذلك صعبًا. يمكنك اصطحاب شخص موثوق عند طلب المساعدة من مختص.",
+      "missed": "أفهم أنك قلق. يمكن لمختص صحي تقييم مخاوف الأكل ومساعدتك على تحديد الرعاية المناسبة.",
+      "snack": "يمكنك التواصل مع فريق دعمك والاستعانة بالخطة المتفق عليها معه.",
+      "shame": "أنت تستحق الدعم. اضطرابات الأكل أمراض، وقد يساعد العلاج.",
+      "plan": "توجد ملاحظة دعمك في صفحة خطتي. ويمكنك أيضًا حفظ سؤال لفريقك في تسجيل المشاعر.",
+      "team": "يمكنك اصطحاب شخص تثق به إلى الموعد لتسهيل طلب المساعدة."
+    }
+  }
+}

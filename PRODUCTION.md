@@ -1,38 +1,34 @@
-# Release status
+# Competition release status
 
-This is a **public static pilot**, suitable for testing with sample details. It can be published on GitHub Pages after the workflow passes. It is not yet a clinical product, an authenticated account system or a verified service for children.
+Alongside is a deployable competition prototype. It is not yet a clinical product, verified patient account system or verified service for children.
 
-## Prepared for the static pilot
+## Included
 
-- Existing cream and sage design and browser-local features retained.
-- Fresh public repository source, without the private preview's history, Site identity, screenshots or profiles.
-- Separate page, stylesheet and JavaScript files; no executable inline scripts or styles.
-- Restrictive page security policy: no network API calls, third-party scripts, frames or external form submissions.
-- No analytics, API key field, third-party fonts or OpenAI integration.
-- No key or health profile inserted at build time. Public files are explicitly allowlisted.
-- Automated source checks, regression tests, credential scanning and Pages deployment.
-- Third-party workflow actions pinned to reviewed commit IDs. Update these pins deliberately as GitHub maintains the actions.
-- Privacy and pilot limitations linked from the website.
+- Chat-first entry, phone layout and cream/sage garden photography.
+- Height/weight inputs removed and a migration clearing previous stored measurement values.
+- Browser-local conversation history and a separate judges’ page.
+- Real Responses API integration for `gpt-6-luna`, with strict function-call validation, approved-summary retrieval and user-initiated app actions.
+- Server-side recent-turn memory, session isolation, access-code checks, atomic request limits, idempotent retry handling and an AI off switch.
+- A synthetic mode that substitutes server-defined fictional prompts; free-text testing is restricted to invited adult judges who attest to fictional use.
+- Explicit selection with a separate publisher code before a demo becomes publicly readable. No fabricated AI transcripts are seeded.
+- Server session expiry after 24 hours; selected-demo expiry after seven days. Cleanup runs hourly. Cloudflare backups/PITR and provider logs have separate retention, which must be reviewed before patient use.
+- A hidden terminal key prompt and Cloudflare secrets. The public build never inserts environment variables.
+- Automated checks, simulated-provider tests, a successful Wrangler deployment dry run, and GitHub Pages CI.
 
-GitHub Pages controls HTTP response headers; HTML security-policy metadata cannot provide every server header, including `frame-ancestors`. Do not treat the static host as a full medical-data security system.
+Live API calls still require the owner's Cloudflare account and OpenAI key. The backend is disabled and the public `apiBase` is empty until setup. Do not describe library mode as a live LLM. Automated tests use a simulated provider; passing them is not evidence of clinical quality or a successful live-key call.
 
-## Still required before real patient use
+## Deliberate LLM boundary
 
-1. Clinical review of all recovery content, check-ins, emergency guidance and food suggestions. This version does not diagnose, calculate fluid targets or prescribe individual treatment plans.
-2. A reviewed approach to age, guardian verification, consent, privacy, data retention and country-specific requirements. A guardian contact field alone would not verify consent. No guardian verification is connected.
-3. Real account authentication and a secure server database if cross-device profiles are needed. The current browser-only profile is not an account or access control.
-4. A backend before any OpenAI key is used, with authentication, request limits, cost controls and a reviewed AI policy. Live AI remains absent.
-5. A WhatsApp Business integration and opt-in before claiming that automatic WhatsApp reminders work. Saving a phone number currently stores it only in this browser.
-6. Translation review before claiming full interface support beyond English and Arabic; broader language preferences can currently be saved but do not translate the whole UI.
-7. Expanded, verified care listings. The directory currently has selected country resources and a WHO fallback, not every clinic or public hospital in every town. External links do not establish free treatment or availability.
-8. Accessibility and usability review with intended users, ongoing review of approved source pages, and an owner responsible for support and maintenance.
+Luna chooses the conversational support, follow-up question, reviewed information entry and next app action through a structured function call. The application retrieves and renders approved wording. It does not allow an unconstrained model to invent medical advice. This means the prototype has bounded conversational coverage; it is not a full therapist or clinical meal-planning agent.
 
-## Deployment and rollback
+## Before real patient use
 
-Set repository **Settings → Pages → Source → GitHub Actions**. The workflow checks and builds first and deploys only after a successful build. A failed check stops publication. Only `build/site/` is uploaded.
+Clinical review and real-user evaluations; verified identity/age and guardian consent; a reviewed privacy and retention policy for each intended market; appropriate provider arrangements; production access controls; abuse monitoring; and emergency escalation design remain required. An adult checkbox plus invitation code is for a closed competition demo, not patient consent verification.
 
-To undo a release, restore the last known-good source commit and push it to `main`; the same checks and deployment run again. Do not publish personal profiles or browser exports when troubleshooting. Check the Pages job's reported URL before announcing a release.
+No automatic WhatsApp service is connected. Local profiles and check-ins are not a cross-device patient database. Only English and Arabic interfaces are prepared; other language preferences can be saved but do not translate the whole app. Care directories are selected resources, not a complete global clinic database.
 
-## Data separation
+## Hosting and rollback
 
-The earlier private preview and the GitHub Pages version have different origins, so browser storage is separate. No profiles are migrated automatically. Clearing browser data removes the local profile. The app does not back it up. Its profile deletion feature clears the local app profile; it does not delete browsing history, exported calendar files or provider records.
+GitHub Pages hosts only `build/site/`; Cloudflare hosts the separate private API. The build inserts only the validated public Worker origin into the security policy. No credential belongs in `site/`, an Actions build variable, screenshots or Git history.
+
+Changes to `main` run checks/tests/build before Pages deployment. Restore a known-good source release to roll back. A failed check stops publication. Switching the API off stops new demo calls independently of Pages.
