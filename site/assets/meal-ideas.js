@@ -55,7 +55,9 @@
     const key=slug || name;
     nutrients[key]=name;sourcesOf[key]=foods;
     const pairs=dishes.filter(d=>d.foods.some(f=>foods.includes(f))).flatMap(d=>d.foods);
-    choices[key]={foods:[...new Set([...foods,...pairs])],url:slug?'https://ods.od.nih.gov/factsheets/'+slug+'-Consumer/':null};
+    const pdf=['Selenium','Molybdenum','VitaminB6'].includes(slug);
+    const url=pdf?'https://ods.od.nih.gov/pdf/factsheets/'+slug+'-Consumer.pdf':'https://ods.od.nih.gov/factsheets/'+slug+'-Consumer/';
+    choices[key]={foods:[...new Set([...foods,...pairs])],url:slug?url:null};
   }
   function request(message) {
     const q=message.trim().toLowerCase().replace(/[?!.]+$/,'');
