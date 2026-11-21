@@ -9,7 +9,8 @@ Alongside is a deployable competition prototype. It is not yet a clinical produc
 - Browser-local conversation history and a separate judges’ page.
 - Real Responses API integration for `gpt-6-luna`, with strict function-call validation, approved-summary retrieval and user-initiated app actions.
 - Server-side recent-turn memory, session isolation, access-code checks, atomic request limits, idempotent retry handling and an AI off switch.
-- A synthetic mode that substitutes server-defined fictional prompts; free-text testing is restricted to invited adult judges who attest to fictional use.
+- Public adult chat with age attestation, explicit consent, limited recent memory, and server-side exclusion from publication.
+- A judge-only synthetic mode that substitutes server-defined fictional prompts; free-text judge testing is restricted to invited adult judges who attest to fictional use.
 - Explicit selection with a separate publisher code before a demo becomes publicly readable. No fabricated AI transcripts are seeded.
 - Server session expiry after 24 hours; selected-demo expiry after seven days. Cleanup runs hourly. Cloudflare backups/PITR and provider logs have separate retention, which must be reviewed before patient use.
 - A hidden terminal key prompt and Cloudflare secrets. The public build never inserts environment variables.

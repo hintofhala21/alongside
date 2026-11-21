@@ -707,5 +707,17 @@
   "Food": "食物",
   "13–17": "13至17岁",
   "Available languages": "可用语言",
-  "You can also save another language preference.": "你也可以保存其他首选语言。"
+  "You can also save another language preference.": "你也可以保存其他首选语言。",
+  "Chat with Luna": "与 Luna 聊聊",
+  "Luna · live chat": "Luna · 实时聊天",
+  "Use on-device chat": "使用本机聊天",
+  "Start live chat": "开始实时聊天",
+  "Private Luna chat": "与 Luna 的私人对话",
+  "I am 18 or older and agree to send my chat messages.": "我已年满18岁，并同意发送我的聊天消息。",
+  "Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.": "你的聊天消息会发送给 Cloudflare 和 OpenAI。你的个人资料和日常记录保存在本设备上。",
+  "Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.": "Cloudflare 会保留近期消息最多一天，然后按计划清理。此浏览器会保留聊天记录，直到你清除为止。服务商的日志可能保留更久。",
+  "If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.": "如果你可能正面临紧急危险，请立即联系当地急救服务。如果可以，请身边的人陪着你。",
+  "You can keep using the library and check-ins on this device. A trusted adult can help you find more support.": "你可以继续在本设备上使用资料库和日常记录。你信任的成年人可以帮你寻找更多支持。",
+  "Luna is unavailable. You can use on-device chat.": "Luna 暂时无法使用。你可以使用本机聊天。",
+  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "你可以询问资料库中的主题，或开始一次日常记录。"
 }

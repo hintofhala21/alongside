@@ -707,5 +707,17 @@
   "Food": "食べ物",
   "13–17": "13～17歳",
   "Available languages": "利用できる言語",
-  "You can also save another language preference.": "ほかの言語を希望言語として保存することもできます。"
+  "You can also save another language preference.": "ほかの言語を希望言語として保存することもできます。",
+  "Chat with Luna": "Luna と話す",
+  "Luna · live chat": "Luna · ライブチャット",
+  "Use on-device chat": "この端末でチャットする",
+  "Start live chat": "ライブチャットを始める",
+  "Private Luna chat": "Luna との非公開チャット",
+  "I am 18 or older and agree to send my chat messages.": "私は18歳以上で、チャットのメッセージを送信することに同意します。",
+  "Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.": "メッセージは Cloudflare と OpenAI に送信されます。プロフィールとチェックインの記録はこの端末に保存されます。",
+  "Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.": "Cloudflare は最近のメッセージを最長1日保持し、その後定期的に削除します。このブラウザには自分で消すまで履歴が残ります。サービス提供者のログはさらに長く残る場合があります。",
+  "If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.": "今すぐ危険が及ぶ可能性がある場合は、地域の救急窓口に連絡してください。可能なら近くの人にそばにいてもらってください。",
+  "You can keep using the library and check-ins on this device. A trusted adult can help you find more support.": "この端末で引き続きライブラリとチェックインを使えます。信頼できる大人と一緒に支援を探せます。",
+  "Luna is unavailable. You can use on-device chat.": "現在 Luna を利用できません。この端末でのチャットは使えます。",
+  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "ライブラリの項目について質問したり、チェックインを始めたりできます。"
 }

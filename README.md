@@ -6,7 +6,7 @@ A chat-first, mobile-first recovery support competition prototype in cream and s
 
 ## Start here
 
-The public link opens the chat in approved-library mode. The private judge invitation opens the competition sign-in for live Luna chat. On 21 November 2026 the private server, judge access and one fictional OpenAI reply all passed the connection test.
+The main link opens Chat. Adults can choose “Chat with Luna,” confirm their age and consent, and send their own messages. On-device library chat is available to everyone. The separate judge invitation still opens the competition demo.
 
 For first-time setup on a new deployment, run this in the project folder:
 
@@ -31,7 +31,7 @@ On this Mac, the guide can use the Node runtime included with the ChatGPT app. I
 
 Luna receives the recent conversation, understands the request, and calls `prepare_recovery_support`. The server validates that call, retrieves the chosen approved summary, and prepares a support action such as opening a check-in, a routine, a care directory or human help. The interface shows those actions and citations.
 
-For this prototype, medical facts and support wording are reviewed templates selected by the LLM. This is deliberately a bounded agent, not an unrestricted text generator. It does not diagnose, prescribe or invent a recovery plan. The library remains subject to clinical review. Offline library mode is labelled clearly and does not pretend to be Luna.
+In adult chat, Luna writes a conversational reflection and chooses a reviewed library entry for health information. Younger visitors can explore local check-ins, routines and library topics. Personal sessions cannot publish to the public history. The pilot offers general support and has no clinical validation.
 
 Younger builders can test Luna using server-defined fictional scenarios. Free-text competition testing requires an adult judge’s attestation and an invitation code. This is not a verified patient account or a children’s medical service.
 

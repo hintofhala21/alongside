@@ -707,5 +707,17 @@
   "Food": "Alimentación",
   "13–17": "De 13 a 17 años",
   "Available languages": "Idiomas disponibles",
-  "You can also save another language preference.": "También puedes guardar otro idioma como preferido."
+  "You can also save another language preference.": "También puedes guardar otro idioma como preferido.",
+  "Chat with Luna": "Hablar con Luna",
+  "Luna · live chat": "Luna · chat en vivo",
+  "Use on-device chat": "Usar el chat en este dispositivo",
+  "Start live chat": "Iniciar chat en vivo",
+  "Private Luna chat": "Chat privado con Luna",
+  "I am 18 or older and agree to send my chat messages.": "Tengo al menos 18 años y acepto enviar mis mensajes.",
+  "Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.": "Tus mensajes se envían a Cloudflare y OpenAI. Tu perfil y tus registros se quedan en este dispositivo.",
+  "Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.": "Cloudflare conserva los mensajes recientes hasta un día antes del borrado programado. Este navegador conserva tu historial hasta que lo borres. Los registros de los proveedores pueden durar más.",
+  "If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.": "Si puedes estar en peligro inmediato, contacta ahora con los servicios de emergencias locales. Si puedes, pide a alguien cercano que se quede contigo.",
+  "You can keep using the library and check-ins on this device. A trusted adult can help you find more support.": "Puedes seguir usando la biblioteca y los registros en este dispositivo. Un adulto de confianza puede ayudarte a buscar más apoyo.",
+  "Luna is unavailable. You can use on-device chat.": "Luna no está disponible. Puedes usar el chat en este dispositivo.",
+  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "Puedes preguntar por un tema de la biblioteca o iniciar un registro."
 }

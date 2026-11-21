@@ -732,14 +732,13 @@ byId("chat-form").addEventListener("submit", (event) => {
   const message = input.value.trim();
   if (!message) { input.focus(); return; }
   if (chatController.busy) return;
-  input.value = "";
   void chatController.send(message);
 });
 byId("toggle-menu").addEventListener("click", () => {
   const opened = document.querySelector(".sidebar").classList.toggle("menu-open");
   byId("toggle-menu").setAttribute("aria-expanded", String(opened));
 });
-byId("connect-demo").addEventListener("click", () => chatController.openConnection());
+byId("connect-demo").addEventListener("click", () => chatController.openPersonal());
 byId("chat-message").addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing && matchMedia("(pointer: fine)").matches) { event.preventDefault(); byId("chat-form").requestSubmit(); }
 });

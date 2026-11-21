@@ -21,13 +21,13 @@ export class AlongsideHub {
   constructor(ctx,env){this.ctx=ctx;this.storage=ctx.storage;this.env=env;}
   async counter(keys) {
     await this.storage.transaction(async txn=>{
-      const entries=[];for(const [key,limit,expires] of keys){const value=await txn.get(key)||{count:0,expires};if(value.count>=limit)fail('The demo limit has been reached. Please try later.',429);entries.push([key,{...value,count:value.count+1}]);}
+      const entries=[];for(const [key,limit,expires] of keys){const value=await txn.get(key)||{count:0,expires};if(value.count>=limit)fail('The chat limit has been reached. Please try later.',429);entries.push([key,{...value,count:value.count+1}]);}
       for(const [key,value]of entries)await txn.put(key,value);
     });
   }
   async session(request) {
-    const raw=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(!raw||!/^[-_A-Za-z0-9]{43}$/.test(raw))fail('Connect to the competition demo first.',401);
-    const key=await hash(this.env.RATE_SALT+':'+raw);const session=await this.storage.get('session:'+key);if(!session||session.expires<Date.now())fail('Your demo session has ended. Reconnect to continue.',401);return {key,...session};
+    const raw=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(!raw||!/^[-_A-Za-z0-9]{43}$/.test(raw))fail('Connect to Luna first.',401);
+    const key=await hash(this.env.RATE_SALT+':'+raw);const session=await this.storage.get('session:'+key);if(!session||session.expires<Date.now())fail('Your chat session has ended. Reconnect to continue.',401);return {key,...session};
   }
   async fetch(request) {
     try {
@@ -43,8 +43,13 @@ export class AlongsideHub {
       const data=await body(request);
       if(path==='/session') {
         const ip=request.headers.get('X-Demo-Client')||'unknown';await this.counter([['login:'+ip+':'+today,20,now+DAY],['login-total:'+today,500,now+DAY]]);
-        if(!await sameSecret(data.code,this.env.DEMO_ACCESS_CODE))fail('That competition access code is not correct.',401);
-        if(!['synthetic','interactive'].includes(data.mode))fail('Choose a testing mode.');if(data.mode==='interactive'&&data.adult!==true)fail('Free-text testing is for adult judges using fictional details.',403);
+        if(data.mode==='personal') {
+          if(data.adult!==true || data.consent!==true) fail('Live chat requires adult confirmation and permission to send chat messages.',403);
+        } else {
+          if(!await sameSecret(data.code,this.env.DEMO_ACCESS_CODE))fail('That competition access code is not correct.',401);
+          if(!['synthetic','interactive'].includes(data.mode))fail('Choose a testing mode.');
+          if(data.mode==='interactive'&&data.adult!==true)fail('Free-text testing is for adult judges using fictional details.',403);
+        }
         const raw=token();const session={mode:data.mode,expires:now+DAY};await this.storage.put('session:'+await hash(this.env.RATE_SALT+':'+raw),session);return json({token:raw,...session});
       }
       const session=await this.session(request);
@@ -60,19 +65,22 @@ export class AlongsideHub {
         await this.storage.transaction(async txn=>{const busy=await txn.get(lock);if(busy?.expires>now)fail('Wait for the current reply before sending another message.',409);await txn.put(lock,{expires:now+30000});await txn.put(requestKey,{expires:now+DAY});});
         try {
           await this.counter([['budget-month:'+month,cap(this.env.MAX_MONTHLY_REQUESTS,500,1000),now+35*DAY],['budget-day:'+today,cap(this.env.MAX_DAILY_REQUESTS,60,100),now+2*DAY],['budget-session:'+session.key,cap(this.env.MAX_SESSION_REQUESTS,30,50),session.expires]]);
-          conversation ||= {id:data.conversationId,owner:session.key,title:message.slice(0,58),created:new Date(now).toISOString(),messages:[],expires:session.expires};
+          conversation ||= {id:data.conversationId,owner:session.key,mode:session.mode,title:message.slice(0,58),created:new Date(now).toISOString(),messages:[],expires:session.expires};
           const user={role:'user',text:message,id:crypto.randomUUID(),created:new Date(now).toISOString()};
-          const reply=await runAgent([...conversation.messages,user],this.env,supportedLanguage(data.language),this.env.TEST_FETCH||fetch);
-          const assistant={...reply,role:'assistant',mode:'luna',id:crypto.randomUUID(),created:new Date().toISOString()};
+          const reply=await runAgent([...conversation.messages,user],this.env,supportedLanguage(data.language),this.env.TEST_FETCH||fetch,session.mode);
+          const mode=session.mode==='personal'?'personal':'luna';
+          const assistant={...reply,role:'assistant',mode,id:crypto.randomUUID(),created:new Date().toISOString()};
           conversation.messages.push(user,assistant);conversation.messages=conversation.messages.slice(-40);
-          const result={reply:assistant,conversationId:conversation.id,mode:'luna'};
-          await this.storage.transaction(async txn=>{await txn.put(conversationKey,conversation);await txn.put(requestKey,{reply:result,expires:session.expires});});return json(result);
+          const result={reply:assistant,conversationId:conversation.id,mode};
+          await this.storage.transaction(async txn=>{if(reply.endLive)await txn.delete('session:'+session.key);await txn.put(conversationKey,conversation);await txn.put(requestKey,{reply:result,expires:session.expires});});return json(result);
         } finally {await this.storage.delete(lock);}
       }
+      if(session.mode==='personal' && ['/publish','/unpublish'].includes(path))fail('Personal chats are private.',403);
       if(path==='/publish') {
         if(!await sameSecret(data.publisherCode,this.env.PUBLISHER_CODE))fail('A publisher code is needed to select a demo for judges.',403);
         if(data.confirmFictional!==true)fail('Review the conversation and confirm that it contains fictional details only.');
         if(!uuid.test(data.conversationId))fail('Conversation not found.',404);const c=await this.storage.get('conversation:'+data.conversationId);if(!c||c.owner!==session.key||c.expires<now)fail('This demo session is unavailable. Run a new demo first.',404);
+        if(c.mode==='personal')fail('Personal chats are private.',403);
         if(!c.messages.some(m=>m.mode==='luna'))fail('Only a completed Luna demo can be published.');
         const title=typeof data.title==='string'?data.title.trim().slice(0,80):'Competition demo';if(!title)fail('Add a title.');
         if(/@|https?:\/\/|\+?\d[\d\s().-]{7,}/.test(title))fail('Use a title without contact details.');
@@ -94,7 +102,7 @@ export default {
     const url=new URL(request.url);const origin=request.headers.get('Origin');const allowed=origin===env.ALLOWED_ORIGIN;
     const cors=allowed?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}:{};
     const finish=response=>{const headers=new Headers(response.headers);for(const [k,v]of Object.entries(cors))headers.set(k,v);return new Response(response.body,{status:response.status,headers});};
-    if(url.pathname==='/status'&&request.method==='GET')return finish(json({ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.DEMO_ACCESS_CODE&&env.PUBLISHER_CODE&&env.RATE_SALT&&env.HUB),mode:'fictional-competition-demo'}));
+    if(url.pathname==='/status'&&request.method==='GET')return finish(json({ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.DEMO_ACCESS_CODE&&env.PUBLISHER_CODE&&env.RATE_SALT&&env.HUB),mode:'adult-support-and-competition-demo'}));
     if(!allowed)return json({error:'This website origin is not permitted.'},403);
     if(request.method==='OPTIONS')return finish(new Response(null,{status:204}));
     if(!['GET','POST'].includes(request.method))return finish(json({error:'Method not allowed.'},405));

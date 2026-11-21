@@ -7,7 +7,8 @@ The system prompt tells Luna how to select a supportive reply, a cited library t
 | [v1](v1.txt) | 92e460b | Original competition planner with English and Arabic language names. |
 | [v2](v2.txt) | b11f48d | Added the French language name. |
 | [v3](v3.txt) | 7e3028c | Passed the interface language code, including Spanish. |
-| [v4](v4.mjs) | e04afaf | Used the shared English question and acknowledgement menus for nine interfaces. Current version, moved verbatim from the original agent into its own file. |
+| [v4](v4.mjs) | e04afaf | Used the shared English question and acknowledgement menus for nine interfaces. Judge demo version, moved verbatim from the original agent into its own file. |
+| [v5](v5.mjs) | 2026-11-21 | Adult opt-in live chat with conversational reflections, cited library answers and optional app actions. Covered by personal-session tests. |
 
 The archived templates include placeholders. The listed project revision preserves the exact menus and library used to fill them.
 

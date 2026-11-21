@@ -707,5 +707,17 @@
   "Food": "खान-पान",
   "13–17": "13 से 17 साल",
   "Available languages": "उपलब्ध भाषाएँ",
-  "You can also save another language preference.": "आप किसी दूसरी भाषा को भी अपनी पसंद के रूप में सहेज सकते हैं।"
+  "You can also save another language preference.": "आप किसी दूसरी भाषा को भी अपनी पसंद के रूप में सहेज सकते हैं।",
+  "Chat with Luna": "लूना से बात करें",
+  "Luna · live chat": "लूना · लाइव चैट",
+  "Use on-device chat": "इस डिवाइस पर चैट करें",
+  "Start live chat": "लाइव चैट शुरू करें",
+  "Private Luna chat": "लूना के साथ निजी चैट",
+  "I am 18 or older and agree to send my chat messages.": "मेरी उम्र कम से कम 18 साल है और मैं अपने चैट संदेश भेजने के लिए सहमत हूँ।",
+  "Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.": "आपके संदेश Cloudflare और OpenAI को भेजे जाते हैं। आपकी प्रोफ़ाइल और चेक-इन इसी डिवाइस पर रहते हैं।",
+  "Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.": "Cloudflare हाल के संदेश तय समय पर हटाने से पहले एक दिन तक रखता है। ब्राउज़र में इतिहास तब तक रहता है जब तक आप उसे मिटा न दें। सेवा प्रदाताओं के रिकॉर्ड और समय तक रह सकते हैं।",
+  "If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.": "अगर आपको अभी खतरा हो सकता है, तो तुरंत स्थानीय आपातकालीन सेवा से संपर्क करें। हो सके तो पास के किसी व्यक्ति को साथ रहने के लिए कहें।",
+  "You can keep using the library and check-ins on this device. A trusted adult can help you find more support.": "आप इस डिवाइस पर लाइब्रेरी और चेक-इन का इस्तेमाल जारी रख सकते हैं। किसी भरोसेमंद वयस्क की मदद से आप और सहायता ढूँढ सकते हैं।",
+  "Luna is unavailable. You can use on-device chat.": "लूना अभी उपलब्ध नहीं है। आप इस डिवाइस पर चैट कर सकते हैं।",
+  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "आप लाइब्रेरी के किसी विषय पर सवाल पूछ सकते हैं या चेक-इन शुरू कर सकते हैं।"
 }

@@ -98,3 +98,43 @@ test('chat is the first visible page before JavaScript runs',async()=>{
   const pages=[...html.matchAll(/<section data-page="([^"]+)"([^>]*)>/g)];
   assert.deepEqual(pages.filter(([, ,attrs])=>!attrs.includes('hidden')).map(([,page])=>page),['support']);
 });
+
+test('personal chat requires consent, remembers the conversation and cannot be shared',async()=>{
+  const requests=[];
+  const s=server({TEST_FETCH:async(url,init)=>{
+    const body=JSON.parse(init.body);requests.push(body);
+    return Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify({reflection:'What would you like your friend to understand?',route:'support',information:'gettingHelp',action:'human'})}]});
+  }});
+  const consent={mode:'personal',adult:true,consent:true};
+  for(const missing of [{adult:false},{consent:false},{consent:'true'}])assert.equal((await s.call('/session',{...consent,...missing})).status,403);
+  const {token}= (await s.call('/session',consent)).body;
+  const first=message(undefined,{message:'I want to ask a friend for support.'});
+  const reply=await s.call('/chat',first,token);
+  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v5');assert.ok(reply.body.reply.sources.length);
+  await s.call('/chat',message(first.conversationId,{message:'How do I start that conversation?'}),token);
+  assert.equal(requests.length,2);assert.equal(requests[1].input[0].content,first.message);
+  const share={conversationId:first.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Example'};
+  assert.equal((await s.call('/publish',share,token)).status,403);
+  assert.equal((await s.call('/publish',share,await s.session())).status,404);
+  assert.deepEqual((await s.call('/showcase')).body.demos,[]);
+});
+
+test('a younger disclosure in adult chat ends access and offers local support',async()=>{
+  const s=server({TEST_FETCH:async()=>Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify({route:'younger',reflection:'',information:'none',action:'none'})}]})});
+  const {token}=(await s.call('/session',{mode:'personal',adult:true,consent:true})).body;
+  const r=await s.call('/chat',message(),token);assert.equal(r.body.reply.endLive,true);
+  assert.equal((await s.call('/chat',message(),token)).status,401);
+});
+
+test('a first draft awaits consent and a younger profile stays on-device even after a saved live login',async()=>{
+  const src=await readFile(new URL('../site/assets/chat.js',import.meta.url),'utf8');
+  const input={value:'My unsent draft'};
+  const vm={document:{getElementById:()=>input},sessionStorage:{getItem:()=>null,removeItem:()=>{}},Date};
+  runInNewContext(src,vm);
+  const chat=Object.create(vm.AlongsideChat.prototype);
+  let age,consentPrompts=0,localReplies=0;
+  Object.assign(chat,{options:{getAgeGroup:()=>age},openPersonal:async()=>{consentPrompts++;},append:()=>{},render:()=>{},libraryReply:()=>{localReplies++;return {text:'local'};}});
+  await chat.send(input.value);assert.equal(consentPrompts,1);assert.equal(input.value,'My unsent draft');assert.equal(localReplies,0);
+  age='teen';chat.session={mode:'personal',expires:Date.now()+10000};
+  await chat.send(input.value);assert.equal(chat.session,null);assert.equal(localReplies,1);assert.equal(input.value,'');
+});

@@ -1,4 +1,5 @@
-import { buildInstructions, promptVersion } from './prompts/v4.mjs';
+import * as demoPrompt from './prompts/v4.mjs';
+import * as personalPrompt from './prompts/v5.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -46,6 +47,27 @@ const tool = {
   },required:['acknowledgement','followup','information','action']}
 };
 
+const personalTool = {
+  ...tool,
+  description:'Prepare a conversational reflection, an approved source and an optional action.',
+  parameters:{type:'object',additionalProperties:false,properties:{
+    reflection:{type:'string',description:'Brief conversational response, up to 500 characters.'},
+    route:{type:'string',enum:['support','urgent','younger']},
+    information:tool.parameters.properties.information,
+    action:tool.parameters.properties.action
+  },required:['reflection','route','information','action']}
+};
+
+function renderPersonal(plan, language) {
+  if (!plan || !['support','urgent','younger'].includes(plan.route) || !information.includes(plan.information) || !actions.includes(plan.action)) throw Error('Invalid support response');
+  const localize = text => languagePacks[language]?.[text] || text;
+  if (plan.route === 'urgent') return {text:localize('If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.'),sources:[],action:'human'};
+  if (plan.route === 'younger') return {text:localize('You can keep using the library and check-ins on this device. A trusted adult can help you find more support.'),sources:[],action:'human',endLive:true};
+  if (typeof plan.reflection !== 'string' || !plan.reflection.trim() || plan.reflection.length > 650 || /https?:|www\./i.test(plan.reflection)) throw Error('Invalid reflection');
+  const entry = library.medicalAnswers[plan.information];
+  return {text:[plan.reflection.trim(), entry && localize(entry.text)].filter(Boolean).join('\n\n'), sources:entry?.sources || [],action:plan.action};
+}
+
 export function renderPlan(plan, language='en') {
   if(!plan || !Object.hasOwn(support,plan.acknowledgement) || !Object.hasOwn(questions,plan.followup) || !information.includes(plan.information) || !actions.includes(plan.action)) throw Error('Invalid model plan');
   const pack = Object.hasOwn(languagePacks, language) ? languagePacks[language] : null;
@@ -62,7 +84,9 @@ export function renderPlan(plan, language='en') {
   return {text,sources:answer?.sources||[],action:plan.action,trace,plan};
 }
 
-export async function runAgent(messages, env, language='en', requestFetch=fetch) {
+export async function runAgent(messages, env, language='en', requestFetch=fetch, mode='interactive') {
+  const personal = mode === 'personal';
+  const {buildInstructions, promptVersion} = personal ? personalPrompt : demoPrompt;
   const topics=Object.entries(library.medicalAnswers).map(([id,a])=>({id,title:a.title}));
   const instructions = buildInstructions({topics, questions, support, language});
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
@@ -70,7 +94,7 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch)
   let outcome = 'network_error';
   let status = 0;
   try {
-    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-6-luna',store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[tool],tool_choice:{type:'function',name:tool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
+    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-6-luna',store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[personal ? personalTool : tool],tool_choice:{type:'function',name:tool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
     status = response.status;
     if (!response.ok) {
       outcome = ({401:'key_rejected',403:'access_denied',404:'model_unavailable',429:'quota_or_rate_limit'})[status] || 'provider_error';
@@ -80,12 +104,12 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch)
     const result=await response.json();if(result.status!=='completed')throw Error('Incomplete model response');
     const calls=(result.output||[]).filter(o=>o.type==='function_call');
     if(calls.length!==1 || calls[0].name!==tool.name)throw Error('Missing support plan');
-    const reply = renderPlan(JSON.parse(calls[0].arguments),language);
+    const reply = (personal ? renderPersonal : renderPlan)(JSON.parse(calls[0].arguments),language);
     outcome = 'verified_reply';
     return {...reply, promptVersion};
   } catch (error) {
     if (controller.signal.aborted) outcome = 'timeout';
-    throw Object.assign(new Error('The AI demo could not respond. Please try again later.'), {status:502, diagnostic:outcome});
+    throw Object.assign(new Error('Luna could not respond. Please try again later.'), {status:502, diagnostic:outcome});
   } finally {
     clearTimeout(timeout);
     console.info(JSON.stringify({event:'alongside.chat', promptVersion, outcome, providerStatus:status, durationMs:Date.now()-started}));

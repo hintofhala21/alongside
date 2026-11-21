@@ -1,6 +1,7 @@
 "use strict";
 (() => {
   const key = 'alongside-chat-history-v1';
+  const localChoice = 'alongside-use-library';
   const sessionKey = 'alongside-demo-session-v1';
   const node = (tag, text = '', cls = '') => { const n = document.createElement(tag); n.textContent = text; if (cls) n.className = cls; return n; };
   const id = value => document.getElementById(value);
@@ -22,7 +23,7 @@
   const store = {
     read() { try { const v = JSON.parse(localStorage.getItem(key)); return { current: typeof v?.current === 'string' ? v.current : null, chats: Array.isArray(v?.chats) ? v.chats.filter(c => typeof c.id === 'string' && typeof c.title === 'string' && Array.isArray(c.messages)).slice(0,30).map(c => ({ ...c, messages:c.messages.filter(cleanMessage).slice(-60) })) : [] }; } catch { return {current:null,chats:[]}; } },
     write(value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } },
-    clear() { localStorage.removeItem(key); sessionStorage.removeItem(sessionKey); }
+    clear() { localStorage.removeItem(key); sessionStorage.removeItem(sessionKey); sessionStorage.removeItem(localChoice); }
   };
   globalThis.AlongsideChatStore = store;
   globalThis.AlongsideChat = class {
@@ -33,15 +34,18 @@
       window.addEventListener('storage', e => { if(e.key === key || e.key === null) { this.cancel(); this.state = store.read(); this.render(); } });
     }
     async loadConfig() {
-      try { const r = await fetch(new URL('../config.json', document.currentScript?.src || new URL('./assets/chat.js',location.href)), {cache:'no-store'}); if(!r.ok) return;
+      try { const r = await fetch(new URL('../config.json', document.currentScript?.src || new URL('./assets/chat.js',location.href)), {cache:'no-store'}); if(!r.ok) throw Error('Configuration unavailable');
         const c = await r.json(); if(c.apiBase) { const u = new URL(c.apiBase); if(u.protocol === 'https:' && u.hostname.endsWith('.workers.dev')) this.apiBase = u.origin; }
       } catch {}
       if(this.session?.apiBase !== this.apiBase) this.disconnect();
       this.render();
     }
     current() { return this.state.chats.find(c => c.id === this.state.current); }
-    ensureChat() {
-      if(!this.current()) { const c = {id:crypto.randomUUID(),title:'A new conversation',created:new Date().toISOString(),messages:[],mode:this.session ? 'luna' : 'library'}; this.state.chats.unshift(c); this.state.chats = this.state.chats.slice(0,30); this.state.current=c.id; }
+    younger() { return ['child','teen'].includes(this.options.getAgeGroup()); }
+    mode() { return this.session?.mode==='personal' ? 'personal' : this.session ? 'luna' : 'library'; }
+    ensureChat(mode=this.mode()) {
+      const current=this.current();
+      if(!current || current.mode!==mode || (mode!=='library' && current.sessionExpires!==this.session?.expires)) { const c = {id:crypto.randomUUID(),title:'A new conversation',created:new Date().toISOString(),messages:[],mode,sessionExpires:mode==='library'?undefined:this.session?.expires}; this.state.chats.unshift(c); this.state.chats = this.state.chats.slice(0,30); this.state.current=c.id; }
       return this.current();
     }
     save() { if(!store.write(this.state)) id('chat-status').textContent='This conversation is available for this visit. Browser storage is unavailable.'; }
@@ -52,11 +56,15 @@
     status(text) { id('chat-status').textContent=text; }
     render() {
       if(!id('conversation')) return;
+      if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic'))) {this.cancel();this.disconnect();}
+      const personal=this.session?.mode==='personal';
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
       id('chat-welcome').hidden=hasMessages; id('chat-options').hidden=hasMessages || this.session?.mode==='synthetic';
-      id('chat-mode').textContent=this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : 'Approved library · AI not connected';
-      id('connect-demo').textContent=this.session?'Demo options':'Competition demo';
-      id('chat-privacy').textContent=this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : 'Library replies stay on this device. No profile details are sent.';
+      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : 'Approved library';
+      id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Luna';
+      id('connect-demo').hidden=this.younger() && !this.session;
+      id('connect-demo').disabled=this.busy;
+      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : 'Library replies stay on this device. No profile details are sent.';
       id('chat-message').disabled=this.busy || this.session?.mode==='synthetic'; id('send-chat').disabled=this.busy || this.session?.mode==='synthetic';
       id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'What’s on your mind?';
       const out=id('conversation'); out.replaceChildren();
@@ -81,21 +89,55 @@
       row.append(node('small','Fictional scenarios — no personal typing is sent.'));
       for(const [scenario,label] of [['meal','A difficult mealtime'],['routine','A busy day'],['support','Asking for support']]) {const b=node('button',label,'action outline');b.type='button';b.disabled=this.busy;b.addEventListener('click',()=>this.send('',null,scenario));row.append(b);}
     }
-    append(role,text,extra={}) {const c=this.ensureChat();c.messages.push({id:crypto.randomUUID(),role,text,created:new Date().toISOString(),...extra});c.messages=c.messages.slice(-60);if(role==='user' && c.messages.length===1)c.title=text.slice(0,58);this.save();}
-    sendApproved(message,answerId) { if(this.busy)return; const a=this.options.answers[answerId];this.append('user',message);this.append('assistant',this.options.translateText(a?.text||'That question is outside the approved library. You can choose an information topic or bring it to your care team.'),{sources:a?.sources||[],mode:'library'});this.render(); }
+    append(role,text,extra={}) {const c=this.ensureChat(extra.mode || this.mode());c.messages.push({id:crypto.randomUUID(),role,text,created:new Date().toISOString(),...extra});c.messages=c.messages.slice(-60);if(role==='user' && c.messages.length===1)c.title=text.slice(0,58);this.save();}
+    sendApproved(message,answerId) { if(this.busy)return; const a=this.options.answers[answerId];this.append('user',message,{mode:'library'});this.append('assistant',this.options.translateText(a?.text||'That question is outside the approved library. You can choose an information topic or bring it to your care team.'),{sources:a?.sources||[],mode:'library'});this.render(); }
     libraryReply(message,hint) {
       const q = message.normalize('NFKC').toLowerCase();
       const topic = hint || commonTopics.find(([pattern]) => pattern.test(q))?.[1];
       const a=this.options.answers[topic];
       const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|clínica|atención médica|krankenhaus|klinik|医院|病院|अस्पताल|عيادة/.test(q)?'care':null;
-      return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. Connect the competition demo to try Luna.')),sources:a?.sources||[],action,mode:'library'};
+      return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.')),sources:a?.sources||[],action,mode:'library'};
     }
     async request(path,body,signal) {
       const r=await fetch(this.apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.session.token},body:JSON.stringify(body),signal});
       const data=await r.json().catch(()=>({})); if(!r.ok) {if(r.status===401)this.disconnect();throw Error(data.error||'The private demo server could not respond. Please try again.');}return data;
     }
+    async openPersonal(message='', hint) {
+      await this.ready;
+      if(this.busy || id('personal-connection')?.open)return;
+      if(this.session?.mode==='personal'){this.disconnect();sessionStorage.setItem(localChoice,'yes');this.newChat();return;}
+      if(this.session) return this.openConnection();
+      if(this.younger())return;
+      const d=node('dialog');d.id='personal-connection';d.setAttribute('aria-labelledby','personal-title');
+      const title=node('h2','Chat with Luna');title.id='personal-title';
+      const form=node('form','','stack');
+      const check=node('input');check.type='checkbox';check.required=true;
+      const label=node('label');label.append(check,document.createTextNode('I am 18 or older and agree to send my chat messages.'));
+      const start=node('button','Start live chat','action');start.type='submit';
+      const local=node('button','Use on-device chat','action outline');local.type='button';
+      const error=node('p','','status');error.setAttribute('role','status');
+      const close=node('button','Close','action outline');close.type='button';close.onclick=()=>d.close();
+      const resume=()=>{d.close();this.newChat();if(message)void this.send(message,hint);};
+      local.onclick=()=>{sessionStorage.setItem(localChoice,'yes');resume();};
+      form.onsubmit=async event=>{
+        event.preventDefault();if(!check.checked || this.younger() || start.disabled)return;
+        start.disabled=true;
+        try {
+          if(!this.apiBase)throw Error('Luna is unavailable. You can use on-device chat.');
+          const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'personal',adult:true,consent:true})});
+          const result=await r.json();if(!r.ok || !result.token)throw Error(result.error || 'Could not connect.');
+          if(!d.open || this.younger())return;
+          this.session={...result,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));sessionStorage.removeItem(localChoice);resume();
+        }catch(e){error.textContent=e.message;}finally{start.disabled=false;}
+      };
+      form.append(node('p','Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.'),node('p','Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.'),label,start,local,close,error);
+      d.append(title,form);document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.showModal();
+    }
     async send(message,hint,scenario) {
       if(this.busy)return;await this.ready;if(this.busy)return;
+      if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic')))this.disconnect();
+      if(!this.session && !this.younger() && !sessionStorage.getItem(localChoice))return this.openPersonal(message,hint);
+      const input=id('chat-message');if(input.value.trim()===message)input.value='';
       if(!this.session) {
         if(!message)return;
         const reply = this.libraryReply(message,hint);
@@ -107,7 +149,8 @@
       const c=this.ensureChat(); const currentId=c.id;this.append('user',display);this.busy=true;this.abort=new AbortController();this.status('');this.render();
       const timer=setTimeout(()=>this.abort.abort(),30000);
       try {const result=await this.request('/chat',{conversationId:c.id,requestId:crypto.randomUUID(),message:scenario?undefined:message,scenario:scenario||undefined,language:this.options.getLanguage()},this.abort.signal);
-        if(this.state.current!==currentId)return;c.mode='luna';this.append('assistant',result.reply.text,{...result.reply,mode:'luna'});
+        if(this.state.current!==currentId || this.abort.signal.aborted)return;this.append('assistant',result.reply.text,{...result.reply,mode:c.mode});
+        if(result.reply.endLive){this.disconnect();sessionStorage.setItem(localChoice,'yes');}
       }catch(e){if(this.state.current===currentId)this.status(e.name==='AbortError'?'The request took too long. Please try again.':e.message);}
       finally {clearTimeout(timer);this.busy=false;this.render();}
     }
