@@ -53,7 +53,7 @@ export async function check() {
         if (!contents.includes('Content-Security-Policy')) throw new Error(`Missing security policy in ${name}.`);
         for (const match of contents.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
           if (match[1].includes('application/json')) JSON.parse(match[2]);
-          else if (!/src="\.\/assets\/(?:app|chat|history|library)\.js"/.test(match[1]) || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
+          else if (!/src="(?:\.|\/alongside)\/assets\/(?:app|chat|history|library|locales)\.js"/.test(match[1]) || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
         }
       }
     }

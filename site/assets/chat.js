@@ -47,8 +47,8 @@
       id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'What’s on your mind?';
       const out=id('conversation'); out.replaceChildren();
       for(const m of chat?.messages || []) {
-        const b=node('article','',m.role==='user'?'bubble user':'bubble'); b.dataset.userContent='';
-        b.append(node('small',m.role==='user'?'You':'Alongside'),node('p',m.text));
+        const b=node('article','',m.role==='user'?'bubble user':'bubble'); const body=node('p',m.text); body.dataset.userContent='';
+        b.append(node('small',m.role==='user'?'You':'Alongside'),body);
         const sources=(m.sources||[]).filter(s=>Object.hasOwn(this.options.sources,s));
         if(sources.length) { const links=node('div','','source-links'); for(const s of sources) { const source=this.options.sources[s]; const a=node('a',source.organization); a.href=source.url; a.target='_blank'; a.rel='noopener noreferrer'; links.append(a); } b.append(links); }
         if(m.action && m.action!=='none') { const labels={checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
@@ -57,7 +57,7 @@
       }
       if(this.busy) out.append(node('p','Alongside is considering a small next step…','thinking'));
       id('empty-chats').hidden=this.state.chats.length>0;
-      id('recent-chats').replaceChildren(...this.state.chats.map(c=>{ const li=node('li'); const b=node('button',c.title,'action outline'); b.type='button'; b.disabled=this.busy; b.setAttribute('aria-pressed',String(c.id===this.state.current)); b.addEventListener('click',()=>{this.state.current=c.id;this.save();this.render();});li.append(b);return li;}));
+      id('recent-chats').replaceChildren(...this.state.chats.map(c=>{ const li=node('li'); const b=node('button',c.title,'action outline'); b.dataset.userContent=''; b.type='button'; b.disabled=this.busy; b.setAttribute('aria-pressed',String(c.id===this.state.current)); b.addEventListener('click',()=>{this.state.current=c.id;this.save();this.render();});li.append(b);return li;}));
       this.renderSynthetic();
       if(hasMessages || this.busy) out.scrollTop=out.scrollHeight;
     }
@@ -68,15 +68,19 @@
       for(const [scenario,label] of [['meal','A difficult mealtime'],['routine','A busy day'],['support','Asking for support']]) {const b=node('button',label,'action outline');b.type='button';b.disabled=this.busy;b.addEventListener('click',()=>this.send('',null,scenario));row.append(b);}
     }
     append(role,text,extra={}) {const c=this.ensureChat();c.messages.push({id:crypto.randomUUID(),role,text,created:new Date().toISOString(),...extra});c.messages=c.messages.slice(-60);if(role==='user' && c.messages.length===1)c.title=text.slice(0,58);this.save();}
-    sendApproved(message,answerId) { if(this.busy)return; const a=this.options.answers[answerId];this.append('user',message);this.append('assistant',a?.text||'That question is outside the approved library. You can choose an information topic or bring it to your care team.',{sources:a?.sources||[],mode:'library'});this.render(); }
+    sendApproved(message,answerId) { if(this.busy)return; const a=this.options.answers[answerId];this.append('user',message);this.append('assistant',this.options.translateText(a?.text||'That question is outside the approved library. You can choose an information topic or bring it to your care team.'),{sources:a?.sources||[],mode:'library'});this.render(); }
     libraryReply(message,hint) {
       const q=message.toLowerCase();let topic=hint;
+      if (this.options.getLanguage() === 'fr' && !topic) {
+        const matches = [[/ostéoporose|santé des os/, 'boneHealth'], [/signes|symptômes/, 'warningSigns'], [/\bfer\b/, 'ironFood'], [/vitamine d/, 'vitaminDFood'], [/hyperphagie/, 'bingeEating'], [/diagnostic|évaluation/, 'assessment'], [/soutien|aide|équipe/, 'team'], [/repas|collation/, 'after']];
+        topic = matches.find(([pattern]) => pattern.test(q))?.[1];
+      }
       if(!this.options.answers[topic]) {
         if(/\barfid\b/.test(q))topic='arfid';else if(/\bosfed\b/.test(q))topic='osfed';else if(/iron|حديد/.test(q))topic='ironFood';else if(/vitamin d|فيتامين د/.test(q))topic='vitaminDFood';else if(/zinc|زنك/.test(q))topic='zincFood';else if(/diagnos|questionnaire|تشخيص/.test(q))topic='assessment';else if(/support|team|help|مساعدة|دعم/.test(q))topic='team';else if(/meal|أكل|وجبة/.test(q))topic='after';
       }
       const a=this.options.answers[topic];
-      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|عيادة/.test(q)?'care':null;
-      return {text:(a?.text ? this.options.translateText(a.text) : null) || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. Connect the competition demo to try Luna.'),sources:a?.sources||[],action,mode:'library'};
+      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|عيادة/.test(q)?'care':null;
+      return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. Connect the competition demo to try Luna.')),sources:a?.sources||[],action,mode:'library'};
     }
     async request(path,body,signal) {
       const r=await fetch(this.apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.session.token},body:JSON.stringify(body),signal});
@@ -87,7 +91,7 @@
       if(!this.session) { if(!message)return;this.append('user',message);this.append('assistant',this.libraryReply(message,hint).text,this.libraryReply(message,hint));this.render();return; }
       const scenarioMessages={meal:'Fictional scenario: Sam has just had a difficult mealtime and wants support.',routine:'Fictional scenario: Sam has a busy day and wants help finding a regular routine.',support:'Fictional scenario: Sam wants to ask a trusted person for support.'};
       if(this.session.mode==='synthetic' && !Object.hasOwn(scenarioMessages,scenario)) {this.status('Choose a fictional scenario.');return;}
-      const display=scenario?scenarioMessages[scenario]:message;if(!display.trim())return;
+      const display=scenario?this.options.translateText(scenarioMessages[scenario]):message;if(!display.trim())return;
       const c=this.ensureChat(); const currentId=c.id;this.append('user',display);this.busy=true;this.abort=new AbortController();this.status('');this.render();
       const timer=setTimeout(()=>this.abort.abort(),30000);
       try {const result=await this.request('/chat',{conversationId:c.id,requestId:crypto.randomUUID(),message:scenario?undefined:message,scenario:scenario||undefined,language:this.options.getLanguage()},this.abort.signal);

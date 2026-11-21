@@ -6,13 +6,14 @@ const arabicInterface = JSON.parse(document.getElementById("arabic-interface").t
 const languageCodes = new Set(languageRegistry.map(([code]) => code));
 const languageAliases = new Map();
 const languageLabels = new Map();
-const originalText = new WeakMap();
-const originalAttributes = new WeakMap();
+const localeTools = globalThis.AlongsideLocale;
+const renderTranslatedText = localeTools.makeRenderer();
 let selectedLanguage = "en";
 let translationObserver;
 
 function interfaceLocale() {
-  return selectedLanguage.split("-")[0] === "ar" ? "ar" : "en";
+  const base = selectedLanguage.split("-")[0];
+  return base === "ar" || Object.hasOwn(localeTools.packs, base) ? base : "en";
 }
 
 function normalizeLanguageName(value) {
@@ -22,6 +23,8 @@ function normalizeLanguageName(value) {
 for (const [code, name, aliases] of languageRegistry) {
   for (const alias of [code, name, ...aliases]) languageAliases.set(normalizeLanguageName(alias), code);
 }
+languageAliases.set("français", "fr");
+languageAliases.set("francais", "fr");
 languageAliases.set("العربية", "ar");
 languageAliases.set("الإنجليزية", "en");
 
@@ -71,7 +74,8 @@ function populateLanguageOptions(query = "") {
 }
 
 function translate(text) {
-  if (interfaceLocale() === "en") return text;
+  const locale = interfaceLocale();
+  if (locale !== "ar") return localeTools.translate(text, locale);
   if (Object.hasOwn(arabicInterface, text)) return arabicInterface[text];
   const question = text.match(/^Question (\d+) \/ (\d+)$/);
   if (question) return "السؤال \u2066" + question[1] + " / " + question[2] + "\u2069";
@@ -95,30 +99,7 @@ function translateView() {
   const locale = interfaceLocale();
   document.documentElement.lang = locale;
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  let node;
-  while ((node = walker.nextNode())) {
-    if (node.parentElement.closest("script, style, textarea, datalist, [data-user-content]")) continue;
-    if (!originalText.has(node)) originalText.set(node, node.nodeValue);
-    const original = originalText.get(node);
-    const content = original.trim();
-    if (!content) continue;
-    const translated = original.replace(content, translate(content));
-    if (node.nodeValue !== translated) node.nodeValue = translated;
-  }
-  for (const element of document.querySelectorAll("[aria-label], [placeholder]")) {
-    let attributes = originalAttributes.get(element);
-    if (!attributes) {
-      attributes = {};
-      originalAttributes.set(element, attributes);
-    }
-    for (const attribute of ["aria-label", "placeholder"]) {
-      if (!element.hasAttribute(attribute)) continue;
-      attributes[attribute] ??= element.getAttribute(attribute);
-      const text = translate(attributes[attribute]);
-      if (element.getAttribute(attribute) !== text) element.setAttribute(attribute, text);
-    }
-  }
+  renderTranslatedText(translate);
   const page = location.hash.slice(1);
   document.title = translate(pageNames[page] ?? "Profile") + " · Alongside";
   translationObserver?.observe(document.body, { childList: true, characterData: true, subtree: true });
@@ -131,16 +112,16 @@ function refreshLanguage() {
   }
   populateLanguageOptions();
   const notice = document.getElementById("language-notice");
-  const available = ["en", "ar"].includes(selectedLanguage.split("-")[0]);
+  const available = interfaceLocale() === selectedLanguage.split("-")[0];
   notice.hidden = available;
   notice.textContent = available ? "" : "Preferred language: " + languageName(selectedLanguage) + ". This preview currently shows its interface in English until that translation is added.";
   if (profile) {
     renderToday();
     renderPlan();
-    renderChat();
     renderHistory();
     renderReminders();
   }
+  renderChat();
   prepareCountryOptions();
   renderLearning();
   if (profile) { renderTasks(); renderDailyPrompt(); }
@@ -998,7 +979,7 @@ function calendarText() {
  const kinds=record().settings;const slots=schedule().filter(s=>(s.kind==='meals'?true:s.kind==='snacks'?kinds.snacks:kinds.water)&& (s.kind!=='water'||withinWaterWindow(s.time)));
  slots.push({id:'checkin',name:'Daily check-in',time:record().checkinTime || '20:00'});
  const today=dayKey();const base=new Date(today+'T12:00:00Z');
- for(let i=0;i<7;i++){const d=new Date(base);d.setUTCDate(d.getUTCDate()+i);const day=d.toISOString().slice(0,10);for(const slot of slots){const start=zonedToUtc(day,slot.time,zone());if(start<new Date())continue;const title=translate(kinds.discreet?'Alongside reminder':slot.name);lines.push('BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(new Date(start.getTime()+5*60000)),'SUMMARY:'+title,'DESCRIPTION:Open Alongside for your reminder. Time zone '+zone(),'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:Alongside reminder','END:VALARM','END:VEVENT');}}
+ for(let i=0;i<7;i++){const d=new Date(base);d.setUTCDate(d.getUTCDate()+i);const day=d.toISOString().slice(0,10);for(const slot of slots){const start=zonedToUtc(day,slot.time,zone());if(start<new Date())continue;const title=translate(kinds.discreet?'Alongside reminder':slot.name);lines.push('BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(new Date(start.getTime()+5*60000)),'SUMMARY:'+title,'DESCRIPTION:'+translate('Open Alongside for your reminder. Time zone')+' '+zone(),'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:'+translate('Alongside reminder'),'END:VALARM','END:VEVENT');}}
  lines.push('END:VCALENDAR');return lines.map(line=>/^[\x00-\x7F]*$/.test(line)?line.replace(/(.{75})(?=.)/g,'$1\r\n '):line).join('\r\n')+'\r\n';
 }
 function downloadFile(name,content,type) {const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
