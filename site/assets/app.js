@@ -1003,6 +1003,9 @@ function initializeRecoveryUpdate() {
   byId('recovery-update-form').addEventListener('submit', event => { event.preventDefault(); saveRecoveryUpdate(); });
 }
 
+// A private invitation carries only the limited judge access code in the fragment.
+const judgeInvite = /^#judge=(demo-[A-Za-z0-9_-]{24})$/.exec(location.hash);
+if (judgeInvite) history.replaceState(null, "", "#support");
 chatController = new globalThis.AlongsideChat({
   sources: medicalSources, answers: medicalAnswers, getLanguage: () => interfaceLocale(),
   getAgeGroup: () => profile?.ageGroup, translateText: text => translate(text),
@@ -1014,3 +1017,5 @@ renderSources();
 renderProfile();
 renderRoute(false);
 initializeLanguageControls();
+
+if (judgeInvite) void chatController.openConnection(judgeInvite[1]);

@@ -19,3 +19,5 @@ coverage/
 outputs/
 .openai/
 .setup-tools/
+
+__pycache__/

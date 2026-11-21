@@ -9,7 +9,7 @@ import secrets
 import shutil
 import subprocess
 import sys
-import urllib.request
+from check_connection import check_connection
 
 ROOT = Path(__file__).resolve().parent.parent
 WRANGLER = 'wrangler@4.166.0'
@@ -20,6 +20,8 @@ def main():
     print('Cloudflare hosts the private server. OpenAI usage has its own charges.')
     print('The demo starts with limits of 60 requests/day and 500/month.')
     print('Use provider accounts that your parent or guardian helps manage.\n')
+    if not sys.stdin.isatty():
+        raise RuntimeError('Open START-HERE.command in your own Terminal window.')
     node = shutil.which('node')
     bundled = Path('/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node')
     if not node and bundled.exists():
@@ -83,14 +85,15 @@ def main():
     config['vars']['AI_ENABLED'] = 'true'
     config_path.write_text(json.dumps(config, indent=2) + '\n')
     wrangler('deploy', '--config', 'api/wrangler.jsonc', capture=True)
-    with urllib.request.urlopen(api_base + '/status', timeout=20) as response:
-        health = json.load(response)
-    if health.get('ready') is not True:
-        raise RuntimeError('The private server is not ready. Keep the website in library mode and ask Codex to check it.')
+    print('Save these codes privately before testing the connection.')
+    print('Judge invitation (share privately with judges after publishing):')
+    print('https://hintofhala21.github.io/alongside/#judge=' + demo_code)
+    print('Competition access code: ' + demo_code)
+    print('Publisher code (owner only): ' + publisher_code)
+    print('Public Worker address: ' + api_base)
+    print('Checking one fictional message through the private server. This uses one model request.')
+    check_connection(api_base, demo_code)
     (ROOT / 'site/config.json').write_text(json.dumps({'apiBase': api_base}, indent=2) + '\n')
-    print('\nThe private server is ready. Save these two codes somewhere private:')
-    print('\nCompetition access code — share with your judges:\n' + demo_code)
-    print('\nPublisher code — keep for yourself; it selects the demos judges can see:\n' + publisher_code)
     print('\nLast step: tell Codex this PUBLIC server address so the website connection can be published:')
     print(api_base)
     print('\nDo not send your OpenAI key. The public address above is enough.')

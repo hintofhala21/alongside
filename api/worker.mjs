@@ -84,7 +84,7 @@ export class AlongsideHub {
         if(!await sameSecret(data.publisherCode,this.env.PUBLISHER_CODE))fail('Publisher code required.',403);if(!uuid.test(data.id))fail('Demo not found.',404);await this.storage.delete('share:'+data.id);return json({removed:true});
       }
       fail('Not found.',404);
-    }catch(e){return json({error:e.status?e.message:'The AI demo could not respond. Please try again later.'},e.status||502);}
+    }catch(e){return json({error:e.status?e.message:'The AI demo could not respond. Please try again later.',diagnostic:e.diagnostic},e.status||502);}
   }
   async alarm(){const now=Date.now();for(const [key,value]of await this.storage.list()){if(value?.expires&&value.expires<now)await this.storage.delete(key);}await this.storage.setAlarm(now+3600000);}
 }

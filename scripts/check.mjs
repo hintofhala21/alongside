@@ -4,7 +4,7 @@ import { resolve, relative, extname } from 'node:path';
 import { Script } from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const skipped = new Set(['.git', 'node_modules', 'build', '.wrangler', 'outputs', '.setup-tools']);
+const skipped = new Set(['.git', 'node_modules', '__pycache__', 'build', '.wrangler', 'outputs', '.setup-tools']);
 const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
 
 export function assertNoSecret(contents, name) {

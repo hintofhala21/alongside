@@ -81,3 +81,20 @@ test('the local profile migration removes old measurements without losing check-
   assert.equal(JSON.parse(saved).data.checkins[0].note,'Keep this reflection');
   const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');assert.doesNotMatch(html,/id="(?:profile-height|profile-weight|height-unit|weight-unit)"/);
 });
+
+test('a verified provider reply identifies the prompt and a rejected key returns a safe diagnostic',async()=>{
+  const s=server(); const token=await s.session('synthetic');
+  const ok=await s.call('/chat',message(undefined,{scenario:'support'}),token);
+  assert.equal(ok.body.reply.promptVersion,'v4');
+  const rejected=server({TEST_FETCH:async()=>Response.json({error:'private provider details'},{status:401})});
+  const t=await rejected.session('synthetic');
+  const r=await rejected.call('/chat',message(undefined,{scenario:'support'}),t);
+  assert.equal(r.status,502);assert.equal(r.body.diagnostic,'key_rejected');
+  assert.doesNotMatch(JSON.stringify(r.body),/private provider details/);
+});
+
+test('chat is the first visible page before JavaScript runs',async()=>{
+  const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');
+  const pages=[...html.matchAll(/<section data-page="([^"]+)"([^>]*)>/g)];
+  assert.deepEqual(pages.filter(([, ,attrs])=>!attrs.includes('hidden')).map(([,page])=>page),['support']);
+});

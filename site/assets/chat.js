@@ -111,7 +111,7 @@
       }catch(e){if(this.state.current===currentId)this.status(e.name==='AbortError'?'The request took too long. Please try again.':e.message);}
       finally {clearTimeout(timer);this.busy=false;this.render();}
     }
-    async openConnection() {
+    async openConnection(invite = '') {
       await this.ready;let d=id('demo-connection');if(d)d.remove();d=node('dialog');d.id='demo-connection';d.setAttribute('aria-labelledby','demo-connect-title');
       const title=node('h2','Try the competition demo');title.id='demo-connect-title';d.append(title);
       if(!this.apiBase) {d.append(node('p','The chatbot is prepared, but its private server has not been connected yet. The owner can run the guided setup; visitors never enter an OpenAI key here.'));const a=node('a','Owner setup guide','action outline');a.href='https://github.com/hintofhala21/alongside/blob/main/docs/OPENAI-SETUP.md';a.target='_blank';a.rel='noopener noreferrer';d.append(a);}
@@ -120,6 +120,10 @@
         const code=node('input');code.type='password';code.id='demo-code';code.required=true;code.maxLength=100;code.autocomplete='off';const cl=node('label','Competition access code','field');cl.append(code);
         const adult=node('input');adult.type='checkbox';const al=node('label','');al.append(adult,document.createTextNode(' I am 18 or older and will use fictional details only.'));al.hidden=true;
         const notice=node('p','Use fictional scenarios. Alongside does not send your profile, check-ins or contact details.');const status=node('p','','status');status.setAttribute('role','status');
+        if (typeof invite === 'string' && invite) {
+          code.value=invite;
+          mode.value='interactive'; al.hidden=false; adult.required=true;
+        }
         mode.addEventListener('change',()=>{al.hidden=mode.value!=='interactive';adult.required=mode.value==='interactive';});
         const submit=node('button','Start demo','action');submit.type='submit';form.append(ml,cl,al,notice,submit,status);
         form.addEventListener('submit',async e=>{e.preventDefault();if(mode.value==='interactive' && (this.options.getAgeGroup()==='child'||this.options.getAgeGroup()==='teen')){status.textContent='Use fictional scenarios for younger builders. Adult judges can use the free-text option.';return;}submit.disabled=true;

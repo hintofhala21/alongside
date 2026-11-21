@@ -30,6 +30,8 @@ jobs:
         run: npm run check
       - name: Test
         run: npm test
+      - name: Test private connection checker offline
+        run: python3 -B -m unittest discover -s tests -p test_connection.py
       - name: Build public files only
         run: npm run build
       - name: Configure Pages

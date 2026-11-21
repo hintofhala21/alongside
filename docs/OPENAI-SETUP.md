@@ -57,3 +57,13 @@ Only competition-demo messages are sent to Cloudflare and OpenAI. Profile fields
 This prototype uses `store: false` for OpenAI requests. That is not the same as Zero Data Retention. Younger builders use predefined fictional messages, not personal data. The product still needs clinical and consent work before patient use.
 
 [OpenAI production guidance](https://developers.openai.com/api/docs/guides/production-best-practices) · [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) · [Under-18 API guidance](https://developers.openai.com/api/docs/guides/safety-checks/under-18-api-guidance) · [Cloudflare secrets](https://developers.cloudflare.com/workers/configuration/secrets/) · [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
+
+## Check that OpenAI really answers
+
+Use a fresh key if an earlier one was pasted into a chat. Delete the exposed key in the OpenAI dashboard. Open START-HERE.command in Finder and enter the replacement only at the hidden prompt. Use the existing private Worker address and competition code for repeat checks, so access codes stay the same.
+
+Setup tests server configuration, judge access and one real fictional reply. A PASS 3/3 line includes the system prompt version. Only then does setup write the Worker address to the website configuration. For another check in Terminal, run `python3 scripts/check_connection.py`. Each run uses at most one model call. If setup stopped at the model check, correct the reported issue, repeat the check, and give Codex the public Worker address after PASS 3/3.
+
+After the connection is published, privately share the judge invitation printed by setup. It opens chat and pre-fills the limited demo code. The judge confirms fictional use before sending a message. The API key and owner publishing code stay private.
+
+For individual requests, the backend emits an `alongside.chat` event with the result, provider HTTP status, duration and prompt version. In Cloudflare Workers, open the Alongside Worker's live logs while testing. The application log omits keys, codes and message text. See the [system prompt history](../api/prompts/README.md) to compare versions.
