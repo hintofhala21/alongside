@@ -1,5 +1,5 @@
 import * as demoPrompt from './prompts/v4.mjs';
-import * as chatPrompt from './prompts/v6.mjs';
+import * as chatPrompt from './prompts/v8.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';

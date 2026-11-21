@@ -110,7 +110,7 @@ test('personal chat requires consent, remembers the conversation and cannot be s
   const {token}= (await s.call('/session',consent)).body;
   const first=message(undefined,{message:'I want to ask a friend for support.'});
   const reply=await s.call('/chat',first,token);
-  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v6');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
+  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v8');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
   await s.call('/chat',message(first.conversationId,{message:'How do I start that conversation?'}),token);
   assert.equal(requests.length,2);assert.equal(requests[1].input[0].content,first.message);
   const share={conversationId:first.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Example'};
