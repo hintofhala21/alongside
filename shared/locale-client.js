@@ -13,7 +13,7 @@
     [/^Question (\d+) \/ (\d+)$/, "Question {current} / {total}", ["current", "total"]],
     [/^(\d+) specific pages approved for Alongside’s information library\.$/, "{count} specific pages approved for Alongside’s information library.", ["count"]],
     [/^Delete check-in (\d+)$/, "Delete check-in {count}", ["count"]],
-    [/^Selected fictional Luna demo · expires (.+)$/, "Selected fictional Luna demo · expires {date}", ["date"]]
+    [/^Selected fictional Breeze demo · expires (.+)$/, "Selected fictional Breeze demo · expires {date}", ["date"]]
   ];
 
   function translate(text, language) {

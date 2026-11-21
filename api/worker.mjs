@@ -28,7 +28,7 @@ export class AlongsideHub {
     });
   }
   async session(request) {
-    const raw=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(!raw||!/^[-_A-Za-z0-9]{43}$/.test(raw))fail('Connect to Luna first.',401);
+    const raw=request.headers.get('Authorization')?.replace(/^Bearer /,'');if(!raw||!/^[-_A-Za-z0-9]{43}$/.test(raw))fail('Connect to Breeze first.',401);
     const key=await hash(this.env.RATE_SALT+':'+raw);const session=await this.storage.get('session:'+key);if(!session||session.expires<Date.now())fail('Your chat session has ended. Reconnect to continue.',401);return {key,...session};
   }
   async fetch(request) {
@@ -84,7 +84,7 @@ export class AlongsideHub {
         if(data.confirmFictional!==true)fail('Review the conversation and confirm that it contains fictional details only.');
         if(!uuid.test(data.conversationId))fail('Conversation not found.',404);const c=await this.storage.get('conversation:'+data.conversationId);if(!c||c.owner!==session.key||c.expires<now)fail('This demo session is unavailable. Run a new demo first.',404);
         if(c.mode==='personal')fail('Personal chats are private.',403);
-        if(!c.messages.some(m=>m.mode==='luna'))fail('Only a completed Luna demo can be published.');
+        if(!c.messages.some(m=>m.mode==='luna'))fail('Only a completed Breeze demo can be published.');
         const title=typeof data.title==='string'?data.title.trim().slice(0,80):'Competition demo';if(!title)fail('Add a title.');
         if(/@|https?:\/\/|\+?\d[\d\s().-]{7,}/.test(title))fail('Use a title without contact details.');
         const shares=await this.storage.list({prefix:'share:',limit:100});if(shares.size>=30)fail('The showcase is full. Remove an old demo first.',429);

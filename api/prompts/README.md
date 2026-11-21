@@ -16,6 +16,8 @@ The system prompt tells Luna how to select a supportive reply, a cited library t
 
 The archived templates include placeholders. The listed project revision preserves the exact menus and library used to fill them.
 
+The current assistant is Breeze. Version 10 changes the displayed identity across languages and preserves the v9 recovery instructions. [Read v10](v10.mjs).
+
 ## For the next change
 
 Create the next numbered file. Keep previous versions and record the date, reason, and test result in a new row. Import the new version in the agent and run the chat tests before release. For a live trial, record the version and outcome with a fictional scenario. Keep private messages and access codes out of this log.

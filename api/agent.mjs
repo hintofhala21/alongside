@@ -1,5 +1,5 @@
 import * as demoPrompt from './prompts/v4.mjs';
-import * as chatPrompt from './prompts/v9.mjs';
+import * as chatPrompt from './prompts/v10.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -80,7 +80,7 @@ export function renderPlan(plan, language='en') {
   const answer = library.medicalAnswers[plan.information];
   const parts = [support[plan.acknowledgement], answer?.text, questions[plan.followup]];
   const text = parts.filter(Boolean).map(localize).join('\n\n');
-  const trace = [localize('Luna selected support and a follow-up using the recent conversation.')];
+  const trace = [localize('Breeze selected support and a follow-up using the recent conversation.')];
   if (answer) trace.push(localize('Retrieved approved summary:') + ' ' + localize(answer.title));
   if (plan.action !== 'none') {
     const label = {checkin:'Check-in',routine:'My plan',care:'Find care',human:'Get human help'}[plan.action];
@@ -115,7 +115,7 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch,
     return {...reply, promptVersion};
   } catch (error) {
     if (controller.signal.aborted) outcome = 'timeout';
-    throw Object.assign(new Error('Luna could not respond. Please try again later.'), {status:502, diagnostic:outcome});
+    throw Object.assign(new Error('Breeze could not respond. Please try again later.'), {status:502, diagnostic:outcome});
   } finally {
     clearTimeout(timeout);
     console.info(JSON.stringify({event:'alongside.chat', promptVersion, outcome, providerStatus:status, durationMs:Date.now()-started}));

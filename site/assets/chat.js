@@ -62,8 +62,8 @@
       const choosing=!this.session && !this.younger() && !sessionStorage.getItem(localChoice);
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
       id('chat-welcome').hidden=hasMessages; id('chat-options').hidden=hasMessages || this.session?.mode==='synthetic';
-      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : kids ? 'Kids’ chat' : choosing ? 'Choose how to chat' : 'Approved library';
-      id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Luna';
+      id('chat-mode').textContent=personal ? 'Breeze · live chat' : this.session ? 'Breeze · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : kids ? 'Kids’ chat' : choosing ? 'Choose how to chat' : 'Approved library';
+      id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Breeze';
       id('connect-demo').hidden=this.younger() && !this.session;
       id('connect-demo').disabled=this.busy;
       id('kids-chat').disabled=this.busy;
@@ -122,7 +122,7 @@
       if(this.session) return this.openConnection();
       if(this.younger())return;
       const d=node('dialog');d.id='personal-connection';d.setAttribute('aria-labelledby','personal-title');
-      const title=node('h2','Chat with Luna');title.id='personal-title';
+      const title=node('h2','Chat with Breeze');title.id='personal-title';
       const form=node('form','','stack');
       const check=node('input');check.type='checkbox';check.required=true;
       const label=node('label');label.append(check,document.createTextNode('I am 18 or older and agree to send my chat messages.'));
@@ -136,7 +136,7 @@
         event.preventDefault();if(!check.checked || this.younger() || start.disabled)return;
         start.disabled=true;
         try {
-          if(!this.apiBase)throw Error('Luna is unavailable. You can use on-device chat.');
+          if(!this.apiBase)throw Error('Breeze is unavailable. You can use on-device chat.');
           const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json',...await this.accountHeaders()},body:JSON.stringify({mode:'personal',adult:true,consent:true})});
           const result=await r.json();if(!r.ok || !result.token)throw Error(result.error || 'Could not connect.');
           if(!d.open || this.younger())return;
