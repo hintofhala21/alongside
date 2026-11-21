@@ -259,3 +259,9 @@ h1 { font-size:clamp(2rem,7vw,3.8rem); }
 #kids-dialog {width:min(38rem,94vw);max-height:90dvh;overflow:auto;}
 .kids-log {max-height:40dvh;overflow:auto;}
 .kids-log:empty {display:none;}
+html.accounts-locked body > :not(#account-screen) {display:none !important}
+.account-screen {min-height:100dvh;display:grid;place-items:center;padding:1.25rem;background:linear-gradient(90deg,#f4f2e4eb,#f4f2e482),url('./garden.jpg') center/cover}
+.account-screen[hidden] {display:none}
+.account-card {width:min(27rem,100%);margin:0 auto;padding:clamp(1.5rem,5vw,2.5rem)}
+.account-card h1 {font-size:clamp(1.9rem,6vw,2.5rem)}
+.basic-setup #profile-form :is(.profile-extra,.health-details,#recovery-stage),.basic-setup #profile-form label[for="recovery-stage"],.basic-setup .mobile-dock,.basic-setup .sidebar nav {display:none}

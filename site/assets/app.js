@@ -162,8 +162,9 @@ const mealSlots = [
 ];
 const defaultWindow = { start: "09:00", end: "21:00" };
 const byId = (id) => document.getElementById(id);
-const storageKey = "stillday-profile-v2";
-const legacyStorageKey = "stillday-demo-v1";
+const account = globalThis.AlongsideAccount;
+const storageKey = account?.key("stillday-profile-v2") ?? "stillday-profile-v2";
+const legacyStorageKey = account?.key("stillday-demo-v1") ?? "stillday-demo-v1";
 const defaultNote = "You can use a check-in to write down what you’d like to discuss with your support team.";
 const settings = ["enabled", "meals", "snacks", "water", "discreet"];
 const ageGroups = ["child", "teen", "adult"];
@@ -186,12 +187,12 @@ function emptyData() {
 }
 
 function readProfile() {
-  const saved = JSON.parse(localStorage.getItem(storageKey));
+  const saved = JSON.parse((globalThis.AlongsideAccount?.storage ?? localStorage).getItem(storageKey));
   if (!saved?.profile || typeof saved.profile.id !== "string") return null;
   const oldFields = ["height", "heightUnit", "weight", "weightUnit"];
   const hadMeasurements = oldFields.some(key => Object.hasOwn(saved.profile, key));
   for (const key of oldFields) delete saved.profile[key];
-  if (hadMeasurements) { try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch {} }
+  if (hadMeasurements) { try { (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify(saved)); } catch {} }
   return saved;
 }
 
@@ -226,7 +227,7 @@ function persist() {
       return false;
     }
     data.settings.meals = true;
-    localStorage.setItem(storageKey, JSON.stringify({ profile, data }));
+    (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify({ profile, data }));
     return true;
   } catch { return false; }
 }
@@ -521,7 +522,9 @@ function renderProfile() {
       : "Add your age group to finish setting up your profile.";
   byId("save-profile").textContent = profile ? "Save profile" : "Create profile";
   byId("nickname").value = profile?.name ?? "";
-  byId("age-group").value = hasAgeGroup() ? profile.ageGroup : "";
+  const ageSelect=byId("age-group");
+  if(account) for(const option of ageSelect.options) option.disabled=Boolean(option.value) && ((option.value==="adult")===account.kids);
+  ageSelect.value = hasAgeGroup() ? profile.ageGroup : account && !account.kids ? "adult" : "";
   byId("recovery-stage").value = profile?.stage ?? "";
   populateLanguageOptions();
   populateProfileExtras();
@@ -543,10 +546,11 @@ function renderProfile() {
 const pageNames = { profile: "Profile", today: "Today", plan: "My plan", support: "Chat with Alongside", checkins: "Check-ins", reminders: "Reminders", sources: "Medical sources", settings: "Settings", care: "Find care", learn: "Learn" };
 function renderRoute(moveFocus) {
   const requested = location.hash.slice(1);
+  document.body.classList.toggle("basic-setup", Boolean(account && !hasAgeGroup()));
   document.querySelector(".sidebar").classList.remove("menu-open");
   byId("toggle-menu").setAttribute("aria-expanded", "false");
   const openPages = ["support", "profile", "sources", "settings", "care", "learn"];
-  const page = !requested ? "support" : openPages.includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "support") : "profile";
+  const page = account && !hasAgeGroup() ? "profile" : !requested ? "support" : openPages.includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "support") : "profile";
   if (location.hash !== "#" + page) history.replaceState(null, "", "#" + page);
   for (const section of document.querySelectorAll("[data-page]")) section.hidden = section.dataset.page !== page;
   for (const link of document.querySelectorAll(".nav a")) {
@@ -604,7 +608,7 @@ byId("profile-form").addEventListener("submit", (event) => {
   const name = byId("nickname").value.trim();
   const stage = byId("recovery-stage").value;
   const ageGroup = byId("age-group").value;
-  if (!ageGroups.includes(ageGroup)) {
+  if (!ageGroups.includes(ageGroup) || (account && ((ageGroup==="adult")===account.kids))) {
     byId("age-group").focus();
     return;
   }
@@ -618,13 +622,17 @@ byId("profile-form").addEventListener("submit", (event) => {
       return;
     }
     const nextProfile = { ...profile, ...extras, id: profile?.id ?? crypto.randomUUID(), name, stage, ageGroup, language };
-    localStorage.setItem(storageKey, JSON.stringify({ profile: nextProfile, data }));
+    (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify({ profile: nextProfile, data }));
     localStorage.removeItem(legacyStorageKey);
     profile = nextProfile;
     useLanguage(language);
     renderProfile();
     byId("profile-status").textContent = "Profile saved.";
-    if (completingSetup) location.hash = "#support";
+    if (completingSetup) {
+      location.hash = "#support";
+      if(account?.kids) chatController.openKids();
+      else if(judgeInvite) void chatController.openConnection(judgeInvite[1]);
+    }
   } catch {
     byId("profile-status").textContent = "Your profile couldn’t be saved. Allow browser storage and try again.";
   }
@@ -649,7 +657,7 @@ byId("delete-dialog").addEventListener("close", (event) => {
     }
     localStorage.removeItem(legacyStorageKey);
     localStorage.removeItem(languageStorageKey);
-    localStorage.removeItem(storageKey);
+    (globalThis.AlongsideAccount?.storage ?? localStorage).removeItem(storageKey);
     chatController?.clearLocal();
   } catch {
     byId("settings-status").textContent = "Your profile couldn’t be deleted. Please try again.";
@@ -1018,4 +1026,8 @@ renderProfile();
 renderRoute(false);
 initializeLanguageControls();
 
-if (judgeInvite) void chatController.openConnection(judgeInvite[1]);
+if (judgeInvite && (!account || hasAgeGroup()) && !account?.kids) void chatController.openConnection(judgeInvite[1]);
+if (account) {
+  byId("account-controls").hidden=false;
+  byId("sign-out").addEventListener("click",account.signOut);
+}

@@ -1,11 +1,12 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, relative, extname } from 'node:path';
+import { validateAccounts } from './account-pages.mjs';
 import { Script } from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const skipped = new Set(['.git', 'node_modules', '__pycache__', 'build', '.wrangler', 'outputs', '.setup-tools']);
-const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/chat.js', 'assets/kids-chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
+const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/accounts.js', 'assets/chat.js', 'assets/kids-chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
 
 export function assertNoSecret(contents, name) {
   // Detect common credential formats without printing the value or matching line.
@@ -59,7 +60,8 @@ export async function check() {
     }
   }
   const config = JSON.parse(await readFile(resolve(root, 'site/config.json'), 'utf8'));
-  if (Object.keys(config).some(k => k !== 'apiBase')) throw new Error('Public configuration accepts only apiBase, never secret fields.');
+  validateAccounts(config.firebase);
+  if (Object.keys(config).some(k => !['firebase','apiBase'].includes(k))) throw new Error('Unexpected public configuration field.');
   if (typeof config.apiBase !== 'string') throw new Error('Invalid public API configuration.');
   const library = JSON.parse(await readFile(resolve(root, 'shared/library.json'), 'utf8'));
   if (!library.medicalSources || !library.medicalAnswers) throw new Error('Missing approved information library.');

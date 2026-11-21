@@ -1,8 +1,8 @@
 "use strict";
 (() => {
-  const key = 'alongside-chat-history-v1';
-  const localChoice = 'alongside-use-library';
-  const sessionKey = 'alongside-demo-session-v1';
+  const key = globalThis.AlongsideAccount?.key('alongside-chat-history-v1') ?? 'alongside-chat-history-v1';
+  const localChoice = globalThis.AlongsideAccount?.key('alongside-use-library') ?? 'alongside-use-library';
+  const sessionKey = globalThis.AlongsideAccount?.key('alongside-demo-session-v1') ?? 'alongside-demo-session-v1';
   const node = (tag, text = '', cls = '') => { const n = document.createElement(tag); n.textContent = text; if (cls) n.className = cls; return n; };
   const id = value => document.getElementById(value);
   // Only match reviewed library topics; visitor text never leaves this mode.
@@ -21,9 +21,9 @@
   ];
   const cleanMessage = m => m && ['user','assistant'].includes(m.role) && typeof m.text === 'string' && m.text.length <= 6000;
   const store = {
-    read() { try { const v = JSON.parse(localStorage.getItem(key)); return { current: typeof v?.current === 'string' ? v.current : null, chats: Array.isArray(v?.chats) ? v.chats.filter(c => typeof c.id === 'string' && typeof c.title === 'string' && Array.isArray(c.messages)).slice(0,30).map(c => ({ ...c, messages:c.messages.filter(cleanMessage).slice(-60) })) : [] }; } catch { return {current:null,chats:[]}; } },
-    write(value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } },
-    clear() { localStorage.removeItem(key); sessionStorage.removeItem(sessionKey); sessionStorage.removeItem(localChoice); }
+    read() { try { const v = JSON.parse((globalThis.AlongsideAccount?.storage ?? localStorage).getItem(key)); return { current: typeof v?.current === 'string' ? v.current : null, chats: Array.isArray(v?.chats) ? v.chats.filter(c => typeof c.id === 'string' && typeof c.title === 'string' && Array.isArray(c.messages)).slice(0,30).map(c => ({ ...c, messages:c.messages.filter(cleanMessage).slice(-60) })) : [] }; } catch { return {current:null,chats:[]}; } },
+    write(value) { try { (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(key, JSON.stringify(value)); return true; } catch { return false; } },
+    clear() { (globalThis.AlongsideAccount?.storage ?? localStorage).removeItem(key); sessionStorage.removeItem(sessionKey); sessionStorage.removeItem(localChoice); }
   };
   globalThis.AlongsideChatStore = store;
   globalThis.AlongsideChat = class {
@@ -41,7 +41,7 @@
       this.render();
     }
     current() { return this.state.chats.find(c => c.id === this.state.current); }
-    younger() { return ['child','teen'].includes(this.options.getAgeGroup()); }
+    younger() { return globalThis.AlongsideAccount?.kids || ['child','teen'].includes(this.options.getAgeGroup()); }
     mode() { return this.session?.mode==='personal' ? 'personal' : this.session ? 'luna' : 'library'; }
     ensureChat(mode=this.mode()) {
       const current=this.current();
@@ -101,6 +101,9 @@
       const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|clínica|atención médica|krankenhaus|klinik|医院|病院|अस्पताल|عيادة/.test(q)?'care':null;
       return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.')),sources:a?.sources||[],action,mode:'library'};
     }
+    async accountHeaders() {
+      return globalThis.AlongsideAccount?.token ? {Authorization:'Bearer '+await globalThis.AlongsideAccount.token()} : {};
+    }
     async request(path,body,signal) {
       const r=await fetch(this.apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.session.token},body:JSON.stringify(body),signal});
       const data=await r.json().catch(()=>({})); if(!r.ok) {if(r.status===401)this.disconnect();throw Error(data.error||'The private demo server could not respond. Please try again.');}return data;
@@ -134,7 +137,7 @@
         start.disabled=true;
         try {
           if(!this.apiBase)throw Error('Luna is unavailable. You can use on-device chat.');
-          const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'personal',adult:true,consent:true})});
+          const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json',...await this.accountHeaders()},body:JSON.stringify({mode:'personal',adult:true,consent:true})});
           const result=await r.json();if(!r.ok || !result.token)throw Error(result.error || 'Could not connect.');
           if(!d.open || this.younger())return;
           this.session={...result,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));sessionStorage.removeItem(localChoice);resume();
@@ -184,7 +187,7 @@
         mode.addEventListener('change',()=>{al.hidden=mode.value!=='interactive';adult.required=mode.value==='interactive';});
         const submit=node('button','Start demo','action');submit.type='submit';form.append(ml,cl,al,notice,submit,status);
         form.addEventListener('submit',async e=>{e.preventDefault();if(mode.value==='interactive' && (this.options.getAgeGroup()==='child'||this.options.getAgeGroup()==='teen')){status.textContent='Use fictional scenarios for younger builders. Adult judges can use the free-text option.';return;}submit.disabled=true;
-          try {const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code.value,mode:mode.value,adult:adult.checked})});const result=await r.json();if(!r.ok)throw Error(result.error||'Could not connect.');this.session={...result,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));d.close();this.newChat();}catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});d.append(form);
+          try {const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json',...await this.accountHeaders()},body:JSON.stringify({code:code.value,mode:mode.value,adult:adult.checked})});const result=await r.json();if(!r.ok)throw Error(result.error||'Could not connect.');this.session={...result,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));d.close();this.newChat();}catch(error){status.textContent=error.message;}finally{submit.disabled=false;}});d.append(form);
         if(this.session){const off=node('button','Disconnect demo','action outline');off.type='button';off.addEventListener('click',()=>{this.disconnect();d.close();this.newChat();});d.append(off);}
       }
       const close=node('button','Close','action outline');close.type='button';close.addEventListener('click',()=>d.close());d.append(close);document.body.append(d);d.showModal();

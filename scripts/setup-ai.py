@@ -103,7 +103,10 @@ def main():
     print('Public Worker address: ' + api_base)
     print('Checking one fictional message through the private server. This uses one model request.')
     check_connection(api_base, demo_code)
-    (ROOT / 'site/config.json').write_text(json.dumps({'apiBase': api_base}, indent=2) + '\n')
+    public_path = ROOT / 'site/config.json'
+    public_settings = json.loads(public_path.read_text())
+    public_settings['apiBase'] = api_base
+    public_path.write_text(json.dumps(public_settings, indent=2) + '\n')
     print('\nLast step: tell Codex this PUBLIC server address so the website connection can be published:')
     print(api_base)
     print('\nDo not send your OpenAI key. The public address above is enough.')

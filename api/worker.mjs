@@ -1,3 +1,5 @@
+import { accountAllowed } from './account.mjs';
+import publicConfig from '../site/config.json' with { type: 'json' };
 import { supportedLanguage } from '../shared/languages.mjs';
 import { runAgent, scenarios } from './agent.mjs';
 
@@ -43,6 +45,7 @@ export class AlongsideHub {
       const data=await body(request);
       if(path==='/session') {
         const ip=request.headers.get('X-Demo-Client')||'unknown';await this.counter([['login:'+ip+':'+today,20,now+DAY],['login-total:'+today,500,now+DAY]]);
+        if(!await accountAllowed(request,publicConfig.firebase))fail('Sign in to Alongside first.',401);
         if(data.mode==='personal') {
           if(data.adult!==true || data.consent!==true) fail('Live chat requires adult confirmation and permission to send chat messages.',403);
         } else {

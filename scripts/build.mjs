@@ -2,6 +2,7 @@ import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { languagePacks, languageNames } from '../shared/languages.mjs';
+import { accountPage } from './account-pages.mjs';
 import { check } from './check.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -30,6 +31,13 @@ if (config.apiBase) {
 }
 for (const page of ['index.html', 'history.html']) {
   const path = resolve(root, 'build/site', page);
-  await writeFile(path, (await readFile(path, 'utf8')).replace("'self' https://alongside-api.invalid", connect));
+  const html=(await readFile(path, 'utf8')).replace("'self' https://alongside-api.invalid", connect);
+  await writeFile(path, accountPage(html,config.firebase));
+}
+if (config.firebase) {
+  const path = resolve(root, 'build/site/privacy.html');
+  const html = await readFile(path, 'utf8');
+  await writeFile(path, html.replace('There is no account sign-in or cross-device backup.',
+    'Adults sign in with Google or email using Firebase. Firebase processes account details to verify sign-in. Profile details and chats stay in this browser. Restarting a profile clears the local notebook. Younger visitors can use this tab without a Firebase account.'));
 }
 console.log('Built public files in build/site. No environment variables are included.');

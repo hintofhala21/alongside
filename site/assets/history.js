@@ -6,7 +6,7 @@
   try {const r=await fetch('./config.json',{cache:'no-store'});const c=await r.json();if(c.apiBase){const u=new URL(c.apiBase);if(u.protocol==='https:'&&u.hostname.endsWith('.workers.dev'))apiBase=u.origin;}}catch{}
   const publicLink=()=>new URL('./history.html?view=showcase',location.href).href;
   const status=t=>{id('history-status').textContent=t;};
-  function session(){try{const s=JSON.parse(sessionStorage.getItem('alongside-demo-session-v1'));return s?.expires>Date.now()&&s.apiBase===apiBase?s:null;}catch{return null;}}
+  function session(){try{const s=JSON.parse(sessionStorage.getItem(globalThis.AlongsideAccount?.key('alongside-demo-session-v1') ?? 'alongside-demo-session-v1'));return s?.expires>Date.now()&&s.apiBase===apiBase?s:null;}catch{return null;}}
   async function post(path,data){const s=session();if(!s)throw Error('Reconnect to the demo in Chat before selecting this conversation.');const r=await fetch(apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.token},body:JSON.stringify(data)});const result=await r.json();if(!r.ok)throw Error(result.error||'That action could not be completed.');return result;}
   async function copy(link){try{await navigator.clipboard.writeText(link);status('Link copied.');}catch{const a=el('a',link);a.href=link;id('history-status').replaceChildren(document.createTextNode('Copy this link: '),a);}}
   id('copy-judges-link').addEventListener('click',()=>copy(publicLink()));
@@ -32,6 +32,10 @@
       if(!entries.length){id('history-transcript').append(el('div',view==='private'?'Your conversations will appear here after you start a chat.':'No Luna demos have been selected yet. Once the owner connects the private chatbot, they can review a fictional conversation and publish it here.','empty-history'));return;}
       for(const c of entries){const b=el('button','','history-item');const title=el('span',c.title);title.dataset.userContent='';b.append(title);b.type='button';b.dataset.id=c.id;b.append(el('small',new Date(c.created).toLocaleDateString(document.documentElement.lang)+' · '+(c.mode==='personal'?'Private Luna chat':c.mode==='luna'?'Luna demo':'Approved library')));b.addEventListener('click',()=>select(c));id('history-list').append(b);}const first=entries.find(c=>c.id===selected)||entries[0];await select(first);
     }catch(e){id('history-transcript').append(el('p',e.message,'empty-history'));}
+  }
+  if(globalThis.AlongsideAccount?.publicOnly){
+    id('private-tab').addEventListener('click',()=>location.assign('./history.html'));
+    await render();return;
   }
   for(const [name,next]of[['private-tab','private'],['showcase-tab','showcase']])id(name).addEventListener('click',()=>{view=next;selected=null;history.replaceState(null,'',next==='showcase'?'?view=showcase':location.pathname);void render();});
   await render();
