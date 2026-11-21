@@ -1,43 +1,49 @@
 # Alongside
 
-A cream and sage recovery support **pilot**, prepared for GitHub Pages.
+A chat-first, mobile-first recovery support competition prototype in cream and sage, with real garden photography.
 
-## What is ready
+[Open Alongside](https://hintofhala21.github.io/alongside/) · [Judges’ history page](https://hintofhala21.github.io/alongside/history.html?view=showcase)
 
-- A profile you create yourself, stored in your browser.
-- Daily meal routines, optional snacks, reminders and calendar downloads.
-- Guided check-ins, daily tasks and recovery-detail updates.
-- An approved information library with cited replies.
-- English and Arabic interfaces, plus saved preferences for other languages.
-- Profile deletion and restart on the current browser.
+## Start here
 
-This version has **no account service, live AI, automatic WhatsApp sending or server database**. Profile creation is not secure sign-in. Please use sample details while testing. It is not ready to provide clinical treatment or handle a children's health service.
+The website works in **approved-library mode** immediately. The real Luna backend is prepared separately and stays off until its owner adds a key privately.
 
-## Publish on GitHub Pages
+To connect Luna, run this in the project folder:
 
-1. Open [repository Pages settings](https://github.com/hintofhala21/alongside/settings/pages).
-2. Under **Build and deployment → Source**, choose **GitHub Actions**.
-3. Open [Actions](https://github.com/hintofhala21/alongside/actions), select **Check and publish Alongside**, then **Run workflow** on `main` if it hasn't started already.
-4. Wait for both build and deploy to turn green. The deploy job supplies the verified website address.
+```sh
+python3 scripts/setup-ai.py
+```
 
-The expected address is **https://hintofhala21.github.io/alongside/**. It becomes usable only after a successful Pages deployment. Each later push to `main` checks and republishes the site automatically. Pull requests run checks without publishing.
+On this Mac, the guide can use the Node runtime included with the ChatGPT app. It opens Cloudflare sign-in, asks for the OpenAI key with typing hidden, and saves it directly as a Cloudflare secret. It never writes that key into this project. Read [the short setup guide](docs/OPENAI-SETUP.md) first. No key is entered into Alongside’s UI.
 
-## Where does the Luna key go?
+## What changed for the competition
 
-**Nowhere in this GitHub Pages project.** Pages publishes files to visitors and cannot keep an OpenAI key private. Even a GitHub Actions secret would become public if inserted into the website during the build.
+- Chat is the first page; no profile is created for you.
+- Phone layout, a reachable message composer, and quick bottom navigation.
+- Real, self-hosted flower and garden photographs with [credits](site/credits.html).
+- Height and weight fields removed. Old stored measurement values are removed on load.
+- Conversations persist in the browser and have their own history page.
+- Separate public judges’ history, containing only explicitly selected fictional Luna demos. It starts empty; no fabricated AI transcripts are included.
+- A private Luna agent with conversation memory, reviewed information retrieval, follow-up questions and app actions.
+- Competition access code, separate publisher code, request limits and a server off switch.
 
-You chose GitHub Pages only for now, so this version deliberately makes no OpenAI requests and has no API-key box. Read [the short private-key setup guide](docs/OPENAI-SETUP.md) when you are ready for the separate server. You do not need a key to publish this version.
+## How the agent works
 
-## Why the project looks like this
+Luna receives the recent conversation, understands the request, and calls `prepare_recovery_support`. The server validates that call, retrieves the chosen approved summary, and prepares a support action such as opening a check-in, a routine, a care directory or human help. The interface shows those actions and citations.
 
-- **HTML** describes the page, **CSS** controls its cream and sage appearance, and **JavaScript** makes its buttons and forms work. Keeping these existing tools avoids a large rebuild.
-- `site/` contains only files a visitor may download. `scripts/` contains preparation tools. `.github/workflows/` tells GitHub how to check and publish. Only `build/site/` is uploaded, never the whole repository.
-- There is no server database yet. Browser storage is like a notebook kept on one device. It is not an account, is not encrypted by this app, and does not follow you to a new phone. Other people with access to that browser can read it.
-- No packages need installing for the website build. Fewer dependencies mean fewer moving parts to maintain. GitHub runs Node to check and copy the files; visitors don't install Node.
+For this prototype, medical facts and support wording are reviewed templates selected by the LLM. This is deliberately a bounded agent, not an unrestricted text generator. It does not diagnose, prescribe or invent a recovery plan. The library remains subject to clinical review. Offline library mode is labelled clearly and does not pretend to be Luna.
 
-## Preview locally
+Younger builders can test Luna using server-defined fictional scenarios. Free-text competition testing requires an adult judge’s attestation and an invitation code. This is not a verified patient account or a children’s medical service.
 
-Install Node 24 LTS, then open a terminal in the repository:
+## The project, simply
+
+`site/` is the public website. `api/` is the private server code; its code can be public, but its keys cannot. `shared/library.json` is the approved information used by both. `scripts/` prepares and checks the release. Only `build/site/` is published to Pages.
+
+Browser storage is a notebook on one device. Cloudflare’s small Durable Object database holds demo conversation memory and controls who can publish a selected demo. It is created automatically by the setup, without a database ID to copy.
+
+## Check or preview
+
+With Node 24 installed:
 
 ```sh
 npm run check
@@ -46,10 +52,6 @@ npm run build
 npm run preview
 ```
 
-Open **http://127.0.0.1:4173**. No API key, paid service or package installation is needed. Stop the preview with Control-C.
+Open http://127.0.0.1:4173. The automated tests use a simulated OpenAI response, so they do not spend API credits. GitHub Pages runs the checks and republishes after updates to `main`.
 
-## Before a patient-facing launch
-
-See [PRODUCTION.md](PRODUCTION.md) for the precise release limits and remaining work. This repository is a deployable software pilot, not a claim of clinical readiness. See [privacy and pilot limits](site/privacy.html) and [security notes](SECURITY.md).
-
-Hosting instructions follow [GitHub's custom Pages workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+See [release limits](PRODUCTION.md), [security notes](SECURITY.md), and [privacy](site/privacy.html). Real clinical use still needs clinical, privacy, age and consent review.
