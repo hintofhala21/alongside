@@ -58,15 +58,16 @@
       if(!id('conversation')) return;
       if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic'))) {this.cancel();this.disconnect();}
       const personal=this.session?.mode==='personal';
+      const choosing=!this.session && !this.younger() && !sessionStorage.getItem(localChoice);
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
       id('chat-welcome').hidden=hasMessages; id('chat-options').hidden=hasMessages || this.session?.mode==='synthetic';
-      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : 'Approved library';
+      id('chat-mode').textContent=personal ? 'Luna · live chat' : this.session ? 'Luna · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : choosing ? 'Choose how to chat' : 'Approved library';
       id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Luna';
       id('connect-demo').hidden=this.younger() && !this.session;
       id('connect-demo').disabled=this.busy;
-      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : 'Library replies stay on this device. No profile details are sent.';
+      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : choosing ? 'Type a message or choose a starter. You can pick live or on-device chat before sending.' : 'Library replies stay on this device. No profile details are sent.';
       id('chat-message').disabled=this.busy || this.session?.mode==='synthetic'; id('send-chat').disabled=this.busy || this.session?.mode==='synthetic';
-      id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'What’s on your mind?';
+      id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'Type your own message…';
       const out=id('conversation'); out.replaceChildren();
       for(const m of chat?.messages || []) {
         const b=node('article','',m.role==='user'?'bubble user':'bubble'); const body=node('p',m.text); body.dataset.userContent='';

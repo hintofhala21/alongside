@@ -1,5 +1,5 @@
 import * as demoPrompt from './prompts/v4.mjs';
-import * as personalPrompt from './prompts/v5.mjs';
+import * as chatPrompt from './prompts/v6.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -47,25 +47,30 @@ const tool = {
   },required:['acknowledgement','followup','information','action']}
 };
 
-const personalTool = {
+const chatTool = {
   ...tool,
-  description:'Prepare a conversational reflection, an approved source and an optional action.',
+  name:'reply_to_visitor',
+  description:'Answer the visitor in your own words or select a sourced health answer.',
   parameters:{type:'object',additionalProperties:false,properties:{
-    reflection:{type:'string',description:'Brief conversational response, up to 500 characters.'},
-    route:{type:'string',enum:['support','urgent','younger']},
+    reply:{type:'string',description:'The conversational answer itself, or empty for a server-rendered response.'},
+    route:{type:'string',enum:['conversation','health','urgent','younger']},
     information:tool.parameters.properties.information,
     action:tool.parameters.properties.action
-  },required:['reflection','route','information','action']}
+  },required:['reply','route','information','action']}
 };
 
-function renderPersonal(plan, language) {
-  if (!plan || !['support','urgent','younger'].includes(plan.route) || !information.includes(plan.information) || !actions.includes(plan.action)) throw Error('Invalid support response');
+function renderChat(plan, language) {
+  if (!plan || !['conversation','health','urgent','younger'].includes(plan.route) || !information.includes(plan.information) || !actions.includes(plan.action)) throw Error('Invalid chat response');
   const localize = text => languagePacks[language]?.[text] || text;
   if (plan.route === 'urgent') return {text:localize('If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.'),sources:[],action:'human'};
   if (plan.route === 'younger') return {text:localize('You can keep using the library and check-ins on this device. A trusted adult can help you find more support.'),sources:[],action:'human',endLive:true};
-  if (typeof plan.reflection !== 'string' || !plan.reflection.trim() || plan.reflection.length > 650 || /https?:|www\./i.test(plan.reflection)) throw Error('Invalid reflection');
-  const entry = library.medicalAnswers[plan.information];
-  return {text:[plan.reflection.trim(), entry && localize(entry.text)].filter(Boolean).join('\n\n'), sources:entry?.sources || [],action:plan.action};
+  if (plan.route === 'health') {
+    const entry = library.medicalAnswers[plan.information];
+    const fallback = 'That question is outside the approved library. You can choose an information topic or bring it to your care team.';
+    return {text:localize(entry?.text || fallback),sources:entry?.sources || [],action:plan.action};
+  }
+  if (typeof plan.reply !== 'string' || !plan.reply.trim() || plan.reply.length > 4000) throw Error('Invalid reply');
+  return {text:plan.reply.trim(), sources:[], action:plan.action};
 }
 
 export function renderPlan(plan, language='en') {
@@ -85,16 +90,17 @@ export function renderPlan(plan, language='en') {
 }
 
 export async function runAgent(messages, env, language='en', requestFetch=fetch, mode='interactive') {
-  const personal = mode === 'personal';
-  const {buildInstructions, promptVersion} = personal ? personalPrompt : demoPrompt;
-  const topics=Object.entries(library.medicalAnswers).map(([id,a])=>({id,title:a.title}));
-  const instructions = buildInstructions({topics, questions, support, language});
+  const conversational = mode === 'personal' || mode === 'interactive';
+  const responseTool = conversational ? chatTool : tool;
+  const {buildInstructions, promptVersion} = conversational ? chatPrompt : demoPrompt;
+  const topics=information.filter(id=>id!=='none').map(id=>({id,title:library.medicalAnswers[id].title}));
+  const instructions = buildInstructions({topics, questions, support, language, mode});
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
   const started = Date.now();
   let outcome = 'network_error';
   let status = 0;
   try {
-    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-6-luna',store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[personal ? personalTool : tool],tool_choice:{type:'function',name:tool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
+    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-6-luna',store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[responseTool],tool_choice:{type:'function',name:responseTool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
     status = response.status;
     if (!response.ok) {
       outcome = ({401:'key_rejected',403:'access_denied',404:'model_unavailable',429:'quota_or_rate_limit'})[status] || 'provider_error';
@@ -103,8 +109,8 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch,
     outcome = 'invalid_reply';
     const result=await response.json();if(result.status!=='completed')throw Error('Incomplete model response');
     const calls=(result.output||[]).filter(o=>o.type==='function_call');
-    if(calls.length!==1 || calls[0].name!==tool.name)throw Error('Missing support plan');
-    const reply = (personal ? renderPersonal : renderPlan)(JSON.parse(calls[0].arguments),language);
+    if(calls.length!==1 || calls[0].name!==responseTool.name)throw Error('Missing support plan');
+    const reply = (conversational ? renderChat : renderPlan)(JSON.parse(calls[0].arguments),language);
     outcome = 'verified_reply';
     return {...reply, promptVersion};
   } catch (error) {

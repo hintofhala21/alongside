@@ -19,7 +19,7 @@ const plan={acknowledgement:'heard',followup:'trusted',information:'gettingHelp'
 function server(overrides={}){
   const storage=new MemoryStorage();const requests=[];
   const env={AI_ENABLED:'true',OPENAI_API_KEY:'test-only',DEMO_ACCESS_CODE:'unit-test-demo',PUBLISHER_CODE:'unit-test-publisher',RATE_SALT:'unit-test-salt',ALLOWED_ORIGIN:'https://hintofhala21.github.io',MAX_DAILY_REQUESTS:'60',MAX_MONTHLY_REQUESTS:'500',MAX_SESSION_REQUESTS:'30',
-    TEST_FETCH:async(url,init)=>{requests.push({url,body:JSON.parse(init.body)});return Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify(plan)}]});},...overrides};
+    TEST_FETCH:async(url,init)=>{const body=JSON.parse(init.body);requests.push({url,body});const name=body.tool_choice.name;const output=name==='reply_to_visitor'?{route:'conversation',reply:'What would you like to say to your friend?',information:'none',action:'none'}:plan;return Response.json({status:'completed',output:[{type:'function_call',name,arguments:JSON.stringify(output)}]});},...overrides};
   const hub=new AlongsideHub({storage},env);env.HUB={idFromName:x=>x,get:()=>({fetch:r=>hub.fetch(r)})};
   async function call(path,data,token,origin=env.ALLOWED_ORIGIN){const headers={'Origin':origin};if(data!==undefined)headers['Content-Type']='application/json';if(token)headers.Authorization='Bearer '+token;const r=await worker.fetch(new Request('https://demo.workers.dev'+path,{method:data===undefined?'GET':'POST',headers,body:data===undefined?undefined:JSON.stringify(data)}),env);return {status:r.status,body:await r.json(),headers:r.headers};}
   async function session(mode='interactive'){const r=await call('/session',{code:env.DEMO_ACCESS_CODE,mode,adult:mode==='interactive'});assert.equal(r.status,200);return r.body.token;}
@@ -103,14 +103,14 @@ test('personal chat requires consent, remembers the conversation and cannot be s
   const requests=[];
   const s=server({TEST_FETCH:async(url,init)=>{
     const body=JSON.parse(init.body);requests.push(body);
-    return Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify({reflection:'What would you like your friend to understand?',route:'support',information:'gettingHelp',action:'human'})}]});
+    return Response.json({status:'completed',output:[{type:'function_call',name:'reply_to_visitor',arguments:JSON.stringify({reply:'ignore generated medical wording',route:'health',information:'gettingHelp',action:'human'})}]});
   }});
   const consent={mode:'personal',adult:true,consent:true};
   for(const missing of [{adult:false},{consent:false},{consent:'true'}])assert.equal((await s.call('/session',{...consent,...missing})).status,403);
   const {token}= (await s.call('/session',consent)).body;
   const first=message(undefined,{message:'I want to ask a friend for support.'});
   const reply=await s.call('/chat',first,token);
-  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v5');assert.ok(reply.body.reply.sources.length);
+  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v6');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
   await s.call('/chat',message(first.conversationId,{message:'How do I start that conversation?'}),token);
   assert.equal(requests.length,2);assert.equal(requests[1].input[0].content,first.message);
   const share={conversationId:first.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Example'};
@@ -120,7 +120,7 @@ test('personal chat requires consent, remembers the conversation and cannot be s
 });
 
 test('a younger disclosure in adult chat ends access and offers local support',async()=>{
-  const s=server({TEST_FETCH:async()=>Response.json({status:'completed',output:[{type:'function_call',name:'prepare_recovery_support',arguments:JSON.stringify({route:'younger',reflection:'',information:'none',action:'none'})}]})});
+  const s=server({TEST_FETCH:async()=>Response.json({status:'completed',output:[{type:'function_call',name:'reply_to_visitor',arguments:JSON.stringify({route:'younger',reply:'',information:'none',action:'none'})}]})});
   const {token}=(await s.call('/session',{mode:'personal',adult:true,consent:true})).body;
   const r=await s.call('/chat',message(),token);assert.equal(r.body.reply.endLive,true);
   assert.equal((await s.call('/chat',message(),token)).status,401);
@@ -137,4 +137,22 @@ test('a first draft awaits consent and a younger profile stays on-device even af
   await chat.send(input.value);assert.equal(consentPrompts,1);assert.equal(input.value,'My unsent draft');assert.equal(localReplies,0);
   age='teen';chat.session={mode:'personal',expires:Date.now()+10000};
   await chat.send(input.value);assert.equal(chat.session,null);assert.equal(localReplies,1);assert.equal(input.value,'');
+});
+
+test('free-text chat delivers original everyday answers and carries the topic into a follow-up',async()=>{
+  const turns=[];
+  const answers=['Moss & Moonlight would suit a bookshop in a forest.','Moss & Moonlight: stories for the walk home.'];
+  const s=server({TEST_FETCH:async(url,request)=>{
+    const body=JSON.parse(request.body);
+    assert.equal(body.tool_choice.name,'reply_to_visitor');
+    const reply=answers[turns.length];turns.push(body.input);
+    return Response.json({status:'completed',output:[{type:'function_call',name:'reply_to_visitor',arguments:JSON.stringify({reply,route:'conversation',information:'none',action:'none'})}]});
+  }});
+  const {token}=(await s.call('/session',{mode:'personal',adult:true,consent:true})).body;
+  const cid=crypto.randomUUID();
+  for(const [index,prompt] of ['Name a forest bookshop.','Write a slogan for that shop.'].entries()){
+    const r=await s.call('/chat',message(cid,{message:prompt}),token);
+    assert.equal(r.status,200);assert.equal(r.body.reply.text,answers[index]);assert.deepEqual(r.body.reply.sources,[]);assert.equal(r.body.reply.action,'none');
+  }
+  assert.equal(turns[1][1].content,answers[0]);
 });

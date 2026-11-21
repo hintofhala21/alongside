@@ -219,19 +219,19 @@
       </section>
       <section data-page="support" aria-labelledby="support-title">
         <div class="chat-heading"><div><p class="eyebrow">A little space for you</p><h1 id="support-title" tabindex="-1">Chat with Alongside</h1></div><button class="icon-button" id="new-chat" type="button" aria-label="Start a new chat"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg></button></div>
-        <div class="chat-toolbar"><span id="chat-mode" class="mode-label">Approved library</span><button class="action" id="connect-demo" type="button">Chat with Luna</button><a href="./history.html">Chat history</a></div>
+        <div class="chat-toolbar"><span id="chat-mode" class="mode-label">Choose how to chat</span><button class="action" id="connect-demo" type="button">Chat with Luna</button><a href="./history.html">Chat history</a></div>
         <div class="chat-layout">
           <div class="chat-main">
             <div class="chat-welcome" id="chat-welcome"><div class="welcome-copy"><p class="eyebrow">Your pace. Your space.</p><h2>You don’t have to<br>figure it out alone.</h2><p>A place to talk, find a small next step,<br>or simply feel heard.</p></div></div>
             <div class="conversation" id="conversation" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Alongside"></div>
+            <p class="chat-status" id="chat-status" role="status"></p>
+            <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" rows="2" maxlength="800" placeholder="Type your own message…" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Type a message or choose a starter. You can pick live or on-device chat before sending.</small></form>
             <div class="starter-grid" id="chat-options">
               <button type="button" data-chat="after">A meal just felt hard</button>
               <button type="button" data-chat="team">Help me ask for support</button>
               <button type="button" data-chat="checkin">Let’s do a gentle check-in</button>
               <button type="button" data-chat="routine">Help me find my routine</button>
             </div>
-            <p class="chat-status" id="chat-status" role="status"></p>
-            <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" rows="2" maxlength="800" placeholder="What’s on your mind?" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Library replies stay on this device. No profile details are sent.</small></form>
             <p class="chat-boundary">Support, not medical care. <button class="text-button" type="button" data-help>Find human help</button></p>
           </div>
           <aside class="chat-side"><details class="panel stack"><summary>Recent conversations</summary><p class="muted" id="empty-chats">Your conversations will appear here.</p><ul class="chat-history" id="recent-chats"></ul><a href="./history.html">View all chat history</a><small>Saved in this browser. Only selected demos go to the judges’ page.</small></details><details class="panel library-drawer"><summary>Explore approved information</summary><form class="stack" id="learn-form">
@@ -379,7 +379,7 @@
       </section>
     </main>
     <nav class="mobile-dock" aria-label="Quick navigation"><a href="#support"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Chat</span></a><a href="#today"><svg class="icon" aria-hidden="true"><use href="#today"></use></svg><span>Today</span></a><a href="#checkins"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg><span>Check-in</span></a><a href="./history.html"><svg class="icon" aria-hidden="true"><use href="#clock"></use></svg><span>History</span></a></nav>
-    <footer><span>Alongside preview · sample schedule and curated replies</span><a href="#care">Find care</a><a href="#learn">Learn</a><a href="#sources">Medical sources</a><a href="./credits.html">Photo credits</a><a href="./privacy.html">Privacy and pilot limits</a></footer>
+    <footer><span>Alongside · Recovery companion</span><a href="#care">Find care</a><a href="#learn">Learn</a><a href="#sources">Medical sources</a><a href="./credits.html">Photo credits</a><a href="./privacy.html">Privacy and pilot limits</a></footer>
   </div>
 </div>
 <dialog id="recovery-dialog" aria-labelledby="recovery-update-title" aria-describedby="recovery-update-description">

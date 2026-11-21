@@ -29,9 +29,9 @@ On this Mac, the guide can use the Node runtime included with the ChatGPT app. I
 
 ## How the agent works
 
-Luna receives the recent conversation, understands the request, and calls `prepare_recovery_support`. The server validates that call, retrieves the chosen approved summary, and prepares a support action such as opening a check-in, a routine, a care directory or human help. The interface shows those actions and citations.
+In live chat, Luna writes an original reply to a typed message or a suggested question. It uses the recent conversation for follow-ups. Everyday subjects can stand on their own. For a medical question, the server displays an approved library answer with its sources or explains that the topic is outside the library. Luna can also offer to open a check-in, a routine or the care directory.
 
-In adult chat, Luna writes a conversational reflection and chooses a reviewed library entry for health information. Younger visitors can explore local check-ins, routines and library topics. Personal sessions cannot publish to the public history. The pilot offers general support and has no clinical validation.
+Younger visitors can explore local check-ins, routines and library topics. Personal sessions cannot publish to the public history. The pilot offers general support and has no clinical validation.
 
 Younger builders can test Luna using server-defined fictional scenarios. Free-text competition testing requires an adult judge’s attestation and an invitation code. This is not a verified patient account or a children’s medical service.
 

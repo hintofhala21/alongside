@@ -719,5 +719,8 @@
   "If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.": "今すぐ危険が及ぶ可能性がある場合は、地域の救急窓口に連絡してください。可能なら近くの人にそばにいてもらってください。",
   "You can keep using the library and check-ins on this device. A trusted adult can help you find more support.": "この端末で引き続きライブラリとチェックインを使えます。信頼できる大人と一緒に支援を探せます。",
   "Luna is unavailable. You can use on-device chat.": "現在 Luna を利用できません。この端末でのチャットは使えます。",
-  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "ライブラリの項目について質問したり、チェックインを始めたりできます。"
+  "I’m here with you. This is library mode, so I can offer reviewed information and small support steps. You can ask about a library topic or open a check-in.": "ライブラリの項目について質問したり、チェックインを始めたりできます。",
+  "Type your own message…": "自由にメッセージを入力…",
+  "Choose how to chat": "チャット方法を選ぶ",
+  "Type a message or choose a starter. You can pick live or on-device chat before sending.": "メッセージを入力するか、候補を選んでください。送信前にライブチャットか端末内のチャットを選べます。"
 }

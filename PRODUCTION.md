@@ -20,7 +20,7 @@ On 21 November 2026, the deployed Cloudflare Worker authenticated a competition 
 
 ## Deliberate LLM boundary
 
-Luna chooses the conversational support, follow-up question, reviewed information entry and next app action through a structured function call. The application retrieves and renders approved wording. It does not allow an unconstrained model to invent medical advice. This means the prototype has bounded conversational coverage; it is not a full therapist or clinical meal-planning agent.
+Personal and adult judge chats use recent messages to write open-ended replies. For questions routed to health information, the server supplies the approved wording and sources. The predefined scenario demo retains its reviewed response menus.
 
 ## Before real patient use
 
