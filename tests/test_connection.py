@@ -15,6 +15,7 @@ class ConnectionTest(unittest.TestCase):
         def mock(request, timeout):
             path = request.full_url.rsplit('/',1)[1]
             paths.append(path)
+            self.assertEqual(request.get_header('User-agent'), 'Alongside-Connection-Check/1.0')
             body = json.loads(request.data) if request.data else {}
             if path == 'status':
                 result = {'ready':failure != 'offline'}

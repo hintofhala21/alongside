@@ -1,8 +1,10 @@
 """Test the public chat server with exactly one fictional model request."""
+import argparse
 import getpass
 import json
 import re
 import sys
+from pathlib import Path
 import urllib.error
 import urllib.request
 import uuid
@@ -19,7 +21,7 @@ def check_connection(base, code, opener=None):
     open_request = opener or urllib.request.build_opener(NoRedirect()).open
 
     def call(path, body=None, token=None):
-        headers = {'Origin': ORIGIN}
+        headers = {'Origin': ORIGIN, 'User-Agent': 'Alongside-Connection-Check/1.0'}
         if token:
             headers['Authorization'] = 'Bearer ' + token
         data = None
@@ -65,7 +67,16 @@ if __name__ == '__main__':
     try:
         if not sys.stdin.isatty():
             raise RuntimeError('Open this check in your private Terminal window.')
-        address = input('Public Alongside Worker address: ').strip()
+        parser = argparse.ArgumentParser()
+        parser.add_argument('address', nargs='?', help='Public Alongside Worker address')
+        parser.add_argument('--save-connection', action='store_true',
+                            help='Save the public Worker address after a verified model reply')
+        args = parser.parse_args()
+        address = args.address or input('Public Alongside Worker address: ').strip()
         check_connection(address, getpass.getpass('Competition access code (hidden): '))
+        if args.save_connection:
+            path = Path(__file__).resolve().parents[1] / 'site/config.json'
+            path.write_text(json.dumps({'apiBase':address}, indent=2) + '\n')
+            print('The verified public address is ready to publish.')
     except (OSError, ValueError, RuntimeError, KeyboardInterrupt, EOFError) as error:
         sys.exit(f'Check stopped. {error}')
