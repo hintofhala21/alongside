@@ -1,32 +1,59 @@
-# Adding Luna safely, later
+# Connect Luna: the short guide
 
-## The important part
+You never need to paste your OpenAI key into Alongside, a GitHub file or this chat.
 
-An **API key is a password that allows spending on an OpenAI account**. Naming a key “luna” in your account does not change how it is stored. The server's secret name should be `OPENAI_API_KEY`; the model name is a separate setting, `gpt-6-luna`.
+## Your one guided command
 
-**There is no safe place to activate that key in the current GitHub Pages-only website.** Do not put it in `site/`, JavaScript, HTML, GitHub Issues, an Actions build variable, or this chat. Do not paste it into an Alongside page. You can publish and use all existing non-AI features without it.
+Open a terminal in the Alongside project folder and run:
 
-## The later setup, without a key box in Alongside
+```sh
+python3 scripts/setup-ai.py
+```
 
-When you approve a private backend, we will prepare and test it first. For example, with a Cloudflare Worker:
+On a Mac, `START-HERE.command` launches the same guide. If macOS has removed its executable permission, use the command above. The helper can use the Node runtime bundled with the ChatGPT app, or a normal Node installation. It downloads the pinned official Cloudflare tool from npm.
 
-1. Create the Worker and configure authentication, rate limits and spending controls. A private key alone does not stop people abusing an open public endpoint.
-2. In the backend folder, run `npx wrangler secret put OPENAI_API_KEY` in your own terminal. This prompts for the key as a secret; don't put the value in the command itself. This is a future instruction: this repository has no Worker configuration yet.
-3. The Worker reads `env.OPENAI_API_KEY`. Only the public Worker address goes in the website. The key stays on the server.
-4. Test access controls and clinical behavior before enabling AI for visitors.
+The guide does the technical work:
 
-For local backend development, Cloudflare supports an ignored `.dev.vars` file. Never create it inside `site/`, and never commit it. This project's ignore rules exclude common secret files, and its checks reject known credential patterns. These checks reduce accidents; they cannot recognize every possible secret.
+1. It opens Cloudflare sign-in. Use accounts managed with help from your parent or guardian, following the providers’ account rules.
+2. It prepares a private server with AI switched off.
+3. It asks for your OpenAI key **in your terminal with typing hidden** and sends it directly to Cloudflare’s secret store. It does not save the key in a file or print it.
+4. It creates a competition access code and a separate publisher code, then enables the demo and checks the server.
+5. It updates the public connection file automatically. Send Codex the **public Worker address** printed at the end, so that one final website connection can be published. Do not send the key.
 
-## What has to be decided before live AI
+“Luna” is a name; the actual model setting is `gpt-6-luna`. The private secret’s name is `OPENAI_API_KEY`. The website only receives the public server address.
 
-- **Access and cost:** verified sign-in, request limits, a spending cap enforced by the application, and an immediate off switch. CORS is not authentication.
-- **Health information:** use the approved library and show sources. An instruction telling an LLM to “use only these websites” cannot guarantee that it ignores its training. A stricter option is letting it select reviewed answers instead of inventing medical advice.
-- **Privacy and children:** explicit consent, a reviewed data policy, age-appropriate safeguards and the required provider arrangements. OpenAI's guidance requires Zero Data Retention before processing personal data from children under 13 or the applicable digital-consent age. Setting `store: false` alone does not establish that arrangement. Do not send under-13 profile information to AI.
-- **Memory:** decide what conversation information is sent and saved, for how long, and how a visitor deletes it. The current site does not send profile data anywhere automatically.
+## Try the chatbot
 
-## Official references
+After the connection is published, open **Competition demo** on Alongside.
 
-- [OpenAI production security guidance](https://developers.openai.com/api/docs/guides/production-best-practices)
-- [Luna model documentation](https://developers.openai.com/api/docs/models/gpt-6-luna)
-- [OpenAI under-18 API guidance](https://developers.openai.com/api/docs/guides/safety-checks/under-18-api-guidance)
-- [Cloudflare Worker secrets and terminal setup](https://developers.cloudflare.com/workers/configuration/secrets/)
+- **Fictional scenarios** lets younger builders run preset fictional examples through the real LLM. No personal typing or profile is sent.
+- **Free-text testing** is for adult judges, using fictional details only. It requires their attestation and the competition code.
+
+Keep the publisher code for yourself. The competition code lets judges test the demo; it does not let them publish chats.
+
+## Give judges a history link
+
+1. Finish a Luna demo, then open **Chat history → On this device**.
+2. Open **Select this demo for the judges**.
+3. Read every message. Confirm that the entire conversation is fictional and suitable to share.
+4. Enter your publisher code and select **Publish selected demo**.
+
+The page supplies a direct link on the same website, such as `history.html?demo=...`. You can also share the whole [judges’ page](https://hintofhala21.github.io/alongside/history.html?view=showcase).
+
+Anyone with a judges’ link can read selected demos. They expire after seven days. Use the owner’s **Unpublish** control to remove one sooner. Private visitor conversations are never listed automatically.
+
+## Costs and limits
+
+Cloudflare has a free starting tier; the helper does not purchase a plan. OpenAI API usage is billed separately from ChatGPT. Set a project budget and billing alerts in your provider account as well.
+
+The server limits the demo to 60 requests per day, 500 per month and 30 per session. Each accepted chat request permits one bounded Luna call, with 400 output tokens at most. These are request limits, not a promised dollar cap. Limits are checked on the server before a model call; the website cannot override them.
+
+To turn AI off, set `AI_ENABLED` to `"false"` in `api/wrangler.jsonc` and redeploy the Worker. Ask Codex to help; never move the key to the frontend as a shortcut. Rerunning setup creates new access codes and invalidates existing sessions.
+
+## Privacy and scope
+
+Only competition-demo messages are sent to Cloudflare and OpenAI. Profile fields, saved check-ins, location and phone details are not sent automatically. Server-side demo sessions expire after 24 hours and are cleaned up periodically; browser history remains until cleared. Selected public demos expire after seven days. Provider backups and logs can have separate retention.
+
+This prototype uses `store: false` for OpenAI requests. That is not the same as Zero Data Retention. Younger builders use predefined fictional messages, not personal data. The product still needs clinical and consent work before patient use.
+
+[OpenAI production guidance](https://developers.openai.com/api/docs/guides/production-best-practices) · [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) · [Under-18 API guidance](https://developers.openai.com/api/docs/guides/safety-checks/under-18-api-guidance) · [Cloudflare secrets](https://developers.cloudflare.com/workers/configuration/secrets/) · [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/)
