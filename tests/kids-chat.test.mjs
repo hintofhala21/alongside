@@ -51,3 +51,36 @@ test('meal-photo distress keeps a listening response even if flagged as an unans
   const factual=await respond({writer:model({route:'health',topic:'none'},[])},options,[],'Could meal photos make me feel sick?');
   assert.match(factual.text,/library/);
 });
+
+test('a standalone ARFID definition returns the cited approved entry',async()=>{
+  const entry={text:'Reviewed ARFID definition',sources:['nimh']};
+  const settings={...options,answers:{arfid:entry}};
+  for(const question of ['What is ARFID?', 'What does ARFID stand for?', 'Define ARFID.']){
+    const reply=await respond({},settings,[],question);
+    assert.equal(reply.text,entry.text);assert.deepEqual(reply.sources,entry.sources);
+  }
+});
+
+test('an incorrect photo classification is retried for a texture note; assistant guesses are not evidence',async()=>{
+  const calls=[];let drafts=0;
+  const writer={clone:async()=>({prompt:async()=>JSON.stringify(++drafts===1?
+    {route:'mealPhotos'}:{route:'chat',textToSend:'The texture made lunch hard for me.'}),destroy(){}})};
+  const history=[{role:'user',text:'The texture made lunch hard for me.'},{role:'assistant',text:'Did you mean photos?'}];
+  const r=await respond({writer,review:model('safe',calls)},options,history,'Help me write a note.');
+  assert.equal(r.text,'The texture made lunch hard for me.');assert.equal(drafts,2);assert.equal(calls.length,1);
+});
+
+test('two ungrounded photo drafts cannot appear as a response',async()=>{
+  const writer=model({route:'chat',textToSend:'Those pictures upset me.'},[]);
+  const r=await respond({writer},options,[{role:'assistant',text:'pictures'}],'Help me write a note about texture.');
+  assert.doesNotMatch(r.text,/picture/i);
+});
+
+test('a check-in uses the visitor’s wording even after a wrong topic choice',async()=>{
+  const history=[{role:'user',text:'I wanted to eat lunch today, but the texture made it hard.'}];
+  const models={writer:model({route:'mealPhotos'},[])};
+  const r=await respond(models,options,history,'Help me write a check-in for my dietitian.');
+  assert.equal(r.text,history[0].text);
+  const danger=await respond({writer:model({route:'urgent'},[])},options,history,'Help me write a note.');
+  assert.match(danger.text,/emergency/);
+});

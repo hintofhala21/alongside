@@ -1,4 +1,4 @@
-import { cp, mkdir, rm, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { languagePacks, languageNames } from '../shared/languages.mjs';
@@ -41,3 +41,32 @@ if (config.firebase) {
     'Adults sign in with Google or email using Firebase. Firebase processes account details to verify sign-in. Profile details and chats stay in this browser. Restarting a profile clears the local notebook. Younger visitors can use this tab without a Firebase account.'));
 }
 console.log('Built public files in build/site. No environment variables are included.');
+
+// Serve the same site with isolated, tab-scoped storage for first-visit walkthroughs.
+const output=resolve(root,'build/site');
+const walkthrough=resolve(output,'first-visit');
+await mkdir(walkthrough,{recursive:true});
+for(const name of await readdir(output)){
+  if(name!=='first-visit')await cp(resolve(output,name),resolve(walkthrough,name),{recursive:true});
+}
+const initializeVisit = `
+(() => {
+  const url=new URL(location.href);
+  const fresh=url.searchParams.has('new');
+  if(fresh || !sessionStorage.getItem('alongside-preview-visit'))
+    sessionStorage.setItem('alongside-preview-visit',crypto.randomUUID());
+  if(fresh){url.searchParams.delete('new');history.replaceState(null,'',url);}
+  const prefix='alongside-preview:'+sessionStorage.getItem('alongside-preview-visit')+':';
+  globalThis.AlongsideVisitStorage={
+    getItem:key=>sessionStorage.getItem(prefix+key),
+    setItem:(key,value)=>sessionStorage.setItem(prefix+key,value),
+    removeItem:key=>sessionStorage.removeItem(prefix+key)
+  };
+})();`;
+const localesPath=resolve(walkthrough,'assets/locales.js');
+await writeFile(localesPath,initializeVisit+'\n'+await readFile(localesPath,'utf8'));
+for(const name of ['app','accounts','history','chat']){
+  const path=resolve(walkthrough,'assets',name+'.js');
+  const source=await readFile(path,'utf8');
+  await writeFile(path,'(function(localStorage,sessionStorage){\n'+source+'\n})(AlongsideVisitStorage,AlongsideVisitStorage);');
+}

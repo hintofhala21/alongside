@@ -31,3 +31,5 @@ Kids v3 asks the writer for a message addressed to the recipient when it recogni
 Kids v4 updates the writer and reviewer to distinguish a disclosure about eating distress from a request for clinical advice.
 
 Kids v5 adds a listening response for distress about meal photos. In the v4 live trial a child’s disclosure opened a library fallback. Both the writer and the reviewer can now select this response.
+
+November 22, 2026 · Personal chat v11 distinguishes the public name Breeze from the configured model identifier and offers the meal chooser on request. The chooser reads preferences locally. Younger-visitor prompt v6 checks meal-photo references against the visitor’s words and matches direct ARFID definitions to the approved source. The lunch-texture replay is recorded on the judging page.

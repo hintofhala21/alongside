@@ -546,11 +546,11 @@ function renderProfile() {
 const pageNames = { profile: "Profile", today: "Today", plan: "My plan", support: "Chat with Alongside", checkins: "Check-ins", reminders: "Reminders", sources: "Medical sources", settings: "Settings", care: "Find care", learn: "Learn" };
 function renderRoute(moveFocus) {
   const requested = location.hash.slice(1);
-  document.body.classList.toggle("basic-setup", Boolean(account && !hasAgeGroup()));
+  document.body.classList.toggle("basic-setup", !hasAgeGroup());
   document.querySelector(".sidebar").classList.remove("menu-open");
   byId("toggle-menu").setAttribute("aria-expanded", "false");
   const openPages = ["support", "profile", "sources", "settings", "care", "learn"];
-  const page = account && !hasAgeGroup() ? "profile" : !requested ? "support" : openPages.includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "support") : "profile";
+  const page = !hasAgeGroup() ? "profile" : !requested ? "support" : openPages.includes(requested) ? requested : hasAgeGroup() ? (Object.hasOwn(pageNames, requested) ? requested : "support") : "profile";
   if (location.hash !== "#" + page) history.replaceState(null, "", "#" + page);
   for (const section of document.querySelectorAll("[data-page]")) section.hidden = section.dataset.page !== page;
   for (const link of document.querySelectorAll(".nav a")) {
@@ -849,7 +849,12 @@ function populateProfileExtras() {
  prepareCountryOptions();
  const values={ 'profile-country':countryLabel(profile?.country), 'profile-city':profile?.city || '', 'profile-timezone':zone(), 'diagnosis':profile?.diagnosis || 'unknown', 'diagnosis-other':profile?.diagnosisOther || '', 'care-team':profile?.careTeam || '', 'profile-gender':profile?.gender || '', 'other-needs':profile?.otherNeeds || '', 'allergies':profile?.allergies || '', 'fluid-note':profile?.fluidNote || '', 'care-plan-note':profile?.carePlanNote || '' };
  for (const [id,value] of Object.entries(values)) byId(id).value=value;
- for(const id of ['iron','zinc','vitaminD']) byId('need-'+id).checked=Boolean(profile?.needs?.includes(id));
+ const list=byId('nutrient-list');list.replaceChildren();
+ for(const [id,name] of Object.entries(globalThis.AlongsideMeals.nutrients)){
+   const label=element('label',''),input=document.createElement('input');
+   input.type='checkbox';input.id='need-'+id;input.value=id;input.checked=Boolean(profile?.needs?.includes(id));
+   label.append(input,document.createTextNode(' '+translate(name)));list.append(label);
+ }
  byId('guardian-note').hidden=byId('age-group').value!=='child';
  byId('diagnosis-other-field').hidden=byId('diagnosis').value!=='other';
  byId('care-country').value=countryLabel(profile?.country); byId('care-city').value=profile?.city || '';
@@ -860,7 +865,7 @@ function populateProfileExtras() {
 function readProfileExtras() {
  const input=byId('profile-timezone');
  try { new Intl.DateTimeFormat('en',{timeZone:input.value.trim()}); input.setCustomValidity(''); } catch { input.setCustomValidity(translate('Choose a valid time zone, such as Asia/Riyadh.')); input.reportValidity(); return null; }
- return {country:resolveCountry(byId('profile-country').value),city:byId('profile-city').value.trim(),timeZone:input.value.trim(),diagnosis:byId('diagnosis').value,diagnosisOther:byId('diagnosis-other').value.trim(),careTeam:byId('care-team').value,gender:byId('profile-gender').value.trim(),needs:['iron','zinc','vitaminD'].filter(id=>byId('need-'+id).checked),otherNeeds:byId('other-needs').value.trim(),allergies:byId('allergies').value.trim(),fluidNote:byId('fluid-note').value.trim(),carePlanNote:byId('care-plan-note').value.trim()};
+ return {country:resolveCountry(byId('profile-country').value),city:byId('profile-city').value.trim(),timeZone:input.value.trim(),diagnosis:byId('diagnosis').value,diagnosisOther:byId('diagnosis-other').value.trim(),careTeam:byId('care-team').value,gender:byId('profile-gender').value.trim(),needs:Object.keys(globalThis.AlongsideMeals.nutrients).filter(id=>byId('need-'+id).checked),otherNeeds:byId('other-needs').value.trim(),allergies:byId('allergies').value.trim(),fluidNote:byId('fluid-note').value.trim(),carePlanNote:byId('care-plan-note').value.trim()};
 }
 function renderCare() {
  const country=resolveCountry(byId('care-country').value); const city=byId('care-city').value.trim(); const out=byId('care-results'); out.replaceChildren();
@@ -913,15 +918,11 @@ function renderCareNotes() {
  const notes=[profile?.carePlanNote,profile?.fluidNote].filter(Boolean);for(const note of notes)out.append(userText('p',note));
  if(!notes.length)out.append(element('p','No care plan notes added yet.','muted'));
  if(profile?.allergies)out.append(element('strong','Your recorded food allergies'),userText('p',profile.allergies));
- if(profile?.needs?.length){out.append(element('h3','General food ideas for your recorded needs'),element('p','Check these ideas against your allergies and your clinician’s plan before using them.'));for(const key of profile.needs){const answer=medicalAnswers[key+'Food'];if(answer)out.append(element('h3',answer.title),element('p',answer.text),sourceLinks(answer.sources));}}
 }
 function renderLearning() {
  const out=byId('learn-cards');out.replaceChildren();
  for(const id of ['warningSigns','boneHealth']) {const answer=medicalAnswers[id];const card=element('section','','panel stack');card.append(element('h2',answer.title),element('p',answer.text),sourceLinks(answer.sources));out.append(card);}
- renderFoodIdeas();
-}
-function renderFoodIdeas() {
- const key=byId('food-topic').value;const answer=medicalAnswers[key+'Food'];const out=byId('food-ideas');out.replaceChildren(element('h3',answer.title),element('p',answer.text),sourceLinks(answer.sources));
+
 }
 function zonedToUtc(day,time,timeZone) {
  const [y,m,d]=day.split('-').map(Number);const [h,min]=time.split(':').map(Number);const target=Date.UTC(y,m-1,d,h,min);let guess=target;
@@ -945,7 +946,7 @@ function initializeFreeFeatures() {
  byId('use-device-zone').addEventListener('click',()=>{byId('profile-timezone').value=Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';byId('profile-timezone').setCustomValidity('');});
  byId('profile-care-link').addEventListener('click',()=>{byId('care-country').value=byId('profile-country').value;byId('care-city').value=byId('profile-city').value;});
  byId('care-form').addEventListener('submit',e=>{e.preventDefault();renderCare();});
- byId('food-topic').addEventListener('change',renderFoodIdeas);
+ byId('ask-learn-meals').onclick=()=>globalThis.AlongsideMeals.open(byId('food-ideas'),chatController.options);
  byId('checkin-preferences').addEventListener('submit',e=>{e.preventDefault();record().checkinKind=byId('checkin-kind').value;record().checkinTime=byId('checkin-time').value;const saved=persist();resetGuided();renderDailyPrompt();byId('checkin-preferences-status').textContent=saved?'Check-in preferences saved.':'Preferences could not be saved.';});
  byId('guided-back').addEventListener('click',()=>{captureGuided();guidedState.step=Math.max(0,guidedState.step-1);renderGuided();byId('guided-title').focus();});
  byId('checkin-form').addEventListener('submit',e=>{e.preventDefault();captureGuided();if(guidedState.step===activeGuidedSteps().length-1)saveGuided();else{guidedState.step++;renderGuided();byId('guided-title').focus();}});
@@ -1016,9 +1017,11 @@ const judgeInvite = /^#judge=(demo-[A-Za-z0-9_-]{24})$/.exec(location.hash);
 if (judgeInvite) history.replaceState(null, "", "#support");
 chatController = new globalThis.AlongsideChat({
   sources: medicalSources, answers: medicalAnswers, getLanguage: () => interfaceLocale(),
+  mealProfile: () => ({needs:profile?.needs,diagnosis:profile?.diagnosis,allergies:Boolean(profile?.allergies),otherNeeds:profile?.otherNeeds}),
   getAgeGroup: () => profile?.ageGroup, translateText: text => translate(text),
-  onAction: (action) => { if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile"}[action] || "support"); }
+  onAction: (action) => { if(action==="meals"){chatController.openMealIdeas();return;} if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile"}[action] || "support"); }
 });
+byId("ask-meals").onclick=()=>chatController.openMealIdeas();
 initializeRecoveryUpdate();
 initializeFreeFeatures();
 renderSources();
@@ -1026,7 +1029,7 @@ renderProfile();
 renderRoute(false);
 initializeLanguageControls();
 
-if (judgeInvite && (!account || hasAgeGroup()) && !account?.kids) void chatController.openConnection(judgeInvite[1]);
+if (judgeInvite && hasAgeGroup() && !account?.kids) void chatController.openConnection(judgeInvite[1]);
 if (account) {
   byId("account-controls").hidden=false;
   byId("sign-out").addEventListener("click",account.signOut);

@@ -1,5 +1,5 @@
 import * as demoPrompt from './prompts/v4.mjs';
-import * as chatPrompt from './prompts/v10.mjs';
+import * as chatPrompt from './prompts/v11.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -55,12 +55,12 @@ const chatTool = {
     reply:{type:'string',description:'The conversational answer itself, or empty for a server-rendered response.'},
     route:{type:'string',enum:['conversation','health','urgent','younger']},
     information:tool.parameters.properties.information,
-    action:tool.parameters.properties.action
+    action:{type:'string',enum:[...actions,'meals']}
   },required:['reply','route','information','action']}
 };
 
 function renderChat(plan, language) {
-  if (!plan || !['conversation','health','urgent','younger'].includes(plan.route) || !information.includes(plan.information) || !actions.includes(plan.action)) throw Error('Invalid chat response');
+  if (!plan || !['conversation','health','urgent','younger'].includes(plan.route) || !information.includes(plan.information) || ![...actions,'meals'].includes(plan.action)) throw Error('Invalid chat response');
   const localize = text => languagePacks[language]?.[text] || text;
   if (plan.route === 'urgent') return {text:localize('If you may be in immediate danger, contact local emergency services now. If you can, ask someone nearby to stay with you.'),sources:[],action:'human'};
   if (plan.route === 'younger') return {text:localize('You can keep using the library and check-ins on this device. A trusted adult can help you find more support.'),sources:[],action:'human',endLive:true};
@@ -94,13 +94,14 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch,
   const responseTool = conversational ? chatTool : tool;
   const {buildInstructions, promptVersion} = conversational ? chatPrompt : demoPrompt;
   const topics=information.filter(id=>id!=='none').map(id=>({id,title:library.medicalAnswers[id].title}));
-  const instructions = buildInstructions({topics, questions, support, language, mode});
+  const model=env.OPENAI_MODEL||'gpt-6-luna';
+  const instructions = buildInstructions({topics, questions, support, language, mode, model});
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
   const started = Date.now();
   let outcome = 'network_error';
   let status = 0;
   try {
-    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-6-luna',store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[responseTool],tool_choice:{type:'function',name:responseTool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
+    const response=await requestFetch('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.OPENAI_API_KEY},body:JSON.stringify({model,store:false,instructions,input:messages.slice(-12).map(m=>({role:m.role,content:m.text.slice(0,6000)})),tools:[responseTool],tool_choice:{type:'function',name:responseTool.name},parallel_tool_calls:false,max_output_tokens:400,reasoning:{effort:'none'}}),signal:controller.signal});
     status = response.status;
     if (!response.ok) {
       outcome = ({401:'key_rejected',403:'access_denied',404:'model_unavailable',429:'quota_or_rate_limit'})[status] || 'provider_error';

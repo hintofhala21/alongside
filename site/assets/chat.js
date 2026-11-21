@@ -76,7 +76,7 @@
         b.append(node('small',m.role==='user'?'You':'Alongside'),body);
         const sources=(m.sources||[]).filter(s=>Object.hasOwn(this.options.sources,s));
         if(sources.length) { const links=node('div','','source-links'); for(const s of sources) { const source=this.options.sources[s]; const a=node('a',source.organization); a.href=source.url; a.target='_blank'; a.rel='noopener noreferrer'; links.append(a); } b.append(links); }
-        if(m.action && m.action!=='none') { const labels={checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
+        if(m.action && m.action!=='none') { const labels={meals:'Ask for meal ideas',checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
         if(m.trace?.length) { const d=node('details','','agent-trace'); d.append(node('summary','How Alongside helped')); for(const t of m.trace) d.append(node('p',t)); b.append(d); }
         out.append(b);
       }
@@ -107,6 +107,9 @@
     async request(path,body,signal) {
       const r=await fetch(this.apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+this.session.token},body:JSON.stringify(body),signal});
       const data=await r.json().catch(()=>({})); if(!r.ok) {if(r.status===401)this.disconnect();throw Error(data.error||'The private demo server could not respond. Please try again.');}return data;
+    }
+    openMealIdeas(message='') {
+      globalThis.AlongsideMeals.open(id('meal-ideas-chat'),{...this.options,onClose:()=>id('ask-meals').focus()},message);
     }
     openKids(message='',hint) {
       if(this.busy)return;
@@ -149,6 +152,9 @@
     async send(message,hint,scenario) {
       if(this.busy)return;await this.ready;if(this.busy)return;
       if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic')))this.disconnect();
+      if(globalThis.AlongsideMeals?.request(message) && !scenario){
+        this.openMealIdeas(message);if(id('chat-message').value.trim()===message)id('chat-message').value='';return;
+      }
       if(!this.session && (this.younger() || sessionStorage.getItem(localChoice)==='kids')){
         if(id('chat-message').value.trim()===message)id('chat-message').value='';
         return this.openKids(message,hint);
