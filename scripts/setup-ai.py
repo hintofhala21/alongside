@@ -58,8 +58,18 @@ def main():
             raise RuntimeError('That Cloudflare step did not finish. Your key has not been added to the website files. Run setup again when ready.')
         return result.stdout or ''
 
-    print('1. Sign in to Cloudflare in the browser when it opens. No key is requested there.\n')
-    wrangler('login')
+    identity = subprocess.run(
+        launcher + ['--yes', '--package=' + WRANGLER, 'wrangler', 'whoami', '--json'],
+        cwd=ROOT, env=env, text=True, capture_output=True)
+    try:
+        signed_in = identity.returncode == 0 and json.loads(identity.stdout).get('loggedIn') is True
+    except (ValueError, AttributeError):
+        signed_in = False
+    if signed_in:
+        print('1. Cloudflare is already signed in on this Mac.')
+    else:
+        print('1. Sign in to Cloudflare in the browser when it opens.')
+        wrangler('login')
     config_path = ROOT / 'api/wrangler.jsonc'
     config = json.loads(config_path.read_text())
     config['vars']['AI_ENABLED'] = 'false'
