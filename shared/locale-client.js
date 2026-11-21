@@ -1,6 +1,13 @@
 "use strict";
 (() => {
-  const packs = globalThis.AlongsideLanguagePacks;
+  const {names, keys, values} = globalThis.AlongsideLocaleData;
+  const indices = new Map(keys.map((key, index) => [key, index]));
+  function baseLanguage(code) {
+    try {
+      const base = new Intl.Locale(code).language;
+      return Object.hasOwn(names, base) ? base : "en";
+    } catch { return "en"; }
+  }
   const substitutions = [
     [/^Welcome, (.+)\.$/, "Welcome, {name}.", ["name"]],
     [/^Question (\d+) \/ (\d+)$/, "Question {current} / {total}", ["current", "total"]],
@@ -10,18 +17,18 @@
   ];
 
   function translate(text, language) {
-    const pack = packs[language];
+    const pack = values[language === "zh-Hans" ? "zh" : language];
     if (!pack) return text;
-    if (Object.hasOwn(pack, text)) return pack[text];
+    if (indices.has(text)) return pack[indices.get(text)];
     for (const [pattern, key, names] of substitutions) {
       const match = text.match(pattern);
-      if (match && pack[key]) return pack[key].replace(/\{(\w+)\}/g, (_, name) => match[1 + names.indexOf(name)]);
+      if (match) return pack[indices.get(key)].replace(/\{(\w+)\}/g, (_, name) => match[1 + names.indexOf(name)]);
     }
     for (const suffix of [" reminder seen", " reminder marked as seen.", " reminder unmarked."]) {
       if (text.endsWith(suffix)) return translate(text.slice(0, -suffix.length), language) + " · " + translate(suffix.trim(), language);
     }
     if (text.includes(" · ")) return text.split(" · ").map(part => translate(part, language)).join(" · ");
-    if (text.endsWith(".") && Object.hasOwn(pack, text.slice(0, -1))) return pack[text.slice(0, -1)] + ".";
+    if (text.endsWith(".") && indices.has(text.slice(0, -1))) return pack[indices.get(text.slice(0, -1))] + ".";
     return text;
   }
 
@@ -56,17 +63,17 @@
     };
   }
 
-  globalThis.AlongsideLocale = {packs, translate, makeRenderer};
-  if (document.getElementById("language-registry")) return;
+  globalThis.AlongsideLocale = {names, baseLanguage, translate, makeRenderer};
+  if (document.getElementById("preferred-language")) return;
   const render = makeRenderer();
   const title = document.title;
   const observer = new MutationObserver(refresh);
   function refresh() {
     observer.disconnect();
     let code = "en";
-    try { code = (localStorage.getItem("alongside-interface-language") || "en").split("-")[0]; } catch {}
-    const locale = Object.hasOwn(packs, code) ? code : "en";
-    document.documentElement.lang = locale;
+    try { code = localStorage.getItem("alongside-interface-language") || "en"; } catch {}
+    const locale = baseLanguage(code);
+    document.documentElement.lang = locale === "zh" ? "zh-Hans" : locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
     render(text => translate(text, locale));
     document.title = translate(title, locale);

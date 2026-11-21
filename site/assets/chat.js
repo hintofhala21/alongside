@@ -4,6 +4,20 @@
   const sessionKey = 'alongside-demo-session-v1';
   const node = (tag, text = '', cls = '') => { const n = document.createElement(tag); n.textContent = text; if (cls) n.className = cls; return n; };
   const id = value => document.getElementById(value);
+  // Only match reviewed library topics; visitor text never leaves this mode.
+  const commonTopics = [
+    [/\barfid\b|\btare\b|回避・制限性食物摂取症|回避限制性|回避性限制性/, 'arfid'],
+    [/\bosfed\b/, 'osfed'],
+    [/osteoporos|ostéoporose|骨质疏松|骨粗鬆|骨粗しょう|ऑस्टियोपोरोसिस|هشاشة العظام/, 'boneHealth'],
+    [/\biron\b|\bfer\b|hierro|\bferro\b|eisen|铁|鉄分|鉄を|鉄が|आयरन|लौह|حديد/, 'ironFood'],
+    [/vitamin[ae]?[- ]?d\b|维生素\s*d|ビタミン\s*d|विटामिन\s*डी|فيتامين د/, 'vitaminDFood'],
+    [/zinc|zink|\bcinc\b|锌|亜鉛|जिंक|जस्ता|ज़िंक|زنك/, 'zincFood'],
+    [/binge|hyperphagie|atrac[oó]n|compulsão alimentar|essanf[aä]ll|暴食|むちゃ食い|बिंज/, 'bingeEating'],
+    [/diagnos|diagn[oó]stic|diagn[oó]s|questionnaire|évaluation|evaluaci[oó]n|avaliação|beurteilung|诊断|评估|診断|評価|निदान|मूल्यांकन|تشخيص/, 'assessment'],
+    [/warning signs|symptom|sympt[oô]mes|signes|señales|s[ií]ntomas|sintomas|anzeichen|症状|征兆|लक्षण|علامات/, 'warningSigns'],
+    [/support|team|help|soutien|aide|équipe|apoyo|ayuda|equipo|apoio|ajuda|equipe|unterstützung|hilfe|支持|帮助|支援|相談|सहारा|सहायता|मदद|مساعدة|دعم/, 'team'],
+    [/meal|repas|collation|comida|colaci[oó]n|merienda|refeição|lanche|mahlzeit|essen|用餐|吃饭|食事|भोजन|खाना|أكل|وجبة/, 'after']
+  ];
   const cleanMessage = m => m && ['user','assistant'].includes(m.role) && typeof m.text === 'string' && m.text.length <= 6000;
   const store = {
     read() { try { const v = JSON.parse(localStorage.getItem(key)); return { current: typeof v?.current === 'string' ? v.current : null, chats: Array.isArray(v?.chats) ? v.chats.filter(c => typeof c.id === 'string' && typeof c.title === 'string' && Array.isArray(c.messages)).slice(0,30).map(c => ({ ...c, messages:c.messages.filter(cleanMessage).slice(-60) })) : [] }; } catch { return {current:null,chats:[]}; } },
@@ -70,26 +84,10 @@
     append(role,text,extra={}) {const c=this.ensureChat();c.messages.push({id:crypto.randomUUID(),role,text,created:new Date().toISOString(),...extra});c.messages=c.messages.slice(-60);if(role==='user' && c.messages.length===1)c.title=text.slice(0,58);this.save();}
     sendApproved(message,answerId) { if(this.busy)return; const a=this.options.answers[answerId];this.append('user',message);this.append('assistant',this.options.translateText(a?.text||'That question is outside the approved library. You can choose an information topic or bring it to your care team.'),{sources:a?.sources||[],mode:'library'});this.render(); }
     libraryReply(message,hint) {
-      const q=message.toLowerCase();let topic=hint;
-      if (this.options.getLanguage() === 'fr' && !topic) {
-        const matches = [[/ostéoporose|santé des os/, 'boneHealth'], [/signes|symptômes/, 'warningSigns'], [/\bfer\b/, 'ironFood'], [/vitamine d/, 'vitaminDFood'], [/hyperphagie/, 'bingeEating'], [/diagnostic|évaluation/, 'assessment'], [/soutien|aide|équipe/, 'team'], [/repas|collation/, 'after']];
-        topic = matches.find(([pattern]) => pattern.test(q))?.[1];
-      }
-      if (this.options.getLanguage() === 'es' && !topic) {
-        const matches = [
-          [/\barfid\b/, 'arfid'], [/\bosfed\b/, 'osfed'], [/osteoporosis|salud ósea/, 'boneHealth'],
-          [/hierro/, 'ironFood'], [/vitamina d/, 'vitaminDFood'], [/zinc|\bcinc\b/, 'zincFood'],
-          [/diagn[oó]stic|evaluaci[oó]n|cuestionario/, 'assessment'], [/atrac[oó]n/, 'bingeEating'],
-          [/señales|s[ií]ntomas/, 'warningSigns'], [/apoyo|ayuda|equipo/, 'team'],
-          [/comida|colaci[oó]n|merienda/, 'after']
-        ];
-        topic = matches.find(([pattern]) => pattern.test(q))?.[1];
-      }
-      if(!this.options.answers[topic]) {
-        if(/\barfid\b/.test(q))topic='arfid';else if(/\bosfed\b/.test(q))topic='osfed';else if(/iron|حديد/.test(q))topic='ironFood';else if(/vitamin d|فيتامين د/.test(q))topic='vitaminDFood';else if(/zinc|زنك/.test(q))topic='zincFood';else if(/diagnos|questionnaire|تشخيص/.test(q))topic='assessment';else if(/support|team|help|مساعدة|دعم/.test(q))topic='team';else if(/meal|أكل|وجبة/.test(q))topic='after';
-      }
+      const q = message.normalize('NFKC').toLowerCase();
+      const topic = hint || commonTopics.find(([pattern]) => pattern.test(q))?.[1];
       const a=this.options.answers[topic];
-      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|clínica|atención médica|عيادة/.test(q)?'care':null;
+      const action=hint==='checkin'?'checkin':hint==='routine'?'routine':/care|hospital|hôpital|soins|clínica|atención médica|krankenhaus|klinik|医院|病院|अस्पताल|عيادة/.test(q)?'care':null;
       return {text:this.options.translateText(a?.text || (action==='checkin'?'We can take a moment to reflect, one question at a time.':action==='routine'?'Your routine is here when you want a gentle place to start.':'I’m here with you. This is library mode, so I can offer reviewed information and small support steps. Connect the competition demo to try Luna.')),sources:a?.sources||[],action,mode:'library'};
     }
     async request(path,body,signal) {
@@ -98,7 +96,11 @@
     }
     async send(message,hint,scenario) {
       if(this.busy)return;await this.ready;if(this.busy)return;
-      if(!this.session) { if(!message)return;this.append('user',message);this.append('assistant',this.libraryReply(message,hint).text,this.libraryReply(message,hint));this.render();return; }
+      if(!this.session) {
+        if(!message)return;
+        const reply = this.libraryReply(message,hint);
+        this.append('user',message);this.append('assistant',reply.text,reply);this.render();return;
+      }
       const scenarioMessages={meal:'Fictional scenario: Sam has just had a difficult mealtime and wants support.',routine:'Fictional scenario: Sam has a busy day and wants help finding a regular routine.',support:'Fictional scenario: Sam wants to ask a trusted person for support.'};
       if(this.session.mode==='synthetic' && !Object.hasOwn(scenarioMessages,scenario)) {this.status('Choose a fictional scenario.');return;}
       const display=scenario?this.options.translateText(scenarioMessages[scenario]):message;if(!display.trim())return;

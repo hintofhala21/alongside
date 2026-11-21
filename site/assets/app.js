@@ -1,105 +1,61 @@
 "use strict";
 
 const languageStorageKey = "alongside-interface-language";
-const languageRegistry = JSON.parse(document.getElementById("language-registry").textContent);
-const arabicInterface = JSON.parse(document.getElementById("arabic-interface").textContent);
-const languageCodes = new Set(languageRegistry.map(([code]) => code));
-const languageAliases = new Map();
-const languageLabels = new Map();
 const localeTools = globalThis.AlongsideLocale;
 const renderTranslatedText = localeTools.makeRenderer();
 let selectedLanguage = "en";
 let translationObserver;
 
 function interfaceLocale() {
-  const base = selectedLanguage.split("-")[0];
-  return base === "ar" || Object.hasOwn(localeTools.packs, base) ? base : "en";
+  return localeTools.baseLanguage(selectedLanguage);
 }
 
+// Also used by the country picker to match names without case differences.
 function normalizeLanguageName(value) {
   return value.normalize("NFKC").trim().toLocaleLowerCase();
 }
 
-for (const [code, name, aliases] of languageRegistry) {
-  for (const alias of [code, name, ...aliases]) languageAliases.set(normalizeLanguageName(alias), code);
-}
-languageAliases.set("español", "es");
-languageAliases.set("espanol", "es");
-languageAliases.set("français", "fr");
-languageAliases.set("francais", "fr");
-languageAliases.set("العربية", "ar");
-languageAliases.set("الإنجليزية", "en");
-
-function resolveLanguage(value) {
-  const normalized = normalizeLanguageName(value);
-  if (languageLabels.has(normalized)) return languageLabels.get(normalized);
-  if (languageAliases.has(normalized)) return languageAliases.get(normalized);
-  const code = value.match(/\(([^()]+)\)$/)?.[1] ?? value.trim();
-  try {
-    const canonical = Intl.getCanonicalLocales(code)[0];
-    return canonical && languageCodes.has(canonical.split("-")[0]) ? canonical : null;
-  } catch { return null; }
-}
-
 function readLanguagePreference() {
-  try {
-    return resolveLanguage(localStorage.getItem(languageStorageKey) || profile?.language || "en") ?? "en";
-  } catch { return resolveLanguage(profile?.language || "en") ?? "en"; }
+  let stored = profile?.language || "en";
+  try { stored = localStorage.getItem(languageStorageKey) || stored; } catch {}
+  try { return Intl.getCanonicalLocales(stored)[0] || "en"; } catch { return "en"; }
+}
+
+function populateLanguageOptions() {
+  const locale = interfaceLocale();
+  const base = new Intl.Locale(selectedLanguage).language;
+  for (const id of ["preferred-language", "dialog-language"]) {
+    const select = document.getElementById(id);
+    select.replaceChildren();
+    for (const [code, name] of Object.entries(localeTools.names)) {
+      const option = new Option(name, code);
+      option.lang = code === "zh" ? "zh-Hans" : code;
+      option.dir = "auto";
+      select.add(option);
+    }
+    // Preserve a previously saved preference until its owner chooses another one.
+    if (!Object.hasOwn(localeTools.names, base)) {
+      select.add(new Option(languageName(selectedLanguage), selectedLanguage));
+      select.value = selectedLanguage;
+    } else {
+      select.value = locale;
+    }
+  }
 }
 
 function languageName(code) {
-  try {
-    const name = new Intl.DisplayNames([interfaceLocale()], { type: "language" }).of(code);
-    if (name && name !== code) return name;
-  } catch {}
-  return languageRegistry.find(([languageCode]) => languageCode === code)?.[1] ?? code;
-}
-
-function languageChoice(code) {
-  return languageName(code) + " (" + code + ")";
-}
-
-function populateLanguageOptions(query = "") {
-  const normalized = normalizeLanguageName(query);
-  const preferred = ["en", "ar", "es", "fr", "de", "hi", "ur", "zh", "ja", "ko", "pt", "ru", "tr", "fa", "bn", "id", "sw", "tl", "ta"];
-  const rows = normalized
-    ? languageRegistry.filter(([code, name, aliases]) => [code, name, ...aliases].some((item) => normalizeLanguageName(item).includes(normalized))).slice(0, 50)
-    : preferred.map((code) => languageRegistry.find((row) => row[0] === code)).filter(Boolean);
-  const list = document.getElementById("language-options");
-  list.replaceChildren();
-  for (const [code] of rows) {
-    const option = document.createElement("option");
-    option.value = languageChoice(code);
-    languageLabels.set(normalizeLanguageName(option.value), code);
-    list.append(option);
-  }
+  try { return new Intl.DisplayNames([interfaceLocale()], {type:"language"}).of(code); }
+  catch { return code; }
 }
 
 function translate(text) {
-  const locale = interfaceLocale();
-  if (locale !== "ar") return localeTools.translate(text, locale);
-  if (Object.hasOwn(arabicInterface, text)) return arabicInterface[text];
-  const question = text.match(/^Question (\d+) \/ (\d+)$/);
-  if (question) return "السؤال \u2066" + question[1] + " / " + question[2] + "\u2069";
-  const welcome = text.match(/^Welcome, (.+)\.$/);
-  if (welcome) return arabicInterface["Welcome, {name}."].replace("{name}", welcome[1]);
-  const count = text.match(/^(\d+) specific pages approved for Alongside’s information library\.$/);
-  if (count) return count[1] + " صفحات محددة معتمدة لمكتبة معلومات Alongside.";
-  const chat = text.match(/^Sample chat (\d+) · (.+)$/);
-  if (chat) return "محادثة توضيحية " + chat[1] + " · " + translate(chat[2]);
-  const remove = text.match(/^Delete check-in (\d+)$/);
-  if (remove) return "حذف التسجيل " + remove[1];
-  for (const suffix of [" reminder seen", " reminder marked as seen.", " reminder unmarked."]) {
-    if (text.endsWith(suffix)) return translate(text.slice(0, -suffix.length)) + " · " + translate(suffix.trim());
-  }
-  if (text.includes(" · ")) return text.split(" · ").map(translate).join(" · ");
-  return text;
+  return localeTools.translate(text, interfaceLocale());
 }
 
 function translateView() {
   translationObserver?.disconnect();
   const locale = interfaceLocale();
-  document.documentElement.lang = locale;
+  document.documentElement.lang = locale === "zh" ? "zh-Hans" : locale;
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
   renderTranslatedText(translate);
   const page = location.hash.slice(1);
@@ -108,14 +64,7 @@ function translateView() {
 }
 
 function refreshLanguage() {
-  for (const id of ["preferred-language", "dialog-language"]) {
-    document.getElementById(id).value = languageChoice(selectedLanguage);
-    document.getElementById(id).setCustomValidity("");
-  }
   populateLanguageOptions();
-  const codes = ["en", "ar", ...Object.keys(localeTools.packs)];
-  const languageList = new Intl.ListFormat(interfaceLocale(), {type:"conjunction"}).format(codes.map(languageName));
-  for (const label of document.querySelectorAll("[data-language-list]")) label.textContent = languageList;
   const notice = document.getElementById("language-notice");
   const available = interfaceLocale() === selectedLanguage.split("-")[0];
   notice.hidden = available;
@@ -144,7 +93,7 @@ function useLanguage(code) {
 
 function chooseLanguage(inputId, statusId) {
   const input = document.getElementById(inputId);
-  const code = resolveLanguage(input.value);
+  const code = input.value;
   if (!code) {
     input.setCustomValidity(translate("Choose a language from the suggestions or enter its language code."));
     input.reportValidity();
@@ -163,20 +112,12 @@ function chooseLanguage(inputId, statusId) {
 }
 
 function initializeLanguageControls() {
-  for (const id of ["preferred-language", "dialog-language"]) {
-    document.getElementById(id).addEventListener("input", (event) => {
-      event.target.setCustomValidity("");
-      populateLanguageOptions(event.target.value);
-    });
-    document.getElementById(id).addEventListener("focus", () => populateLanguageOptions());
-  }
   document.getElementById("apply-profile-language").addEventListener("click", () => {
     chooseLanguage("preferred-language", "language-status");
   });
   document.getElementById("open-language").addEventListener("click", () => {
-    document.getElementById("dialog-language").value = languageChoice(selectedLanguage);
     document.getElementById("dialog-language-status").textContent = "";
-    populateLanguageOptions();
+    document.getElementById("dialog-language").value = Object.hasOwn(localeTools.names, new Intl.Locale(selectedLanguage).language) ? interfaceLocale() : selectedLanguage;
     document.getElementById("language-dialog").showModal();
   });
   document.getElementById("cancel-language").addEventListener("click", () => document.getElementById("language-dialog").close());
@@ -582,7 +523,7 @@ function renderProfile() {
   byId("nickname").value = profile?.name ?? "";
   byId("age-group").value = hasAgeGroup() ? profile.ageGroup : "";
   byId("recovery-stage").value = profile?.stage ?? "";
-  byId("preferred-language").value = languageChoice(selectedLanguage);
+  populateLanguageOptions();
   populateProfileExtras();
   renderHelp();
   if (!profile) return;
@@ -655,7 +596,7 @@ window.addEventListener("hashchange", () => renderRoute(true));
 
 byId("profile-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  const language = resolveLanguage(byId("preferred-language").value);
+  const language = byId("preferred-language").value;
   if (!language) {
     chooseLanguage("preferred-language", "language-status");
     return;
