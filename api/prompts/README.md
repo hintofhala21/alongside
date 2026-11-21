@@ -27,3 +27,5 @@ Kids prompt v1 (November 2026) runs in the browser. It uses a child-oriented wri
 Kids v3 asks the writer for a message addressed to the recipient when it recognizes a request for a draft. The same safety review still applies. A real on-device test of v2 had responded to the child instead.
 
 Kids v4 updates the writer and reviewer to distinguish a disclosure about eating distress from a request for clinical advice.
+
+Kids v5 adds a listening response for distress about meal photos. In the v4 live trial a child’s disclosure opened a library fallback. Both the writer and the reviewer can now select this response.

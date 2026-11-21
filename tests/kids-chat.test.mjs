@@ -38,3 +38,16 @@ test('a requested text goes through the same safety review before display',async
   assert.equal(reply.text,'Could we talk about my day?');
   assert.equal(calls[1].proposed,reply.text);
 });
+
+test('meal-photo distress keeps a listening response even if flagged as an unanswered medical question',async()=>{
+  const message='I wanted my lunch, but seeing those pictures made me feel sick.';
+  for(const models of [
+    {writer:model({route:'health',topic:'none',reply:''},[])},
+    {writer:model({route:'chat',topic:'none',reply:'draft'},[]),review:model('health',[])},
+    {writer:model({route:'mealPhotos',topic:'none',reply:''},[])}
+  ])assert.match((await respond(models,options,[],message)).text,/pictures made eating feel hard/);
+  const urgent=await respond({writer:model({route:'urgent'},[])},options,[],message);
+  assert.match(urgent.text,/emergency services/);
+  const factual=await respond({writer:model({route:'health',topic:'none'},[])},options,[],'Could meal photos make me feel sick?');
+  assert.match(factual.text,/library/);
+});
