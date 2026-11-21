@@ -22,3 +22,5 @@ Create the next numbered file. Keep previous versions and record the date, reaso
 ## On-device kids’ chat
 
 Kids prompt v1 (November 2026) runs in the browser. It uses a child-oriented writer and a separate review of original text before display. Medical questions use local library material. The original kids instructions are preserved in revision 1d9c38f. Version 2 adds social-comparison and help-seeking guidance to the writer and reviewer. The current instructions are kept in [kids-chat.js](../../site/assets/kids-chat.js).
+
+Kids v3 asks the writer for a message addressed to the recipient when it recognizes a request for a draft. The same safety review still applies. A real on-device test of v2 had responded to the child instead.

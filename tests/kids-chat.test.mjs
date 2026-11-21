@@ -30,3 +30,11 @@ test('a rejected or malformed second opinion cannot release a draft',async()=>{
     assert.doesNotMatch(r.text,/discard this draft/);assert.equal(r.action,'human');
   }
 });
+
+test('a requested text goes through the same safety review before display',async()=>{
+  const calls=[];
+  const models={writer:model({route:'chat',textToSend:'Could we talk about my day?',topic:'none'},calls),review:model('safe',calls)};
+  const reply=await respond(models,options,[],'What could I text my sister?');
+  assert.equal(reply.text,'Could we talk about my day?');
+  assert.equal(calls[1].proposed,reply.text);
+});
