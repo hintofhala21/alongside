@@ -4,8 +4,8 @@ import { resolve, relative, extname } from 'node:path';
 import { Script } from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const skipped = new Set(['.git', 'node_modules', 'build', '.wrangler', 'outputs']);
-const allowedPublic = new Set(['index.html', 'privacy.html', '404.html', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/styles.css', 'assets/favicon.svg']);
+const skipped = new Set(['.git', 'node_modules', 'build', '.wrangler', 'outputs', '.setup-tools']);
+const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/app.js', 'assets/chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
 
 export function assertNoSecret(contents, name) {
   // Detect common credential formats without printing the value or matching line.
@@ -36,6 +36,12 @@ export async function check() {
   for (const file of all) {
     const name = relative(root, file);
     if (/(?:^|\/)\.(?:env|dev\.vars)(?:\.|$)|\.(?:pem|key|p12)$/.test(name)) throw new Error(`Secret file found: ${name}. Move it out of this static project.`);
+    if (extname(file) === '.jpg') {
+      const bytes = await readFile(file);
+      if (bytes[0] !== 255 || bytes[1] !== 216 || bytes.length > 500000) throw new Error(`Invalid or oversized photograph: ${name}`);
+      if (!allowedPublic.has(name.slice(5))) throw new Error(`Unexpected photograph: ${name}`);
+      continue;
+    }
     const contents = await readFile(file, 'utf8');
     assertNoSecret(contents, name);
     if (extname(file) === '.js') new Script(contents, { filename: name });
@@ -47,11 +53,16 @@ export async function check() {
         if (!contents.includes('Content-Security-Policy')) throw new Error(`Missing security policy in ${name}.`);
         for (const match of contents.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
           if (match[1].includes('application/json')) JSON.parse(match[2]);
-          else if (!match[1].includes('src="./assets/app.js"') || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
+          else if (!/src="\.\/assets\/(?:app|chat|history|library)\.js"/.test(match[1]) || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
         }
       }
     }
   }
+  const config = JSON.parse(await readFile(resolve(root, 'site/config.json'), 'utf8'));
+  if (Object.keys(config).some(k => k !== 'apiBase')) throw new Error('Public configuration accepts only apiBase, never secret fields.');
+  if (typeof config.apiBase !== 'string') throw new Error('Invalid public API configuration.');
+  const library = JSON.parse(await readFile(resolve(root, 'shared/library.json'), 'utf8'));
+  if (!library.medicalSources || !library.medicalAnswers) throw new Error('Missing approved information library.');
   console.log('Checks passed: JavaScript, embedded JSON, public-file allowlist and credential scan.');
 }
 
