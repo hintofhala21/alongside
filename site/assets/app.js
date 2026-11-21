@@ -830,7 +830,7 @@ const careDirectories = {
  GB: [ ['NHS service finder', 'https://www.nhs.uk/nhs-services/services-near-you/', 'Search NHS services in England by area. Other UK nations use their own NHS directories.'] ],
  AU: [ ['Healthdirect service finder', 'https://www.healthdirect.gov.au/australian-health-services', 'Search health services by location and service type.'] ],
  IE: [ ['HSE Find a GP', 'https://www2.hse.ie/services/find-a-gp/', 'Search by place, name, or address in Ireland.'] ],
- AE: [ ['UAE Ministry of Health and Prevention', 'https://mohap.gov.ae/en/about-us/medical-facilities-directory', 'Search the official medical facilities directory. Confirm services and eligibility.'] ]
+ AE: [ ['UAE Ministry of Health and Prevention', 'https://mohap.gov.ae/en/about-us/medical-facilities-directory', 'Search the official medical facilities directory. Confirm services and eligibility.'], ['Abu Dhabi Department of Health', 'https://stem.doh.gov.ae/publicmap/', 'Public health facility map for the emirate of Abu Dhabi.'] ]
 };
 function userText(tag, text) { const node = element(tag, text); node.dataset.userContent = ''; return node; }
 function zone() { const value=profile?.timeZone; try { new Intl.DateTimeFormat('en', { timeZone: value || 'UTC' }); return value || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch { return 'UTC'; } }
