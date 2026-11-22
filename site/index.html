@@ -227,12 +227,7 @@
             <p class="chat-status" id="chat-status" role="status"></p>
             <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" rows="2" maxlength="800" placeholder="Type your own message…" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Breeze uses AI and can make mistakes.</small></form>
             <button type="button" class="text-button" id="ask-meals">Ask for meal ideas</button><div id="meal-ideas-chat" hidden></div>
-            <div class="starter-grid" id="chat-options">
-              <button type="button" data-chat="after">A meal just felt hard</button>
-              <button type="button" data-chat="team">Help me ask for support</button>
-              <button type="button" data-chat="checkin">Let’s do a gentle check-in</button>
-              <button type="button" data-chat="routine">Help me find my routine</button>
-            </div>
+            <div class="starter-grid" id="prepared-questions"></div>
             <p class="chat-boundary">Support, not medical care. <button class="text-button" type="button" data-help>Find human help</button></p>
           </div>
           <aside class="chat-side"><details class="panel stack"><summary>Recent conversations</summary><p class="muted" id="empty-chats">Your conversations will appear here.</p><ul class="chat-history" id="recent-chats"></ul><a href="./history.html">View all chat history</a><small>Saved in this browser. Only selected demos go to the judges’ page.</small></details><details class="panel library-drawer"><summary>Explore approved information</summary><form class="stack" id="learn-form">

@@ -721,12 +721,6 @@ byId("reset-dialog").addEventListener("close", (event) => {
   byId("plan-status").textContent = stored ? "Reminder times reset." : "Reminder times reset for this visit.";
 });
 
-byId("chat-options").addEventListener("click", (event) => {
-  const button = event.target.closest("[data-chat]");
-  if (!button) return;
-  void chatController.send(button.textContent, button.dataset.chat);
-});
-
 byId("learn-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const select = byId("approved-topic");

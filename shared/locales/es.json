@@ -814,5 +814,7 @@
   "Could you put that in one short sentence?": "¿Puedes decirlo en una frase corta?",
   "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "Elige una pregunta. Brisa responde según tu grupo de edad. Lo que escribes se queda en tu dispositivo.",
   "Your messages go to OpenAI only after you agree.": "Tus mensajes se envían a OpenAI solo si aceptas.",
-  "One difficult meal alone cannot tell you whether you have an eating disorder. A healthcare professional can ask what has been happening over time and how it affects you.": "Una comida difícil por sí sola no permite saber si tienes un trastorno alimentario. Un profesional de salud puede preguntarte qué ha pasado con el tiempo y cómo te afecta."
+  "One difficult meal alone cannot tell you whether you have an eating disorder. A healthcare professional can ask what has been happening over time and how it affects you.": "Una comida difícil por sí sola no permite saber si tienes un trastorno alimentario. Un profesional de salud puede preguntarte qué ha pasado con el tiempo y cómo te afecta.",
+  "You can type a general question such as “What is ARFID?” or choose one below. Personal messages cannot be sent from this profile yet.": "Puedes escribir una pregunta general o elegir una de las sugerencias. Este perfil aún no permite enviar mensajes personales.",
+  "Your message is still in the box. It was not sent. This profile can currently send general questions from the suggestions.": "Tu mensaje sigue en el cuadro y no se ha enviado. Por ahora este perfil puede enviar preguntas generales de las sugerencias."
 }

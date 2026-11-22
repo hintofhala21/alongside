@@ -19,6 +19,25 @@
     [/support|team|help|soutien|aide|équipe|apoyo|ayuda|equipo|apoio|ajuda|equipe|unterstützung|hilfe|支持|帮助|支援|相談|सहारा|सहायता|मदद|مساعدة|دعم/, 'team'],
     [/meal|repas|collation|comida|colaci[oó]n|merienda|refeição|lanche|mahlzeit|essen|用餐|吃饭|食事|भोजन|खाना|أكل|وجبة/, 'after']
   ];
+  const prompts = {
+    after:'How can I describe a difficult meal?', team:'How can I ask for company at lunch?',
+    arfid:'What is ARFID?', assessment:'Can one meal tell me if I have an eating disorder?',
+    note:'Show me a note about a difficult texture.', routine:'Help me find my routine',
+    checkin:'Let’s do a gentle check-in', shorter:'Could you put that in one short sentence?'
+  };
+  // Compare complete general questions locally. A personal draft must never become an API payload.
+  const generalWording = {
+    arfid:['What does ARFID mean?', 'Can you explain ARFID?', 'Define ARFID'],
+    checkin:['How do I start a check-in?', 'How does a check-in work?'],
+    routine:['Where can I find my routine?', 'How do I find my routine?'],
+    team:['How can I ask someone to sit with me at lunch?'],
+    shorter:['Can you make that shorter?', 'Can you say that more simply?']
+  };
+  function questionKey(text, translate) {
+    const normalize = value => value.normalize('NFKC').toLowerCase().trim().replace(/[.!?؟。！？]+$/u,'').replace(/\s+/gu,' ');
+    const typed=normalize(text);
+    return Object.keys(prompts).find(key=>[prompts[key],translate(prompts[key]),...(generalWording[key]||[])].some(label=>normalize(label)===typed));
+  }
   const cleanMessage = m => m && ['user','assistant'].includes(m.role) && typeof m.text === 'string' && m.text.length <= 6000;
   const store = {
     read() { try { const v = JSON.parse((globalThis.AlongsideAccount?.storage ?? localStorage).getItem(key)); return { current: typeof v?.current === 'string' ? v.current : null, chats: Array.isArray(v?.chats) ? v.chats.filter(c => typeof c.id === 'string' && typeof c.title === 'string' && Array.isArray(c.messages)).slice(0,30).map(c => ({ ...c, messages:c.messages.filter(cleanMessage).slice(-60) })) : [] }; } catch { return {current:null,chats:[]}; } },
@@ -61,15 +80,14 @@
       const synthetic=this.session?.mode==='synthetic';
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
       id('chat-welcome').hidden=hasMessages;
-      id('chat-options').hidden=guided || hasMessages || synthetic;
       id('chat-mode').textContent=this.options.translateText('Breeze');
       id('chat-privacy').textContent=this.options.translateText(guided
-        ? 'Choose a question below. Breeze uses your age group to answer. Your own writing stays private.'
+        ? 'You can type a general question such as “What is ARFID?” or choose one below. Personal messages cannot be sent from this profile yet.'
         : 'Your messages go to OpenAI only after you agree.');
-      id('chat-message').hidden=guided;
-      id('send-chat').hidden=guided;
-      id('chat-message').disabled=this.busy || synthetic || guided;
-      id('send-chat').disabled=this.busy || synthetic || guided;
+      id('chat-message').hidden=synthetic;
+      id('send-chat').hidden=synthetic;
+      id('chat-message').disabled=this.busy || synthetic;
+      id('send-chat').disabled=this.busy || synthetic;
       const out=id('conversation'); out.replaceChildren();
       for(const m of chat?.messages || []) {
         const b=node('article','',m.role==='user'?'bubble user':'bubble'); const body=node('p',m.text); body.dataset.userContent='';
@@ -84,7 +102,7 @@
       id('empty-chats').hidden=this.state.chats.length>0;
       id('recent-chats').replaceChildren(...this.state.chats.map(c=>{ const li=node('li'); const b=node('button',c.title,'action outline'); b.dataset.userContent=''; b.type='button'; b.disabled=this.busy; b.setAttribute('aria-pressed',String(c.id===this.state.current)); b.addEventListener('click',()=>{this.state.current=c.id;this.save();this.render();});li.append(b);return li;}));
       this.renderSynthetic();
-      this.renderQuestions(guided && !synthetic);
+      this.renderQuestions(!synthetic);
       if(hasMessages || this.busy) out.scrollTop=out.scrollHeight;
     }
     matchesProfile() {
@@ -94,15 +112,13 @@
       return this.session.mode!=='guided' && this.options.getAgeGroup()==='adult';
     }
     renderQuestions(show) {
-      let row=id('prepared-questions');
-      if(!row){row=node('div','','starter-grid');row.id='prepared-questions';id('chat-form').after(row);}
+      const row=id('prepared-questions');
       row.replaceChildren();row.hidden=!show;if(!show)return;
-      const labels={after:'How can I describe a difficult meal?',team:'How can I ask for company at lunch?',arfid:'What is ARFID?',assessment:'Can one meal tell me if I have an eating disorder?',note:'Show me a note about a difficult texture.',routine:'Help me find my routine',checkin:'Let’s do a gentle check-in'};
-      if(this.current()?.messages?.length)labels.shorter='Could you put that in one short sentence?';
-      for(const [key,label] of Object.entries(labels)){
+      for(const [key,label] of Object.entries(prompts)){
+        if(key==='shorter' && !this.current()?.messages?.length)continue;
         const text=this.options.translateText(label);
         const button=node('button',text);button.type='button';button.disabled=this.busy;
-        button.onclick=()=>this.send(text,null,key);row.append(button);
+        button.onclick=()=>this.send(text,null,this.younger()?key:undefined);row.append(button);
       }
     }
     async connectGuided() {
@@ -175,11 +191,15 @@
       if(this.busy)return;await this.ready;if(this.busy)return;
       if(this.session && !this.matchesProfile())this.disconnect();
       if(!['child','teen','adult'].includes(this.options.getAgeGroup())){location.hash='#profile';return;}
+      if(globalThis.AlongsideMeals?.request(message) && !scenario){this.openMealIdeas(message);return;}
       if(this.younger() && this.session?.mode!=='synthetic'){
-        if(!scenario){this.status('Choose a question below.');return;}
+        scenario ||= questionKey(message,text=>this.options.translateText(text));
+        if(!scenario){
+          this.status(this.options.translateText('Your message is still in the box. It was not sent. This profile can currently send general questions from the suggestions.'));
+          return;
+        }
         if(!this.session && !await this.connectGuided())return;
       }
-      if(globalThis.AlongsideMeals?.request(message) && !scenario){this.openMealIdeas(message);return;}
       if(!this.session)return this.openPersonal(message,hint);
       const input=id('chat-message');if(input.value.trim()===message)input.value='';
       const scenarioMessages={meal:'Fictional scenario: Sam has just had a difficult mealtime and wants support.',routine:'Fictional scenario: Sam has a busy day and wants help finding a regular routine.',support:'Fictional scenario: Sam wants to ask a trusted person for support.'};

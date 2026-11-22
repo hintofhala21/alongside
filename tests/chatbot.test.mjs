@@ -144,7 +144,7 @@ test('a changed profile cannot reuse an adult session for younger personal writi
   const input={value:'My unsent draft'};
   const vm={document:{getElementById:()=>input},sessionStorage:{removeItem:()=>{}},Date};
   runInNewContext(src,vm);const chat=Object.create(vm.AlongsideChat.prototype);
-  let age='adult',consent=0;Object.assign(chat,{options:{getAgeGroup:()=>age},openPersonal:()=>consent++});
+  let age='adult',consent=0;Object.assign(chat,{options:{getAgeGroup:()=>age,translateText:text=>text},openPersonal:()=>consent++});
   await chat.send(input.value);assert.equal(consent,1);
   age='teen';chat.session={mode:'personal',expires:Date.now()+10000};
   await chat.send(input.value);assert.equal(chat.session,null);assert.equal(input.value,'My unsent draft');

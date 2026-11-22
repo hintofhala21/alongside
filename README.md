@@ -29,7 +29,7 @@ On this Mac, the guide can use the Node runtime included with the ChatGPT app. I
 
 ## How the agent works
 
-Breeze uses one OpenAI model and the age group selected during profile setup. Children and teens choose prepared questions and follow-ups. The server accepts only known question IDs from these sessions. Adults can consent to sending their own words. All replies appear in the same conversation. Health facts use approved summaries with sources. Users can also open a check-in, plan, meal chooser or care directory.
+Breeze uses one OpenAI model and the age group selected during profile setup. All profiles have a text box and question suggestions throughout the chat. Children and teens can type supported general questions or select them. Unmatched personal drafts stay in the text box. The server accepts only known question IDs from these sessions. Adults can consent to sending their own words. All replies appear in the same conversation. Health facts use approved summaries with sources. Users can also open a check-in, plan, meal chooser or care directory.
 
 Private conversations cannot be published to the judges’ history. Invited judges can try fictional examples. Alongside has not been clinically validated.
 
