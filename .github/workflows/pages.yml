@@ -34,6 +34,8 @@ jobs:
         run: python3 -B -m unittest discover -s tests -p test_connection.py
       - name: Build public files only
         run: npm run build
+      - name: Verify first-visit link matches this release
+        run: node scripts/check-first-visit.mjs
       - name: Configure Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

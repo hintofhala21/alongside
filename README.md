@@ -2,11 +2,11 @@
 
 A chat-first, mobile-first recovery support competition prototype in cream and sage, with real garden photography.
 
-[Open Alongside](https://hintofhala21.github.io/alongside/) · [Judges’ history page](https://hintofhala21.github.io/alongside/history.html?view=showcase)
+[Open Alongside](https://hintofhala21.github.io/alongside/first-visit/?new=1) · [Judges’ history page](https://hintofhala21.github.io/alongside/waicy-conversation.html)
 
 ## Start here
 
-The main link opens Chat. Adults can choose “Chat with Luna,” confirm their age and consent, and send their own messages. On-device library chat is available to everyone. The separate judge invitation still opens the competition demo.
+Use the “Open Alongside” link above in every handout, presentation, poster and report. Each opening begins with a blank profile in an isolated walkthrough. All pages and assets come from the current Pages build. Refreshing continues that walkthrough. Opening the shared link again starts a new one without changing the regular profile. Saving a profile opens Breeze. Link to the judging transcript separately as recorded evidence.
 
 For first-time setup on a new deployment, run this in the project folder:
 
@@ -18,13 +18,13 @@ On this Mac, the guide can use the Node runtime included with the ChatGPT app. I
 
 ## What changed for the competition
 
-- Chat is the first page; no profile is created for you.
+- Profile setup comes first. Saving the required age group opens chat.
 - Phone layout, a reachable message composer, and quick bottom navigation.
 - Real, self-hosted flower and garden photographs with [credits](site/credits.html).
 - Height and weight fields removed. Old stored measurement values are removed on load.
 - Conversations persist in the browser and have their own history page.
-- Separate public judges’ history, containing only explicitly selected fictional Luna demos. It starts empty; no fabricated AI transcripts are included.
-- A private Luna agent with conversation memory, reviewed information retrieval, follow-up questions and app actions.
+- Separate public judges’ history, containing only explicitly selected fictional Breeze demos. It starts empty; no fabricated AI transcripts are included.
+- A private Breeze agent with conversation memory, reviewed information retrieval, follow-up questions and app actions.
 - Competition access code, separate publisher code, request limits and a server off switch.
 
 ## How the agent works

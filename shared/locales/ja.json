@@ -816,5 +816,7 @@
   "Your messages go to OpenAI only after you agree.": "同意した場合のみ、メッセージがOpenAIに送られます。",
   "One difficult meal alone cannot tell you whether you have an eating disorder. A healthcare professional can ask what has been happening over time and how it affects you.": "一度の食事がつらかったというだけで、摂食障害かどうかはわかりません。医療の専門家に、これまでの様子や生活への影響を相談できます。",
   "You can type a general question such as “What is ARFID?” or choose one below. Personal messages cannot be sent from this profile yet.": "一般的な質問を入力するか、下から選べます。このプロフィールから個人的なメッセージはまだ送れません。",
-  "Your message is still in the box. It was not sent. This profile can currently send general questions from the suggestions.": "メッセージは入力欄に残っていて、送信されていません。現在このプロフィールから送れるのは候補にある一般的な質問です。"
+  "Your message is still in the box. It was not sent. This profile can currently send general questions from the suggestions.": "メッセージは入力欄に残っていて、送信されていません。現在このプロフィールから送れるのは候補にある一般的な質問です。",
+  "Preview Alongside from the beginning": "Alongside を最初から体験する",
+  "Invited judges can also open a separate competition session with fictional scenarios. Only those sessions can be selected for sharing.": "招待された審査員は、架空の事例を使う大会用のセッションも開けます。共有の対象として選べるのは、そのセッションだけです。"
 }

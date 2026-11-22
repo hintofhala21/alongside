@@ -63,10 +63,20 @@ const initializeVisit = `
     removeItem:key=>sessionStorage.removeItem(prefix+key)
   };
 })();`;
-const localesPath=resolve(walkthrough,'assets/locales.js');
-await writeFile(localesPath,initializeVisit+'\n'+await readFile(localesPath,'utf8'));
-for(const name of ['app','accounts','history','chat']){
-  const path=resolve(walkthrough,'assets',name+'.js');
-  const source=await readFile(path,'utf8');
-  await writeFile(path,'(function(localStorage,sessionStorage){\n'+source+'\n})(AlongsideVisitStorage,AlongsideVisitStorage);');
+// Isolate storage for every shipped browser script, including the locale renderer
+// on the history and privacy pages. Add new features only in the main site.
+const assets=resolve(walkthrough,'assets');
+for(const page of await readdir(walkthrough)){
+  if(!page.endsWith('.html'))continue;
+  const path=resolve(walkthrough,page);
+  const html=await readFile(path,'utf8');
+  if(html.includes('<script '))await writeFile(path,html.replace('<script ', '<script src="./assets/visit-storage.js" defer></script>\n<script '));
 }
+for(const file of await readdir(assets)){
+  if(!file.endsWith('.js'))continue;
+  const path=resolve(assets,file);
+  const source=await readFile(path,'utf8');
+  const scoped='(function(localStorage,sessionStorage){\n'+source+'\n})(AlongsideVisitStorage,AlongsideVisitStorage);';
+  await writeFile(path,scoped);
+}
+await writeFile(resolve(assets,'visit-storage.js'),initializeVisit);
