@@ -806,5 +806,12 @@
   "Sweet potato with beans": "Patates douces avec Haricots",
   "Rice with chickpeas": "Pois chiches avec Riz",
   "Egg on whole-grain toast": "Pain complet avec Œuf",
-  "Salmon with rice": "Saumon avec Riz"
+  "Salmon with rice": "Saumon avec Riz",
+  "How can I describe a difficult meal?": "Comment décrire un repas difficile ?",
+  "How can I ask for company at lunch?": "Comment demander à quelqu’un de déjeuner avec moi ?",
+  "Can one meal tell me if I have an eating disorder?": "Un seul repas suffit-il pour savoir si j’ai un trouble alimentaire ?",
+  "Show me a note about a difficult texture.": "Montre-moi un exemple de note sur une texture difficile.",
+  "Could you put that in one short sentence?": "Peux-tu le dire en une phrase courte ?",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "Choisis une question. Brise adapte sa réponse à ta tranche d’âge. Tes écrits personnels restent sur ton appareil.",
+  "Your messages go to OpenAI only after you agree.": "Tes messages sont envoyés à OpenAI uniquement avec ton accord."
 }

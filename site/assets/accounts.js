@@ -36,7 +36,6 @@
     if(started)return;started=true;
     globalThis.AlongsideAccount=account;
     if(isHistory && !account.publicOnly && !account.storage.getItem(account.key('stillday-profile-v2'))){location.replace('./#profile');return;}
-    if(!isHistory)await script('kids-chat');
     await script('chat');await script(isHistory?'history':'app');
     screen.hidden=true;document.documentElement.classList.remove('accounts-locked');
   }

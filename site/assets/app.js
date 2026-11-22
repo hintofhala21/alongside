@@ -627,11 +627,11 @@ byId("profile-form").addEventListener("submit", (event) => {
     profile = nextProfile;
     useLanguage(language);
     renderProfile();
+    chatController?.render();
     byId("profile-status").textContent = "Profile saved.";
     if (completingSetup) {
       location.hash = "#support";
-      if(account?.kids) chatController.openKids();
-      else if(judgeInvite) void chatController.openConnection(judgeInvite[1]);
+      if(judgeInvite && ageGroup==="adult") void chatController.openConnection(judgeInvite[1]);
     }
   } catch {
     byId("profile-status").textContent = "Your profile couldn’t be saved. Allow browser storage and try again.";
@@ -746,8 +746,6 @@ byId("toggle-menu").addEventListener("click", () => {
   const opened = document.querySelector(".sidebar").classList.toggle("menu-open");
   byId("toggle-menu").setAttribute("aria-expanded", String(opened));
 });
-byId("kids-chat").addEventListener("click", () => chatController.openKids());
-byId("connect-demo").addEventListener("click", () => chatController.openPersonal());
 byId("chat-message").addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing && matchMedia("(pointer: fine)").matches) { event.preventDefault(); byId("chat-form").requestSubmit(); }
 });

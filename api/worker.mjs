@@ -1,7 +1,7 @@
 import { accountAllowed } from './account.mjs';
 import publicConfig from '../site/config.json' with { type: 'json' };
 import { supportedLanguage } from '../shared/languages.mjs';
-import { runAgent, scenarios } from './agent.mjs';
+import { runAgent, scenarios, starters } from './agent.mjs';
 
 const DAY=86400000;
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
@@ -45,20 +45,25 @@ export class AlongsideHub {
       const data=await body(request);
       if(path==='/session') {
         const ip=request.headers.get('X-Demo-Client')||'unknown';await this.counter([['login:'+ip+':'+today,20,now+DAY],['login-total:'+today,500,now+DAY]]);
-        if(!await accountAllowed(request,publicConfig.firebase))fail('Sign in to Alongside first.',401);
-        if(data.mode==='personal') {
+        if(data.mode!=='guided' && !await accountAllowed(request,publicConfig.firebase))fail('Sign in to Alongside first.',401);
+        if(data.mode==='guided') {
+          if(!['child','teen'].includes(data.ageGroup))fail('Select your age group in your profile.');
+        } else if(data.mode==='personal') {
+          if(data.ageGroup && data.ageGroup!=='adult')fail('Choose a prepared question in Breeze.',403);
           if(data.adult!==true || data.consent!==true) fail('Live chat requires adult confirmation and permission to send chat messages.',403);
         } else {
           if(!await sameSecret(data.code,this.env.DEMO_ACCESS_CODE))fail('That competition access code is not correct.',401);
           if(!['synthetic','interactive'].includes(data.mode))fail('Choose a testing mode.');
           if(data.mode==='interactive'&&data.adult!==true)fail('Free-text testing is for adult judges using fictional details.',403);
         }
-        const raw=token();const session={mode:data.mode,expires:now+DAY};await this.storage.put('session:'+await hash(this.env.RATE_SALT+':'+raw),session);return json({token:raw,...session});
+        const raw=token();const session={mode:data.mode,ageGroup:data.mode==='guided'?data.ageGroup:'adult',expires:now+DAY};await this.storage.put('session:'+await hash(this.env.RATE_SALT+':'+raw),session);return json({token:raw,...session});
       }
       const session=await this.session(request);
       if(path==='/chat') {
         if(!uuid.test(data.conversationId)||!uuid.test(data.requestId))fail('Invalid conversation.');
-        const message=session.mode==='synthetic'?scenarios[data.scenario]:data.message;
+        const guided=session.mode==='guided';
+        if(guided && (Object.hasOwn(data,'message') || !Object.hasOwn(starters,data.scenario)))fail('Choose a prepared question.');
+        const message=guided?starters[data.scenario]:session.mode==='synthetic'?scenarios[data.scenario]:data.message;
         if(typeof message!=='string'||!message.trim()||message.length>messageLimit)fail('Use a message of up to 800 characters.');
         if(session.mode==='synthetic'&&!Object.hasOwn(scenarios,data.scenario))fail('Choose a fictional scenario.');
         const conversationKey='conversation:'+data.conversationId;let conversation=await this.storage.get(conversationKey);
@@ -70,20 +75,20 @@ export class AlongsideHub {
           await this.counter([['budget-month:'+month,cap(this.env.MAX_MONTHLY_REQUESTS,500,1000),now+35*DAY],['budget-day:'+today,cap(this.env.MAX_DAILY_REQUESTS,60,100),now+2*DAY],['budget-session:'+session.key,cap(this.env.MAX_SESSION_REQUESTS,30,50),session.expires]]);
           conversation ||= {id:data.conversationId,owner:session.key,mode:session.mode,title:message.slice(0,58),created:new Date(now).toISOString(),messages:[],expires:session.expires};
           const user={role:'user',text:message,id:crypto.randomUUID(),created:new Date(now).toISOString()};
-          const reply=await runAgent([...conversation.messages,user],this.env,supportedLanguage(data.language),this.env.TEST_FETCH||fetch,session.mode);
-          const mode=session.mode==='personal'?'personal':'luna';
+          const reply=await runAgent([...conversation.messages,user],this.env,supportedLanguage(data.language),this.env.TEST_FETCH||fetch,session.mode,session.ageGroup);
+          const mode=(guided || session.mode==='personal')?'personal':'luna';
           const assistant={...reply,role:'assistant',mode,id:crypto.randomUUID(),created:new Date().toISOString()};
           conversation.messages.push(user,assistant);conversation.messages=conversation.messages.slice(-40);
           const result={reply:assistant,conversationId:conversation.id,mode};
           await this.storage.transaction(async txn=>{if(reply.endLive)await txn.delete('session:'+session.key);await txn.put(conversationKey,conversation);await txn.put(requestKey,{reply:result,expires:session.expires});});return json(result);
         } finally {await this.storage.delete(lock);}
       }
-      if(session.mode==='personal' && ['/publish','/unpublish'].includes(path))fail('Personal chats are private.',403);
+      if(['guided','personal'].includes(session.mode) && ['/publish','/unpublish'].includes(path))fail('Personal chats are private.',403);
       if(path==='/publish') {
         if(!await sameSecret(data.publisherCode,this.env.PUBLISHER_CODE))fail('A publisher code is needed to select a demo for judges.',403);
         if(data.confirmFictional!==true)fail('Review the conversation and confirm that it contains fictional details only.');
         if(!uuid.test(data.conversationId))fail('Conversation not found.',404);const c=await this.storage.get('conversation:'+data.conversationId);if(!c||c.owner!==session.key||c.expires<now)fail('This demo session is unavailable. Run a new demo first.',404);
-        if(c.mode==='personal')fail('Personal chats are private.',403);
+        if(['guided','personal'].includes(c.mode))fail('Personal chats are private.',403);
         if(!c.messages.some(m=>m.mode==='luna'))fail('Only a completed Breeze demo can be published.');
         const title=typeof data.title==='string'?data.title.trim().slice(0,80):'Competition demo';if(!title)fail('Add a title.');
         if(/@|https?:\/\/|\+?\d[\d\s().-]{7,}/.test(title))fail('Use a title without contact details.');

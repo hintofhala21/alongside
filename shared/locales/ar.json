@@ -806,5 +806,12 @@
   "Sweet potato with beans": "بطاطا حلوة مع فاصوليا",
   "Rice with chickpeas": "حمص مع أرز",
   "Egg on whole-grain toast": "خبز من الحبوب الكاملة مع بيض",
-  "Salmon with rice": "سلمون مع أرز"
+  "Salmon with rice": "سلمون مع أرز",
+  "How can I describe a difficult meal?": "كيف أصف وجبة كانت صعبة عليّ؟",
+  "How can I ask for company at lunch?": "كيف أطلب من أحد أن يجلس معي وقت الغداء؟",
+  "Can one meal tell me if I have an eating disorder?": "هل تكفي وجبة واحدة لمعرفة ما إذا كان لدي اضطراب أكل؟",
+  "Show me a note about a difficult texture.": "أرني مثالًا على ملاحظة عن قوام طعام صعب عليّ.",
+  "Could you put that in one short sentence?": "هل يمكنك قول ذلك في جملة قصيرة؟",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "اختر سؤالًا أدناه. يجيب نسيم بأسلوب يناسب فئتك العمرية. تبقى كتاباتك الخاصة على جهازك.",
+  "Your messages go to OpenAI only after you agree.": "تُرسل رسائلك إلى OpenAI بعد موافقتك فقط."
 }

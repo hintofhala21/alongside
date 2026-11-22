@@ -42,7 +42,7 @@
     }
     current() { return this.state.chats.find(c => c.id === this.state.current); }
     younger() { return globalThis.AlongsideAccount?.kids || ['child','teen'].includes(this.options.getAgeGroup()); }
-    mode() { return this.session?.mode==='personal' ? 'personal' : this.session ? 'luna' : 'library'; }
+    mode() { return ['guided','personal'].includes(this.session?.mode) ? 'personal' : this.session ? 'luna' : 'library'; }
     ensureChat(mode=this.mode()) {
       const current=this.current();
       if(!current || current.mode!==mode || (mode!=='library' && current.sessionExpires!==this.session?.expires)) { const c = {id:crypto.randomUUID(),title:'A new conversation',created:new Date().toISOString(),messages:[],mode,sessionExpires:mode==='library'?undefined:this.session?.expires}; this.state.chats.unshift(c); this.state.chats = this.state.chats.slice(0,30); this.state.current=c.id; }
@@ -50,30 +50,30 @@
     }
     save() { if(!store.write(this.state)) id('chat-status').textContent='This conversation is available for this visit. Browser storage is unavailable.'; }
     cancel() { this.abort?.abort(); this.busy=false; }
-    newChat() { this.cancel(); this.state.current=null; this.save(); this.render(); id('chat-message').focus(); }
+    newChat() { this.status(''); this.cancel(); this.state.current=null; this.save(); this.render(); id('chat-message').focus(); }
     clearLocal() { this.cancel(); store.clear(); this.state={current:null,chats:[]}; this.session=null; this.render(); }
     disconnect() { this.session=null; try { sessionStorage.removeItem(sessionKey); } catch {} }
     status(text) { id('chat-status').textContent=text; }
     render() {
       if(!id('conversation')) return;
-      if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic'))) {this.cancel();this.disconnect();}
-      const personal=this.session?.mode==='personal';
-      const kids=!this.session && (this.younger() || sessionStorage.getItem(localChoice)==='kids');
-      const choosing=!this.session && !this.younger() && !sessionStorage.getItem(localChoice);
+      if(this.session && !this.matchesProfile()){this.cancel();this.disconnect();}
+      const guided=this.younger();
+      const synthetic=this.session?.mode==='synthetic';
       const chat=this.current(); const hasMessages=Boolean(chat?.messages.length);
-      id('chat-welcome').hidden=hasMessages; id('chat-options').hidden=hasMessages || this.session?.mode==='synthetic';
-      id('chat-mode').textContent=personal ? 'Breeze · live chat' : this.session ? 'Breeze · '+(this.session.mode==='synthetic'?'fictional demo':'judge demo') : kids ? 'Kids’ chat' : choosing ? 'Choose how to chat' : 'Approved library';
-      id('connect-demo').textContent=personal?'Use on-device chat':this.session?'Demo options':'Chat with Breeze';
-      id('connect-demo').hidden=this.younger() && !this.session;
-      id('connect-demo').disabled=this.busy;
-      id('kids-chat').disabled=this.busy;
-      id('chat-privacy').textContent=personal ? 'Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.' : this.session ? 'Fictional testing only. Demo messages go to the private AI server; profile details never do.' : kids ? 'This AI runs on your device and can make mistakes. Closing this chat clears it. Keep your name, address and phone number to yourself.' : choosing ? 'Type a message or choose a starter. You can pick live or on-device chat before sending.' : 'Library replies stay on this device. No profile details are sent.';
-      id('chat-message').disabled=this.busy || this.session?.mode==='synthetic'; id('send-chat').disabled=this.busy || this.session?.mode==='synthetic';
-      id('chat-message').placeholder=this.session?.mode==='synthetic'?'Use the fictional scenario buttons below.':'Type your own message…';
+      id('chat-welcome').hidden=hasMessages;
+      id('chat-options').hidden=guided || hasMessages || synthetic;
+      id('chat-mode').textContent=this.options.translateText('Breeze');
+      id('chat-privacy').textContent=this.options.translateText(guided
+        ? 'Choose a question below. Breeze uses your age group to answer. Your own writing stays private.'
+        : 'Your messages go to OpenAI only after you agree.');
+      id('chat-message').hidden=guided;
+      id('send-chat').hidden=guided;
+      id('chat-message').disabled=this.busy || synthetic || guided;
+      id('send-chat').disabled=this.busy || synthetic || guided;
       const out=id('conversation'); out.replaceChildren();
       for(const m of chat?.messages || []) {
         const b=node('article','',m.role==='user'?'bubble user':'bubble'); const body=node('p',m.text); body.dataset.userContent='';
-        b.append(node('small',m.role==='user'?'You':'Alongside'),body);
+        b.append(node('small',m.role==='user'?'You':this.options.translateText('Breeze')),body);
         const sources=(m.sources||[]).filter(s=>Object.hasOwn(this.options.sources,s));
         if(sources.length) { const links=node('div','','source-links'); for(const s of sources) { const source=this.options.sources[s]; const a=node('a',source.organization); a.href=source.url; a.target='_blank'; a.rel='noopener noreferrer'; links.append(a); } b.append(links); }
         if(m.action && m.action!=='none') { const labels={meals:'Ask for meal ideas',checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
@@ -84,7 +84,38 @@
       id('empty-chats').hidden=this.state.chats.length>0;
       id('recent-chats').replaceChildren(...this.state.chats.map(c=>{ const li=node('li'); const b=node('button',c.title,'action outline'); b.dataset.userContent=''; b.type='button'; b.disabled=this.busy; b.setAttribute('aria-pressed',String(c.id===this.state.current)); b.addEventListener('click',()=>{this.state.current=c.id;this.save();this.render();});li.append(b);return li;}));
       this.renderSynthetic();
+      this.renderQuestions(guided && !synthetic);
       if(hasMessages || this.busy) out.scrollTop=out.scrollHeight;
+    }
+    matchesProfile() {
+      if(this.session.expires<=Date.now())return false;
+      if(this.session.mode==='synthetic')return true;
+      if(this.younger())return this.session.mode==='guided' && this.session.ageGroup===this.options.getAgeGroup();
+      return this.session.mode!=='guided' && this.options.getAgeGroup()==='adult';
+    }
+    renderQuestions(show) {
+      let row=id('prepared-questions');
+      if(!row){row=node('div','','starter-grid');row.id='prepared-questions';id('chat-form').after(row);}
+      row.replaceChildren();row.hidden=!show;if(!show)return;
+      const labels={after:'How can I describe a difficult meal?',team:'How can I ask for company at lunch?',arfid:'What is ARFID?',assessment:'Can one meal tell me if I have an eating disorder?',note:'Show me a note about a difficult texture.',routine:'Help me find my routine',checkin:'Let’s do a gentle check-in'};
+      if(this.current()?.messages?.length)labels.shorter='Could you put that in one short sentence?';
+      for(const [key,label] of Object.entries(labels)){
+        const text=this.options.translateText(label);
+        const button=node('button',text);button.type='button';button.disabled=this.busy;
+        button.onclick=()=>this.send(text,null,key);row.append(button);
+      }
+    }
+    async connectGuided() {
+      this.busy=true;this.render();
+      const ageGroup=this.options.getAgeGroup();
+      try {
+        const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'guided',ageGroup})});
+        const data=await r.json();
+        if(!r.ok || !data.token)throw Error(data.error || 'Breeze could not connect.');
+        if(ageGroup!==this.options.getAgeGroup())return false;
+        this.session={...data,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));return true;
+      }catch(e){this.status(e.message);return false;}
+      finally{this.busy=false;this.render();}
     }
     renderSynthetic() {
       let row=id('synthetic-scenarios'); if(!row) {row=node('div','','synthetic-scenarios');row.id='synthetic-scenarios';id('chat-form').before(row);}
@@ -111,17 +142,10 @@
     openMealIdeas(message='') {
       globalThis.AlongsideMeals.open(id('meal-ideas-chat'),{...this.options,onClose:()=>id('ask-meals').focus()},message);
     }
-    openKids(message='',hint) {
-      if(this.busy)return;
-      this.disconnect();
-      sessionStorage.setItem(localChoice,'kids');
-      this.render();
-      globalThis.AlongsideKidsChat.open(this.options,(text,topic)=>this.libraryReply(text,topic),message,hint);
-    }
     async openPersonal(message='', hint) {
       await this.ready;
       if(this.busy || id('personal-connection')?.open)return;
-      if(this.session?.mode==='personal'){this.disconnect();sessionStorage.setItem(localChoice,'yes');this.newChat();return;}
+      if(this.session?.mode==='personal')return;
       if(this.session) return this.openConnection();
       if(this.younger())return;
       const d=node('dialog');d.id='personal-connection';d.setAttribute('aria-labelledby','personal-title');
@@ -130,45 +154,37 @@
       const check=node('input');check.type='checkbox';check.required=true;
       const label=node('label');label.append(check,document.createTextNode('I am 18 or older and agree to send my chat messages.'));
       const start=node('button','Start live chat','action');start.type='submit';
-      const local=node('button','Use on-device chat','action outline');local.type='button';
       const error=node('p','','status');error.setAttribute('role','status');
       const close=node('button','Close','action outline');close.type='button';close.onclick=()=>d.close();
       const resume=()=>{d.close();this.newChat();if(message)void this.send(message,hint);};
-      local.onclick=()=>{sessionStorage.setItem(localChoice,'yes');resume();};
       form.onsubmit=async event=>{
         event.preventDefault();if(!check.checked || this.younger() || start.disabled)return;
         start.disabled=true;
         try {
-          if(!this.apiBase)throw Error('Breeze is unavailable. You can use on-device chat.');
-          const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json',...await this.accountHeaders()},body:JSON.stringify({mode:'personal',adult:true,consent:true})});
+          if(!this.apiBase)throw Error('Breeze could not connect. Please try again.');
+          const r=await fetch(this.apiBase+'/session',{method:'POST',headers:{'Content-Type':'application/json',...await this.accountHeaders()},body:JSON.stringify({mode:'personal',adult:true,consent:true,ageGroup:'adult'})});
           const result=await r.json();if(!r.ok || !result.token)throw Error(result.error || 'Could not connect.');
           if(!d.open || this.younger())return;
           this.session={...result,apiBase:this.apiBase};sessionStorage.setItem(sessionKey,JSON.stringify(this.session));sessionStorage.removeItem(localChoice);resume();
         }catch(e){error.textContent=e.message;}finally{start.disabled=false;}
       };
-      form.append(node('p','Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.'),node('p','Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.'),label,start,local,close,error);
+      form.append(node('p','Your chat messages go to Cloudflare and OpenAI. Your profile and check-ins stay on this device.'),node('p','Cloudflare keeps recent messages for up to a day before scheduled cleanup. This browser keeps your history until you clear it. Provider logs may last longer.'),label,start,close,error);
       d.append(title,form);document.body.append(d);d.addEventListener('close',()=>d.remove(),{once:true});d.showModal();
     }
     async send(message,hint,scenario) {
       if(this.busy)return;await this.ready;if(this.busy)return;
-      if(this.session && (this.session.expires<=Date.now() || (this.younger() && this.session.mode!=='synthetic')))this.disconnect();
-      if(globalThis.AlongsideMeals?.request(message) && !scenario){
-        this.openMealIdeas(message);if(id('chat-message').value.trim()===message)id('chat-message').value='';return;
+      if(this.session && !this.matchesProfile())this.disconnect();
+      if(!['child','teen','adult'].includes(this.options.getAgeGroup())){location.hash='#profile';return;}
+      if(this.younger() && this.session?.mode!=='synthetic'){
+        if(!scenario){this.status('Choose a question below.');return;}
+        if(!this.session && !await this.connectGuided())return;
       }
-      if(!this.session && (this.younger() || sessionStorage.getItem(localChoice)==='kids')){
-        if(id('chat-message').value.trim()===message)id('chat-message').value='';
-        return this.openKids(message,hint);
-      }
-      if(!this.session && !sessionStorage.getItem(localChoice))return this.openPersonal(message,hint);
+      if(globalThis.AlongsideMeals?.request(message) && !scenario){this.openMealIdeas(message);return;}
+      if(!this.session)return this.openPersonal(message,hint);
       const input=id('chat-message');if(input.value.trim()===message)input.value='';
-      if(!this.session) {
-        if(!message)return;
-        const reply = this.libraryReply(message,hint);
-        this.append('user',message);this.append('assistant',reply.text,reply);this.render();return;
-      }
       const scenarioMessages={meal:'Fictional scenario: Sam has just had a difficult mealtime and wants support.',routine:'Fictional scenario: Sam has a busy day and wants help finding a regular routine.',support:'Fictional scenario: Sam wants to ask a trusted person for support.'};
       if(this.session.mode==='synthetic' && !Object.hasOwn(scenarioMessages,scenario)) {this.status('Choose a fictional scenario.');return;}
-      const display=scenario?this.options.translateText(scenarioMessages[scenario]):message;if(!display.trim())return;
+      const display=scenario && this.session.mode==='synthetic'?this.options.translateText(scenarioMessages[scenario]):message;if(!display.trim())return;
       const c=this.ensureChat(); const currentId=c.id;this.append('user',display);this.busy=true;this.abort=new AbortController();this.status('');this.render();
       const timer=setTimeout(()=>this.abort.abort(),30000);
       try {const result=await this.request('/chat',{conversationId:c.id,requestId:crypto.randomUUID(),message:scenario?undefined:message,scenario:scenario||undefined,language:this.options.getLanguage()},this.abort.signal);

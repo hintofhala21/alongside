@@ -708,7 +708,7 @@
   "13–17": "13 bis 17 Jahre",
   "Available languages": "Verfügbare Sprachen",
   "You can also save another language preference.": "Du kannst auch eine andere bevorzugte Sprache speichern.",
-  "Chat with Breeze": "Mit Brise chatten",
+  "Chat with Breeze": "Mit Brise sprechen",
   "Breeze · live chat": "Brise · Live-Chat",
   "Use on-device chat": "Chat auf diesem Gerät nutzen",
   "Start live chat": "Live-Chat starten",
@@ -806,5 +806,12 @@
   "Sweet potato with beans": "Süßkartoffeln mit Bohnen",
   "Rice with chickpeas": "Kichererbsen mit Reis",
   "Egg on whole-grain toast": "Vollkornbrot mit Ei",
-  "Salmon with rice": "Lachs mit Reis"
+  "Salmon with rice": "Lachs mit Reis",
+  "How can I describe a difficult meal?": "Wie kann ich eine schwierige Mahlzeit beschreiben?",
+  "How can I ask for company at lunch?": "Wie bitte ich jemanden, beim Mittagessen bei mir zu sitzen?",
+  "Can one meal tell me if I have an eating disorder?": "Kann ich an einer Mahlzeit erkennen, ob ich eine Essstörung habe?",
+  "Show me a note about a difficult texture.": "Zeig mir eine Notiz über eine schwierige Konsistenz.",
+  "Could you put that in one short sentence?": "Kannst du das in einem kurzen Satz sagen?",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "Wähle eine Frage. Brise antwortet passend zu deiner Altersgruppe. Eigene Texte bleiben auf deinem Gerät.",
+  "Your messages go to OpenAI only after you agree.": "Deine Nachrichten werden erst mit deiner Zustimmung an OpenAI gesendet."
 }

@@ -806,5 +806,12 @@
   "Sweet potato with beans": "शकरकंद + बीन्स",
   "Rice with chickpeas": "चना + चावल",
   "Egg on whole-grain toast": "साबुत अनाज की ब्रेड + अंडा",
-  "Salmon with rice": "सैल्मन + चावल"
+  "Salmon with rice": "सैल्मन + चावल",
+  "How can I describe a difficult meal?": "मैं एक मुश्किल भोजन के बारे में कैसे बताऊँ?",
+  "How can I ask for company at lunch?": "दोपहर के खाने पर साथ बैठने को कैसे कहूँ?",
+  "Can one meal tell me if I have an eating disorder?": "क्या एक बार के भोजन से पता चलता है कि मुझे खान-पान का विकार है?",
+  "Show me a note about a difficult texture.": "ऐसी बनावट के बारे में एक नोट दिखाएँ जिससे खाना मुश्किल लगा।",
+  "Could you put that in one short sentence?": "क्या आप इसे एक छोटे वाक्य में कह सकते हैं?",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "नीचे एक सवाल चुनें। बयार आपकी उम्र के हिसाब से जवाब देती है। आपकी अपनी लिखी बातें आपके डिवाइस पर रहती हैं।",
+  "Your messages go to OpenAI only after you agree.": "आपकी सहमति के बाद ही आपके संदेश OpenAI को भेजे जाते हैं।"
 }

@@ -708,7 +708,7 @@
   "13–17": "13～17歳",
   "Available languages": "利用できる言語",
   "You can also save another language preference.": "ほかの言語を希望言語として保存することもできます。",
-  "Chat with Breeze": "そよ風 と話す",
+  "Chat with Breeze": "そよ風と話す",
   "Breeze · live chat": "そよ風 · ライブチャット",
   "Use on-device chat": "この端末でチャットする",
   "Start live chat": "ライブチャットを始める",
@@ -806,5 +806,12 @@
   "Sweet potato with beans": "さつまいもと豆",
   "Rice with chickpeas": "ひよこ豆とご飯",
   "Egg on whole-grain toast": "全粒粉パンと卵",
-  "Salmon with rice": "サーモンとご飯"
+  "Salmon with rice": "サーモンとご飯",
+  "How can I describe a difficult meal?": "食事がつらかったことをどう伝えたらいい？",
+  "How can I ask for company at lunch?": "昼食のとき、一緒にいてほしいとどう頼めばいい？",
+  "Can one meal tell me if I have an eating disorder?": "一度の食事だけで摂食障害かどうかわかる？",
+  "Show me a note about a difficult texture.": "苦手な食感についてのメモの例を見せて。",
+  "Could you put that in one short sentence?": "短い一文にしてくれる？",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "下の質問を選んでください。そよ風が年齢に合わせて答えます。自分で書いた内容は端末に残ります。",
+  "Your messages go to OpenAI only after you agree.": "同意した場合のみ、メッセージがOpenAIに送られます。"
 }

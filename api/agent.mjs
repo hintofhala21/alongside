@@ -1,5 +1,4 @@
-import * as demoPrompt from './prompts/v4.mjs';
-import * as chatPrompt from './prompts/v11.mjs';
+import * as chatPrompt from './prompts/v12.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -36,6 +35,16 @@ export const scenarios = {
   routine: 'Fictional scenario: Sam has a busy day and wants help finding a regular routine.',
   support: 'Fictional scenario: Sam wants to ask a trusted person for support.'
 };
+export const starters = Object.freeze({
+  after: 'What could help someone put a difficult mealtime into words?',
+  team: 'How could someone ask a trusted person to sit with them at lunch?',
+  checkin: 'How does a gentle meal check-in work?',
+  routine: 'How can someone find their routine in Alongside?',
+  arfid: 'What is ARFID?',
+  assessment: 'Does one difficult meal tell someone whether they have an eating disorder?',
+  note: 'Can you give one example sentence for someone who wanted lunch but found the texture hard?',
+  shorter: 'Could you put that in one short sentence?'
+});
 const tool = {
   type:'function', name:'prepare_recovery_support', strict:true,
   description:'Choose a supportive response, a follow-up question, an approved library entry and an optional app action. The application retrieves reviewed facts and prepares the chosen action; it never changes a care plan automatically.',
@@ -89,13 +98,12 @@ export function renderPlan(plan, language='en') {
   return {text,sources:answer?.sources||[],action:plan.action,trace,plan};
 }
 
-export async function runAgent(messages, env, language='en', requestFetch=fetch, mode='interactive') {
-  const conversational = mode === 'personal' || mode === 'interactive';
-  const responseTool = conversational ? chatTool : tool;
-  const {buildInstructions, promptVersion} = conversational ? chatPrompt : demoPrompt;
+export async function runAgent(messages, env, language='en', requestFetch=fetch, mode='interactive', ageGroup='adult') {
+  const responseTool = chatTool;
+  const {buildInstructions, promptVersion} = chatPrompt;
   const topics=information.filter(id=>id!=='none').map(id=>({id,title:library.medicalAnswers[id].title}));
   const model=env.OPENAI_MODEL||'gpt-6-luna';
-  const instructions = buildInstructions({topics, questions, support, language, mode, model});
+  const instructions = buildInstructions({topics, questions, support, language, mode, model, ageGroup});
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
   const started = Date.now();
   let outcome = 'network_error';
@@ -111,7 +119,7 @@ export async function runAgent(messages, env, language='en', requestFetch=fetch,
     const result=await response.json();if(result.status!=='completed')throw Error('Incomplete model response');
     const calls=(result.output||[]).filter(o=>o.type==='function_call');
     if(calls.length!==1 || calls[0].name!==responseTool.name)throw Error('Missing support plan');
-    const reply = (conversational ? renderChat : renderPlan)(JSON.parse(calls[0].arguments),language);
+    const reply = renderChat(JSON.parse(calls[0].arguments),language);
     outcome = 'verified_reply';
     return {...reply, promptVersion};
   } catch (error) {

@@ -708,7 +708,7 @@
   "13–17": "13至17岁",
   "Available languages": "可用语言",
   "You can also save another language preference.": "你也可以保存其他首选语言。",
-  "Chat with Breeze": "与 微风 聊聊",
+  "Chat with Breeze": "和微风聊天",
   "Breeze · live chat": "微风 · 实时聊天",
   "Use on-device chat": "使用本机聊天",
   "Start live chat": "开始实时聊天",
@@ -806,5 +806,12 @@
   "Sweet potato with beans": "红薯配菜豆",
   "Rice with chickpeas": "鹰嘴豆配米饭",
   "Egg on whole-grain toast": "全麦面包配鸡蛋",
-  "Salmon with rice": "三文鱼配米饭"
+  "Salmon with rice": "三文鱼配米饭",
+  "How can I describe a difficult meal?": "我可以怎样描述一次困难的用餐经历？",
+  "How can I ask for company at lunch?": "怎样邀请别人陪我吃午饭？",
+  "Can one meal tell me if I have an eating disorder?": "一次用餐能判断我是否有进食障碍吗？",
+  "Show me a note about a difficult texture.": "给我看一个描述食物口感让我难以进食的例子。",
+  "Could you put that in one short sentence?": "能用一句简短的话表达吗？",
+  "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "请选择下面的问题。微风会根据你的年龄段回答。你自己写的内容保留在设备上。",
+  "Your messages go to OpenAI only after you agree.": "只有你同意后，消息才会发送给 OpenAI。"
 }
