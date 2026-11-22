@@ -813,5 +813,6 @@
   "Show me a note about a difficult texture.": "给我看一个描述食物口感让我难以进食的例子。",
   "Could you put that in one short sentence?": "能用一句简短的话表达吗？",
   "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "请选择下面的问题。微风会根据你的年龄段回答。你自己写的内容保留在设备上。",
-  "Your messages go to OpenAI only after you agree.": "只有你同意后，消息才会发送给 OpenAI。"
+  "Your messages go to OpenAI only after you agree.": "只有你同意后，消息才会发送给 OpenAI。",
+  "One difficult meal alone cannot tell you whether you have an eating disorder. A healthcare professional can ask what has been happening over time and how it affects you.": "一次用餐困难本身不能判断你是否有进食障碍。医护人员可以了解一段时间以来发生了什么，以及它对你的影响。"
 }

@@ -85,7 +85,7 @@ test('the local profile migration removes old measurements without losing check-
 test('a verified provider reply identifies the prompt and a rejected key returns a safe diagnostic',async()=>{
   const s=server(); const token=await s.session('synthetic');
   const ok=await s.call('/chat',message(undefined,{scenario:'support'}),token);
-  assert.equal(ok.body.reply.promptVersion,'v12');
+  assert.equal(ok.body.reply.promptVersion,'v13');
   const rejected=server({TEST_FETCH:async()=>Response.json({error:'private provider details'},{status:401})});
   const t=await rejected.session('synthetic');
   const r=await rejected.call('/chat',message(undefined,{scenario:'support'}),t);
@@ -110,7 +110,7 @@ test('personal chat requires consent, remembers the conversation and cannot be s
   const {token}= (await s.call('/session',consent)).body;
   const first=message(undefined,{message:'I want to ask a friend for support.'});
   const reply=await s.call('/chat',first,token);
-  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v12');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
+  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v13');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
   await s.call('/chat',message(first.conversationId,{message:'How do I start that conversation?'}),token);
   assert.equal(requests.length,2);assert.equal(requests[1].input[0].content,first.message);
   const share={conversationId:first.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Example'};
@@ -133,7 +133,7 @@ test('one agent uses age from the session and accepts only prepared questions fo
     const turn={conversationId:crypto.randomUUID(),requestId:crypto.randomUUID(),scenario:'note'};
     assert.equal((await s.call('/chat',{...turn,message:'private text'},token)).status,400);
     const reply=await s.call('/chat',{...turn,ageGroup:'adult'},token);
-    assert.equal(reply.status,200);assert.equal(reply.body.reply.promptVersion,'v12');
+    assert.equal(reply.status,200);assert.equal(reply.body.reply.promptVersion,'v13');
     const sent=s.requests.at(-1).body;assert.ok(sent.instructions.includes(guide));assert.equal(sent.tool_choice.name,'reply_to_visitor');
     assert.match(sent.input[0].content,/texture/);
     assert.equal((await s.call('/publish',{},token)).status,403);

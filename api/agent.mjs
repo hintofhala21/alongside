@@ -1,4 +1,4 @@
-import * as chatPrompt from './prompts/v12.mjs';
+import * as chatPrompt from './prompts/v13.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';

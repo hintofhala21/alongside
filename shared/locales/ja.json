@@ -813,5 +813,6 @@
   "Show me a note about a difficult texture.": "苦手な食感についてのメモの例を見せて。",
   "Could you put that in one short sentence?": "短い一文にしてくれる？",
   "Choose a question below. Breeze uses your age group to answer. Your own writing stays private.": "下の質問を選んでください。そよ風が年齢に合わせて答えます。自分で書いた内容は端末に残ります。",
-  "Your messages go to OpenAI only after you agree.": "同意した場合のみ、メッセージがOpenAIに送られます。"
+  "Your messages go to OpenAI only after you agree.": "同意した場合のみ、メッセージがOpenAIに送られます。",
+  "One difficult meal alone cannot tell you whether you have an eating disorder. A healthcare professional can ask what has been happening over time and how it affects you.": "一度の食事がつらかったというだけで、摂食障害かどうかはわかりません。医療の専門家に、これまでの様子や生活への影響を相談できます。"
 }
