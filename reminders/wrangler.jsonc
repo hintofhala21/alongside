@@ -1,0 +1,14 @@
+{
+  "name": "alongside-reminders",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-20",
+  "workers_dev": true,
+  "observability": {"enabled": false},
+  "vars": {
+    "ALLOWED_ORIGIN": "https://hintofhala21.github.io",
+    "WA_GRAPH_VERSION": "v25.0",
+    "WA_TEMPLATE_LANGUAGE": "en_US"
+  },
+  "durable_objects": {"bindings": [{"name":"REMINDERS","class_name":"ReminderStore"}]},
+  "migrations": [{"tag":"v1","new_sqlite_classes":["ReminderStore"]}]
+}

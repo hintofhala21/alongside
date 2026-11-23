@@ -226,7 +226,7 @@
             <div class="conversation" id="conversation" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Breeze"></div>
             <p class="chat-status" id="chat-status" role="status"></p>
             <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" rows="2" maxlength="800" placeholder="Type your own message…" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Breeze uses AI and can make mistakes.</small></form>
-            <button type="button" class="text-button" id="ask-meals">Ask for meal ideas</button><div id="meal-ideas-chat" hidden></div>
+            <button type="button" class="text-button" id="ask-meals">Ask for meal ideas</button><a class="text-button" href="#reminders">Set up reminders</a><div id="meal-ideas-chat" hidden></div>
             <div class="starter-grid" id="prepared-questions"></div>
             <p class="chat-boundary">Support, not medical care. <button class="text-button" type="button" data-help>Find human help</button></p>
           </div>
@@ -270,20 +270,24 @@
 </div>
       </section>
       <section data-page="reminders" aria-labelledby="reminders-title" hidden>
-        <div class="intro page-intro"><h1 tabindex="-1" id="reminders-title">Reminders</h1><p class="muted">Try the settings and preview a sample WhatsApp message.</p></div>
+        <div class="intro page-intro"><h1 tabindex="-1" id="reminders-title">Reminders</h1><p class="muted">Choose where you want to receive your reminders.</p></div>
+        <aside id="walkthrough-reminders" class="panel stack" hidden>
+          <p>This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.</p>
+          <a class="text-link" id="regular-reminders">Open a regular profile</a>
+        </aside>
         <div class="two-columns">
           <section class="panel stack">
-            <h2>WhatsApp settings</h2>
+            <h2>Reminder preferences</h2>
             <div>
               <label class="switch-row" for="enabled">Enable reminder previews <input type="checkbox" id="enabled" role="switch"></label>
               <label class="switch-row" for="meals">Meals (always included) <input type="checkbox" id="meals" role="switch" checked disabled aria-describedby="meal-setting-note"></label>
               <label class="switch-row" for="snacks">Include snacks (optional) <input type="checkbox" id="snacks" role="switch" aria-describedby="meal-setting-note"></label>
-              <label class="switch-row" for="water">Include a sample water reminder <input type="checkbox" id="water" role="switch"></label>
+              <label class="switch-row" for="water">Include a water reminder <input type="checkbox" id="water" role="switch"></label>
               <label class="switch-row" for="discreet">Discreet message preview <input type="checkbox" id="discreet" role="switch"></label>
             </div>
             <small id="meal-setting-note">Breakfast, lunch, and dinner stay in your routine. Turn snacks on or off here.</small>
             <small id="water-settings-note"></small>
-            <small>WhatsApp messages are simulated here. Use the test button to see how a reminder would look.</small>
+            <small>Message previews stay on this device. Connecting WhatsApp is a separate choice.</small>
           </section>
           <section class="panel stack">
             <h2>Message preview</h2>
@@ -292,8 +296,33 @@
           </section>
         </div>
 
-        <form class="layout-2 panel stack" id="whatsapp-form"><h2>Your WhatsApp number</h2><label class="field" for="whatsapp-number">Phone number (optional) <input id="whatsapp-number" type="tel" maxlength="24" placeholder="+ country code and number" autocomplete="off" dir="ltr"></label><small>Saving a number does not connect WhatsApp. Automatic sending needs a WhatsApp Business service, which is not connected here. Use a sample number in this preview.</small><div><button class="action outline" type="submit">Save number locally</button></div><p class="status" id="whatsapp-status" role="status"></p></form>
-        <section class="layout-2 panel stack"><h2>Calendar reminders</h2><p>Download the next seven days of meal, snack, optional water, and check-in reminders using your chosen time zone.</p><button type="button" id="download-calendar" class="action outline">Download calendar reminders</button><small>Import the file in your calendar app and allow reminders there. Import once; importing again may create duplicates. Discreet message settings also apply to calendar titles.</small><p class="status" role="status" id="calendar-status"></p></section>
+        <form class="layout-2 panel stack" id="whatsapp-form">
+          <h2>WhatsApp reminders</h2>
+          <p class="status" id="whatsapp-status" role="status">WhatsApp reminders are off.</p>
+          <p id="whatsapp-schedule" dir="ltr" data-user-content></p>
+          <div id="whatsapp-enrol" class="stack" hidden>
+            <label class="field" for="whatsapp-number">Your WhatsApp number <input id="whatsapp-number" type="tel" maxlength="24" placeholder="+966…" autocomplete="tel" dir="ltr"></label>
+            <small>Alongside stores your number, times and time zone on its reminder server. WhatsApp receives your number to deliver a discreet reminder.</small>
+            <label><input id="whatsapp-consent" type="checkbox"> I can use WhatsApp in my country and agree to receive daily reminders at these times for 30 days.</label>
+            <div><button class="action" type="submit" id="whatsapp-start">Connect WhatsApp</button></div>
+          </div>
+          <div class="form-actions">
+            <a id="whatsapp-activate" class="action" target="_blank" rel="noopener noreferrer" hidden>Confirm in WhatsApp</a>
+            <button id="whatsapp-update" class="action outline" type="button" hidden>Update times and renew for 30 days</button>
+            <button id="whatsapp-check" class="action outline" type="button">Check connection</button>
+            <button id="whatsapp-stop" class="action outline" type="button" hidden>Turn off WhatsApp</button>
+          </div>
+          <small id="whatsapp-until" data-user-content></small><small id="whatsapp-delivery" role="status"></small>
+        </form>
+        <section class="layout-2 panel stack">
+          <h2>Calendar reminders</h2>
+          <div id="calendar-connect" class="stack"></div>
+          <details><summary>Download a week instead</summary>
+            <p>Download the next seven days of meal, snack, optional water, and check-in reminders using your chosen time zone.</p>
+            <button type="button" id="download-calendar" class="action outline">Download calendar reminders</button>
+            <small>Import the file in your calendar app and allow reminders there. Import once; importing again may create duplicates. Discreet message settings also apply to calendar titles.</small>
+          </details><p class="status" role="status" id="calendar-status"></p>
+        </section>
         <form class="panel stack" id="times-form">
           <h2>Reminder times</h2>
           <p class="muted">Saved meal and snack times appear on Today and in the sample plan.</p>
@@ -442,6 +471,8 @@
 <script src="./assets/library.js" defer></script>
 <script src="./assets/meal-ideas.js" defer></script>
 
+<script src="./assets/calendar.js" defer></script>
+<script src="./assets/whatsapp.js" defer></script>
 <script src="./assets/chat.js" defer></script>
 <script src="./assets/app.js" defer></script>
 </body>

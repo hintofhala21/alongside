@@ -1,0 +1,11 @@
+{
+  "name":"alongside-calendar",
+  "main":"worker.mjs",
+  "compatibility_date":"2026-11-20",
+  "workers_dev":true,
+  "observability":{"enabled":false},
+  "vars":{"ALLOWED_ORIGIN":"https://hintofhala21.github.io"},
+  "durable_objects":{"bindings":[{"name":"CALENDARS","class_name":"CalendarPlan"}]},
+  "migrations":[{"tag":"v1","new_sqlite_classes":["CalendarPlan"]}],
+  "ratelimits":[{"name":"WRITE_LIMIT","namespace_id":"24031","simple":{"limit":60,"period":60}}]
+}

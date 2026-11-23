@@ -33,6 +33,12 @@ Breeze uses one OpenAI model and the age group selected during profile setup. Al
 
 Private conversations cannot be published to the judges’ history. Invited judges can try fictional examples. Alongside has not been clinically validated.
 
+## Calendar and WhatsApp reminders
+
+Open **Reminders** from Breeze to review your plan. A calendar subscription shares the times you choose. Confirm the subscription in your calendar app. You can also download a week as a calendar file. For ongoing reminders across visits, use the regular profile link in Reminders.
+
+WhatsApp stays off until the owner connects a business sender. Once connected, users opt in, confirm from their own phone, and can stop from the site or by replying STOP. See the [owner’s WhatsApp setup guide](reminders/README.md).
+
 ## The project, simply
 
 `site/` is the public website. `api/` is the private server code; its code can be public, but its keys cannot. `shared/library.json` is the approved information used by both. `scripts/` prepares and checks the release. Only `build/site/` is published to Pages.

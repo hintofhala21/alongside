@@ -33,6 +33,12 @@
     team:['How can I ask someone to sit with me at lunch?'],
     shorter:['Can you make that shorter?', 'Can you say that more simply?']
   };
+  function requestsReminderSettings(text,translatedLabel){
+    const plain=text.normalize('NFKC').trim().toLowerCase().replace(/[.!?؟。！？]+$/u,'');
+    if(plain===translatedLabel.toLowerCase())return true;
+    const request=plain.replace(/^(?:please |can you |could you |how (?:do|can) i )/u,'').replace(/ please$/u,'');
+    return /^(?:(?:set up|open|enable|disable|stop|cancel|change|update|connect|manage) (?:my |the )?(?:(?:calendar|whatsapp|meal|snack|water) )?reminders?(?: settings)?|connect (?:my )?(?:calendar|whatsapp)|(?:add|put) (?:my |the )?(?:plan|meals|meal plan|breakfast|lunch|dinner) (?:to|on|in) (?:my |the )?calendar|remind me (?:about|to have) (?:breakfast|lunch|dinner|my meals|my snacks)|remind me to drink water)$/u.test(request);
+  }
   function questionKey(text, translate) {
     const normalize = value => value.normalize('NFKC').toLowerCase().trim().replace(/[.!?؟。！？]+$/u,'').replace(/\s+/gu,' ');
     const typed=normalize(text);
@@ -94,7 +100,7 @@
         b.append(node('small',m.role==='user'?'You':this.options.translateText('Breeze')),body);
         const sources=(m.sources||[]).filter(s=>Object.hasOwn(this.options.sources,s));
         if(sources.length) { const links=node('div','','source-links'); for(const s of sources) { const source=this.options.sources[s]; const a=node('a',source.organization); a.href=source.url; a.target='_blank'; a.rel='noopener noreferrer'; links.append(a); } b.append(links); }
-        if(m.action && m.action!=='none') { const labels={meals:'Ask for meal ideas',checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
+        if(m.action && m.action!=='none') { const labels={reminders:'Set up reminders',meals:'Ask for meal ideas',checkin:'Open a gentle check-in',routine:'Open my routine',care:'Find care',human:'Get human help'}; const a=node('button',labels[m.action]||'View next step','action outline'); a.type='button'; a.addEventListener('click',()=>this.options.onAction(m.action)); b.append(a); }
         if(m.trace?.length) { const d=node('details','','agent-trace'); d.append(node('summary','How Alongside helped')); for(const t of m.trace) d.append(node('p',t)); b.append(d); }
         out.append(b);
       }
@@ -191,6 +197,12 @@
       if(this.busy)return;await this.ready;if(this.busy)return;
       if(this.session && !this.matchesProfile())this.disconnect();
       if(!['child','teen','adult'].includes(this.options.getAgeGroup())){location.hash='#profile';return;}
+      if(!scenario && requestsReminderSettings(message,this.options.translateText('Set up reminders'))) {
+        const input=id('chat-message');if(input.value.trim()===message)input.value='';
+        this.append('user',this.younger()?this.options.translateText('Set up reminders'):message);
+        this.append('assistant',this.options.translateText('Open reminder settings to review your plan and choose where to receive reminders.'),{action:'reminders'});
+        this.status('');this.render();return;
+      }
       if(globalThis.AlongsideMeals?.request(message) && !scenario){this.openMealIdeas(message);return;}
       if(this.younger() && this.session?.mode!=='synthetic'){
         scenario ||= questionKey(message,text=>this.options.translateText(text));

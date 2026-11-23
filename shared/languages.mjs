@@ -7,7 +7,10 @@ import ja from './locales/ja.json' with {type: 'json'};
 import pt from './locales/pt.json' with {type: 'json'};
 import zh from './locales/zh.json' with {type: 'json'};
 
-export const languagePacks = { ar, de, es, fr, hi, ja, pt, zh };
+import {calendarPacks} from './calendar-languages.mjs';
+export const languagePacks = Object.fromEntries(
+  Object.entries({ar, de, es, fr, hi, ja, pt, zh}).map(([code, pack])=>[code,{...pack,...calendarPacks[code]}])
+);
 export const languageNames = {
   en: 'English', ar: 'العربية الفصحى', zh: '简体中文（普通话）', es: 'Español',
   fr: 'Français', hi: 'हिन्दी', pt: 'Português (Brasil)', de: 'Deutsch', ja: '日本語'

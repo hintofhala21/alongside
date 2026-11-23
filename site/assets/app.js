@@ -175,6 +175,8 @@ let showTestPreview = false;
 let feeling = "";
 let conversationState = { recent: [], current: null };
 let chatController;
+let calendarController;
+let whatsappController;
 
 function emptyData() {
   return {
@@ -228,6 +230,7 @@ function persist() {
     }
     data.settings.meals = true;
     (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify({ profile, data }));
+    syncReminderPlan();
     return true;
   } catch { return false; }
 }
@@ -319,7 +322,7 @@ function renderToday() {
       : element("p", "Water reminders are off. You can turn on a sample reminder in Reminders.", "muted"));
     return group;
   }));
-  byId("brief-reminder").textContent = record().settings.enabled ? "Reminder previews are enabled." : "Preview a discreet reminder message.";
+  byId("brief-reminder").textContent = "Choose where you want to receive your reminders.";
 }
 
 function renderPlan() {
@@ -568,6 +571,7 @@ function renderRoute(moveFocus) {
   if (page === "today") { renderToday(); renderTasks(); }
   if (page === "care") renderCare();
   if (page === "learn") renderLearning();
+  if (page === "reminders") { void whatsappController?.refresh(); calendarController?.refresh(); }
   document.title = translate(pageNames[page]) + " · Alongside";
   if (moveFocus) {
     window.scrollTo(0, 0);
@@ -598,7 +602,7 @@ window.addEventListener("storage", (event) => {
 });
 window.addEventListener("hashchange", () => renderRoute(true));
 
-byId("profile-form").addEventListener("submit", (event) => {
+byId("profile-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const language = byId("preferred-language").value;
   if (!language) {
@@ -621,10 +625,16 @@ byId("profile-form").addEventListener("submit", (event) => {
       syncProfile();
       return;
     }
+    if(profile && ageGroup==="child" && profile.ageGroup!=="child") {
+      const previousId=profile.id;
+      if(!await disconnectReminders()){byId("profile-status").textContent="Your reminders could not be disconnected. Check your connection and try again.";return;}
+      if(readProfile()?.profile.id!==previousId){syncProfile();return;}
+    }
     const nextProfile = { ...profile, ...extras, id: profile?.id ?? crypto.randomUUID(), name, stage, ageGroup, language };
     (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify({ profile: nextProfile, data }));
     localStorage.removeItem(legacyStorageKey);
     profile = nextProfile;
+    syncReminderPlan();
     useLanguage(language);
     renderProfile();
     chatController?.render();
@@ -647,7 +657,7 @@ byId("open-delete").addEventListener("click", () => {
   byId("delete-dialog").showModal();
 });
 
-byId("delete-dialog").addEventListener("close", (event) => {
+byId("delete-dialog").addEventListener("close", async (event) => {
   if (event.target.returnValue !== "delete") return;
   try {
     const stored = readProfile();
@@ -655,6 +665,12 @@ byId("delete-dialog").addEventListener("close", (event) => {
       syncProfile();
       return;
     }
+    const deletingId=profile?.id;
+    if(!await disconnectReminders()) {
+      byId("settings-status").textContent="Your reminders could not be disconnected. Check your connection and try again.";
+      return;
+    }
+    if(readProfile()?.profile.id!==deletingId) {syncProfile();return;}
     localStorage.removeItem(legacyStorageKey);
     localStorage.removeItem(languageStorageKey);
     (globalThis.AlongsideAccount?.storage ?? localStorage).removeItem(storageKey);
@@ -850,7 +866,7 @@ function populateProfileExtras() {
  byId('guardian-note').hidden=byId('age-group').value!=='child';
  byId('diagnosis-other-field').hidden=byId('diagnosis').value!=='other';
  byId('care-country').value=countryLabel(profile?.country); byId('care-city').value=profile?.city || '';
- byId('whatsapp-number').value=record().whatsappNumber || '';
+
  byId('checkin-kind').value=record().checkinKind || 'meals'; byId('checkin-time').value=record().checkinTime || '20:00';
  byId('checkin-zone').textContent=zone();
 }
@@ -946,8 +962,6 @@ function initializeFreeFeatures() {
  byId('task-form').addEventListener('submit',e=>{e.preventDefault();const pick=byId('task-type');const text=pick.value==='custom'?byId('task-custom').value.trim():pick.value;if(!text)return;if((record().tasks || []).length>=20){byId('task-status').textContent='You can keep up to 20 daily tasks.';return;}const currentData=record();const currentId=profile?.id;const previous=currentData.tasks || [];currentData.tasks=[...previous,{id:crypto.randomUUID(),text,custom:pick.value==='custom',doneDay:''}];if(!persist()){if(profile?.id===currentId && record()===currentData)currentData.tasks=previous;byId('task-status').textContent='Your task could not be saved.';return;}e.currentTarget.reset();byId('task-custom-field').hidden=true;byId('task-custom').required=false;renderTasks();byId('task-status').textContent='Task added.';});
  byId('task-list').addEventListener('change',e=>{const task=record().tasks?.find(t=>t.id===e.target.dataset.task);if(!task)return;task.doneDay=e.target.checked?dayKey():'';persist();renderTasks();});
  byId('task-list').addEventListener('click',e=>{const id=e.target.closest('[data-remove-task]')?.dataset.removeTask;if(!id)return;record().tasks=(record().tasks || []).filter(t=>t.id!==id);persist();renderTasks();});
- byId('whatsapp-form').addEventListener('submit',e=>{e.preventDefault();const input=byId('whatsapp-number');const phone=input.value.replace(/[\s()-]/g,'');if(phone&&!/^\+[1-9]\d{6,14}$/.test(phone)){input.setCustomValidity(translate('Use an international number beginning with + and the country calling code.'));input.reportValidity();return;}record().whatsappNumber=phone;const ok=persist();byId('whatsapp-status').textContent=ok?'Number saved in this browser. WhatsApp sending is not connected.':'Your number could not be saved.';});
- byId('whatsapp-number').addEventListener('input',e=>e.target.setCustomValidity(''));
  byId('download-calendar').addEventListener('click',()=>{downloadFile('alongside-reminders.ics',calendarText(),'text/calendar;charset=utf-8');byId('calendar-status').textContent='Calendar downloaded. Import it in your calendar app and allow its reminders.';});
  populateProfileExtras();resetGuided();renderCare();renderLearning();renderTasks();renderDailyPrompt();
  setInterval(()=>{if(profile){renderDailyPrompt();renderTasks();if(location.hash==='#today')renderToday();}},60000);
@@ -1011,9 +1025,34 @@ chatController = new globalThis.AlongsideChat({
   sources: medicalSources, answers: medicalAnswers, getLanguage: () => interfaceLocale(),
   mealProfile: () => ({needs:profile?.needs,diagnosis:profile?.diagnosis,allergies:Boolean(profile?.allergies),otherNeeds:profile?.otherNeeds}),
   getAgeGroup: () => profile?.ageGroup, translateText: text => translate(text),
-  onAction: (action) => { if(action==="meals"){chatController.openMealIdeas();return;} if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile"}[action] || "support"); }
+  onAction: (action) => { if(action==="meals"){chatController.openMealIdeas();return;} if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile",reminders:"reminders"}[action] || "support"); }
 });
 byId("ask-meals").onclick=()=>chatController.openMealIdeas();
+function reminderPlan() {
+  const slots=schedule().filter(slot=>slot.kind!=="water" || withinWaterWindow(slot.time))
+    .map(({id,time})=>({id,time}));
+  slots.push({id:"checkin",time:record().checkinTime || "20:00"});
+  return {timeZone:zone(),discreet:record().settings.discreet!==false,slots};
+}
+function syncReminderPlan() {
+  whatsappController?.render();
+  calendarController?.refresh();
+}
+async function disconnectReminders() {
+  try {
+    if(whatsappController && !await whatsappController.disconnect())return false;
+    return calendarController ? (await calendarController.disconnect()) !== false : true;
+  } catch {return false;}
+}
+if(globalThis.AlongsideVisitStorage){
+  byId("walkthrough-reminders").hidden=false;
+  byId("regular-reminders").href=new URL("../#reminders", location.href).href;
+}
+const reminderOptions={document,storage:account?.storage ?? localStorage,getProfileId:()=>profile?.id,
+  getPlan:reminderPlan, canShare:()=>hasAgeGroup() && profile?.ageGroup!=="child", canConnect:()=>hasAgeGroup() && profile?.ageGroup!=="child", translate};
+whatsappController=globalThis.AlongsideWhatsApp.mount(reminderOptions);
+calendarController=globalThis.AlongsideCalendar.mount({...reminderOptions,container:byId("calendar-connect")});
+window.addEventListener("focus",()=>{if(location.hash==="#reminders")void whatsappController.refresh(true);});
 initializeRecoveryUpdate();
 initializeFreeFeatures();
 renderSources();
@@ -1024,5 +1063,8 @@ initializeLanguageControls();
 if (judgeInvite && hasAgeGroup() && !account?.kids) void chatController.openConnection(judgeInvite[1]);
 if (account) {
   byId("account-controls").hidden=false;
-  byId("sign-out").addEventListener("click",account.signOut);
+  byId("sign-out").addEventListener("click",async ()=>{
+    if(account.kids && !await disconnectReminders()){byId("settings-status").textContent="Your reminders could not be disconnected. Check your connection and try again.";return;}
+    await account.signOut();
+  });
 }

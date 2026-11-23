@@ -1,0 +1,92 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {runInNewContext} from 'node:vm';
+
+const source=await readFile(new URL('../site/assets/whatsapp.js',import.meta.url),'utf8');
+function setup(){
+  const context={URL,AbortSignal};
+  runInNewContext(source,context);
+  const nodes=new Map(), data=new Map(), requests=[];
+  const doc={documentElement:{lang:'en'},getElementById(id){
+    if(!nodes.has(id))nodes.set(id,{
+      value:'',checked:false,listeners:{},hidden:false,
+      addEventListener(k,fn){this.listeners[k]=fn;},
+      removeAttribute(k){delete this[k];},
+      reportValidity(){},setCustomValidity(value){this.error=value;}
+    });
+    return nodes.get(id);
+  }};
+  const person={id:'test-profile',allowed:true}, plan={timeZone:'Asia/Riyadh',slots:[{id:'breakfast',time:'08:00'},{id:'checkin',time:'19:00'}]};
+  let enabled=true,remote=null,failStop=false;
+  const controller=context.AlongsideWhatsApp.mount({document:doc,storage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)},
+    canConnect:()=>person.allowed,getProfileId:()=>person.id,getPlan:()=>plan,fetcher:async(url,options)=>{
+      requests.push({url,...options});const path=new URL(url).pathname;
+      if(path==='/status')return Response.json({available:enabled});
+      const body=options.body && JSON.parse(options.body);
+      if(options.method==='POST'){
+        remote={status:'pending',id:'test-id',...body};
+        return Response.json({status:'pending',id:'test-id',token:'local-test',activationUrl:'https://wa.me/12025550102?text=START%20example'});
+      }
+      assert.equal(options.headers.Authorization,'Bearer local-test');
+      if(!remote)return new Response(null,{status:404});
+      if(options.method==='DELETE'){
+        if(failStop)return new Response(null,{status:503});
+        remote=null;return new Response(null,{status:204});
+      }
+      if(options.method==='PATCH')Object.assign(remote,body);
+      return Response.json(remote);
+    }
+  });
+  const el=id=>doc.getElementById('whatsapp-'+id);
+  const connect=async()=>{
+    el('number').value='+1 (202) 555-0146';el('consent').checked=true;
+    await el('form').listeners.submit({preventDefault(){}});
+  };
+  return {person,controller,el,plan,data,requests,connect,get remote(){return remote;},offline:()=>enabled=false,badStop:()=>failStop=true};
+}
+test('phone and plan leave the browser only after permission and service readiness',async()=>{
+  const ui=setup();assert.equal(ui.requests.length,0);
+  await ui.controller.refresh();assert.equal(ui.requests.length,1);
+  ui.el('number').value='+12025550146';
+  await ui.el('form').listeners.submit({preventDefault(){}});
+  assert.equal(ui.requests.length,1);assert.equal(ui.el('activate').hidden,true);
+  await ui.connect();
+  assert.equal(ui.remote.status,'pending');assert.equal(ui.el('activate').hidden,false);
+  assert.deepEqual(JSON.parse(ui.requests[1].body),{timeZone:'Asia/Riyadh',times:['08:00'],phone:'+12025550146',consent:true});
+  assert.equal([...ui.data.values()].join('').includes('5550146'),false);
+});
+test('unavailable service and under-13 profiles do not submit a number',async()=>{
+  const ui=setup();ui.offline();await ui.controller.refresh(true);await ui.connect();
+  assert.equal(ui.el('enrol').hidden,true);assert.equal(ui.remote,null);
+  const child=setup();child.person.allowed=false;await child.controller.refresh(true);await child.connect();
+  assert.equal(child.requests.length,0);assert.equal(child.el('enrol').hidden,true);
+});
+test('confirmed connection reflects changed times, explicit updates, delivery receipts and successful cancellation',async()=>{
+  const ui=setup();await ui.controller.refresh();await ui.connect();
+  ui.remote.status='active';ui.remote.lastDelivery='delivered';
+  await ui.controller.refresh(true);
+  assert.match(ui.el('delivery').textContent,/delivered/);assert.equal(ui.el('activate').hidden,true);
+  ui.plan.slots[0].time='09:00';ui.controller.render();assert.match(ui.el('status').textContent,/times have changed/);
+  assert.equal(ui.remote.times[0],'08:00');
+  await ui.el('update').listeners.click();assert.equal(ui.remote.times[0],'09:00');
+  assert.ok(await ui.controller.disconnect());assert.equal(ui.remote,null);assert.equal(ui.data.size,0);
+});
+test('failed revocation preserves the connection so users can retry',async()=>{
+  const ui=setup();await ui.controller.refresh();await ui.connect();
+  ui.badStop();assert.equal(await ui.controller.disconnect(),false);assert.equal(ui.data.size,1);assert.equal(ui.el('stop').hidden,false);
+});
+test('Breeze reminder requests open settings without subscribing or swallowing unrelated questions',async()=>{
+  const script=await readFile(new URL('../site/assets/chat.js',import.meta.url),'utf8');
+  const start=script.indexOf('  function requestsReminderSettings('), end=script.indexOf('  function questionKey(',start);
+  const recognizes=runInNewContext(script.slice(start,end)+';requestsReminderSettings;');
+  const label='Set up reminders';
+  for(const phrase of ['Can you add my plan to my calendar?', 'Connect WhatsApp', 'Remind me to drink water','Set up reminders']){
+    assert.equal(recognizes(phrase,label),true);
+  }
+  assert.equal(recognizes('Remind me what fainting means.',label),false);
+  assert.equal(recognizes('I have chest pain and want to ask about reminders.',label),false);
+  const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');
+  assert.match(html,/<a class="text-button" href="#reminders">Set up reminders<\/a>/);
+  assert.doesNotMatch(html,/<input id="whatsapp-consent"[^>]*checked/);
+});

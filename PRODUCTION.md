@@ -26,7 +26,7 @@ Personal and adult judge chats use recent messages to write open-ended replies. 
 
 Clinical review and real-user evaluations; verified identity/age and guardian consent; a reviewed privacy and retention policy for each intended market; appropriate provider arrangements; production access controls; abuse monitoring; and emergency escalation design remain required. An adult checkbox plus invitation code is for a closed competition demo, not patient consent verification.
 
-No automatic WhatsApp service is connected. Local profiles and check-ins are not a cross-device patient database. The interface offers English, Modern Standard Arabic, Simplified Chinese, French, Spanish, Hindi, Brazilian Portuguese, German and Japanese. Stored conversations keep their original wording. Care directories are selected resources, not a complete global clinic database.
+The calendar subscription service supports consent, schedule updates and revocation. The [WhatsApp reminder service](reminders/README.md) requires a registered Meta sender and an approved template before it accepts a phone number or sends scheduled reminders. Verify delivery on a consenting test phone after connecting the sender. Local profiles and check-ins are not a cross-device patient database. The interface offers English, Modern Standard Arabic, Simplified Chinese, French, Spanish, Hindi, Brazilian Portuguese, German and Japanese. Stored conversations keep their original wording. Care directories are selected resources, not a complete global clinic database.
 
 ## Hosting and rollback
 
