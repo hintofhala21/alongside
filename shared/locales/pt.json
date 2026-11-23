@@ -850,5 +850,10 @@
   "Set up reminders": "Configurar lembretes",
   "Open reminder settings to review your plan and choose where to receive reminders.": "Abra as configurações de lembretes para revisar seu plano e escolher onde recebê-los.",
   "This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.": "Esta aba de primeira visita é temporária. Desative aqui os lembretes conectados antes de fechá-la. Use um perfil normal para gerenciá-los na próxima visita.",
-  "Open a regular profile": "Abrir um perfil normal"
+  "Open a regular profile": "Abrir um perfil normal",
+  "Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.": "Alteração não salva. O WhatsApp não confirmou os novos horários. Tente novamente ou responda STOP no WhatsApp.",
+  "Your changes could not be saved on this device. Please try again.": "Não foi possível salvar as alterações neste dispositivo. Tente novamente.",
+  "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "Salvo neste dispositivo. O calendário assinado não pôde ser atualizado. Tente novamente em Lembretes do calendário.",
+  "Reminder times updated. Your calendar app may show old events until it refreshes.": "Horários atualizados. Seu aplicativo de calendário pode mostrar eventos antigos até a próxima atualização.",
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "O WhatsApp não conseguiu confirmar os horários. Abra Lembretes de novo ou responda STOP no WhatsApp."
 }

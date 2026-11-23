@@ -1,4 +1,4 @@
-import {day, nextSlot, readSchedule} from './schedule.mjs';
+import {day, nextSlot, readSchedule, readTimes} from './schedule.mjs';
 
 const pendingLife = 15 * 60_000;
 const activeLife = 30 * day;
@@ -103,13 +103,20 @@ async function siteRequest(request,env,path) {
   if (!match || !['GET','PATCH','DELETE'].includes(method)) return err(404,'Not found');
   const token=tokenFrom(request);
   if (!token) return err(404,'Subscription not found');
-  let plan,id;
+  let plan,id,retainTimes;
   try {id=env.REMINDERS.idFromString(match[1]);} catch {return err(404,'Subscription not found');}
   if (method==='PATCH') {
-    try {plan=readSchedule(JSON.parse(new TextDecoder().decode(await readLimited(request,8192))));} catch {}
-    if (!plan) return err(400,'Choose a valid schedule and confirm consent');
+    let input;
+    try {input=JSON.parse(new TextDecoder().decode(await readLimited(request,8192)));} catch {}
+    if(input && Object.hasOwn(input,'retainTimes')){
+      retainTimes=readTimes(input.retainTimes);
+      if(!retainTimes || Object.keys(input).length!==1)return err(400,'Choose valid retained times');
+    }else{
+      plan=readSchedule(input);
+      if(!plan)return err(400,'Choose a valid schedule and confirm consent');
+    }
   }
-  return call(env,id,'manage',{method,plan,tokenHash:await hash(token)});
+  return call(env,id,'manage',{method,plan,retainTimes,tokenHash:await hash(token)});
 }
 
 export default {async fetch(request,env) {
@@ -222,13 +229,24 @@ export class ReminderStore {
     if (path!=='/manage') return err(404,'Not found');
     const selected=active?.tokenHash===data.tokenHash ? active : state.pending.find(p=>p.tokenHash===data.tokenHash);
     if (!selected) return err(404,'Subscription not found');
-    if (data.method==='DELETE') {
+    // A local opt-out may narrow this subscription, but cannot add reminders or renew consent.
+    const retain=data.retainTimes && selected.plan.times.filter(time=>data.retainTimes.includes(time));
+    const narrower=retain && retain.length<selected.plan.times.length;
+    if (data.method==='DELETE' || (narrower && (selected!==active || !retain.length))) {
       if (selected===active) {delete state.active;state.pending=[];}
       else state.pending=state.pending.filter(p=>p!==selected);
       await this.save(state);
       return json({status:'cancelled'});
     }
-    if (data.method==='PATCH') {
+    if (narrower) {
+      const removed=selected.plan.times.filter(time=>!retain.includes(time));
+      state.pending=state.pending.filter(p=>!p.plan.times.some(time=>removed.includes(time)));
+      selected.plan={...selected.plan,times:retain};
+      // A kept breakfast or water alarm may already be due while a snack is removed.
+      if (!retain.includes(selected.next.key.slice(-5))) selected.next=nextSlot(selected.plan,now,selected.lastKey);
+      await this.save(state);
+    }
+    if (data.method==='PATCH' && !retain) {
       if (selected!==active) return err(409,'Confirm the number before changing the schedule');
       selected.plan=data.plan;
       selected.next=nextSlot(data.plan,now,selected.lastKey);

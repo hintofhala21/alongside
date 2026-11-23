@@ -132,14 +132,14 @@ globalThis.AlongsideCalendar = (() => {
       // Profile edits can arrive in bursts. Read the current plan only when a queued update runs.
       const id=getProfileId();render();
       const plan=planFor(id);
-      if(!id || !plan || !read(id)?.active)return Promise.resolve();
-      return enqueue(()=>publish(id,false)).then(render,error=>{
+      if(!id || !plan || !read(id)?.active)return Promise.resolve(true);
+      return enqueue(()=>publish(id,false)).then(()=>{render();return true;},error=>{
         status=error.message==='expired'?'This subscription expired. Connect again to get a new link.':'Calendar update pending. Use the update button to retry.';
-        render();
+        render();return error.message==='expired';
       });
     }
     refresh();
-    return {refresh,disconnect};
+    return {refresh,disconnect,isConnected:()=>Boolean(read(getProfileId())?.active)};
   }
   return {mount};
 })();

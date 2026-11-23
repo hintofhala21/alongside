@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {runInNewContext} from 'node:vm';
 import worker,{CalendarPlan,feedId} from '../calendar/worker.mjs';
 import {calendarFeed,normalizePlan,DAY} from '../calendar/feed.mjs';
+import {checkCalendarService} from '../calendar/smoke.mjs';
 
 const base='https://calendar.example', origin='https://site.example';
 const plan={timeZone:'Asia/Riyadh',discreet:true,slots:[{id:'breakfast',time:'08:00'},{id:'lunch',time:'12:30'}]};
@@ -42,6 +43,11 @@ test('private calendar requires an owner key to publish or revoke; read links ca
  assert.equal((await request(path+'.ics')).status,404);
  assert.equal((await request(path,write('PUT',plan,{'If-None-Match':'*'}))).status,410);
  assert.equal((await request(path,write('DELETE'))).status,204);
+});
+test('switching off snacks removes every snack while preserving breakfast, lunch and dinner on the existing calendar',async()=>{
+  const {env}=service();env.ALLOWED_ORIGIN='https://hintofhala21.github.io';
+  const result=await checkCalendarService((url,options)=>worker.fetch(new Request(url,options),env));
+  assert.deepEqual(result,{days:28,meals:84,snacks:84});
 });
 test('validation excludes personal information, unknown slots, bad time zones, malformed/oversized data and rate-limited updates',async()=>{
  const {request,env}=service();

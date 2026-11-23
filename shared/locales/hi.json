@@ -850,5 +850,10 @@
   "Set up reminders": "रिमाइंडर सेट करें",
   "Open reminder settings to review your plan and choose where to receive reminders.": "अपनी योजना देखने और रिमाइंडर कहाँ प्राप्त करने हैं यह चुनने के लिए रिमाइंडर की सेटिंग खोलें।",
   "This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.": "पहली बार वाला यह टैब अस्थायी है। इसे बंद करने से पहले जुड़े रिमाइंडर यहीं बंद करें। अगली बार रिमाइंडर प्रबंधित करने के लिए नियमित प्रोफ़ाइल इस्तेमाल करें।",
-  "Open a regular profile": "नियमित प्रोफ़ाइल खोलें"
+  "Open a regular profile": "नियमित प्रोफ़ाइल खोलें",
+  "Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.": "बदलाव सहेजा नहीं गया। WhatsApp नए समय की पुष्टि नहीं कर सका। फिर कोशिश करें या WhatsApp में STOP भेजें।",
+  "Your changes could not be saved on this device. Please try again.": "आपके बदलाव इस डिवाइस पर नहीं सहेजे जा सके। फिर कोशिश करें।",
+  "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "इस डिवाइस पर सहेजा गया। कैलेंडर फ़ीड अपडेट नहीं हुई। कैलेंडर रिमाइंडर में फिर कोशिश करें।",
+  "Reminder times updated. Your calendar app may show old events until it refreshes.": "रिमाइंडर का समय अपडेट हो गया। रीफ़्रेश होने तक आपके कैलेंडर ऐप में पुराने इवेंट दिख सकते हैं।",
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsApp आपके रिमाइंडर के समय की पुष्टि नहीं कर सका। रिमाइंडर फिर खोलें या WhatsApp में STOP भेजें।"
 }

@@ -50,7 +50,7 @@ test('every cited answer points to the approved HTTPS authorities', async () => 
 test('turning off snacks cannot remove meals and preserves saved times', () => {
   const fixture = { settings: { meals: false, snacks: false, water: false }, times: { breakfast: '09:10', morning: '11:15' } };
   const context = { record: () => fixture };
-  const code = section('const mealSlots =', 'const defaultWindow =') + section('function activeEatingSlots()', 'function formatTime(');
+  const code = section('const mealSlots =', 'const defaultWindow =') + section('function activeEatingSlots(', 'function formatTime(');
   const result = runInNewContext(code + ';schedule();', { ...context });
   assert.deepEqual(Array.from(result, slot => slot.id), ['breakfast', 'lunch', 'dinner']);
   assert.equal(result[0].time, '09:10');

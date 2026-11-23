@@ -29,7 +29,7 @@
     const start=el('whatsapp-start'), link=el('whatsapp-activate'), stop=el('whatsapp-stop');
     const check=el('whatsapp-check'), update=el('whatsapp-update'), status=el('whatsapp-status');
     const key = p => 'alongside-wa-reminders-v1:'+p;
-    let current='', available=false, busy=false, generation=0, state, message='idle', checkedAt=0;
+    let current='', available=false, busy=false, generation=0, state, message='idle', checkedAt=0, working;
     function load(p) {
       try { return JSON.parse(storage.getItem(key(p))) || null; } catch { return null; }
     }
@@ -94,6 +94,7 @@
       selectProfile(); if(!current || busy)return false;
       const expected=current, revision=++generation;
       const valid=()=>getProfileId()===expected && revision===generation;
+      let finish; working=new Promise(resolve=>{finish=resolve;});
       busy=true; render();
       try{return await operation(valid);}
       catch(e){
@@ -102,7 +103,7 @@
           else {message='error';}
         }
         return false;
-      } finally {if(valid()){busy=false;render();}}
+      } finally {finish();if(valid()){busy=false;render();}}
     }
     async function refresh(force=false) {
       selectProfile();render();
@@ -153,6 +154,30 @@
         return true;
       });
     }
+    async function retainSchedule(slots) {
+      const id=getProfileId();
+      selectProfile();
+      while(busy && working){await working;selectProfile();}
+      if(!id || id!==current)return false;
+      if(!state)return true;
+      const times=[...new Set(slots.filter(slot=>slot.id!=='checkin').map(slot=>slot.time))].sort();
+      return perform(async valid=>{
+        const token=state.token;
+        let result;
+        try{result=await request(path(state),'PATCH',{retainTimes:times},token);}
+        catch(e){if(e.status!==404)throw e;result={status:'cancelled'};}
+        if(!valid() || (load(current) && load(current).token!==token))return false;
+        if(result.status==='cancelled'){save(null);message='ended';}
+        else {save({...state,...details(result)});message='idle';}
+        return true;
+      });
+    }
+    async function reconcileSavedPlan(slots) {
+      selectProfile();
+      if(!state)return true;
+      const wanted=new Set(slots.filter(s=>s.id!=='checkin').map(s=>s.time));
+      return state.times.some(t=>!wanted.has(t)) ? retainSchedule(slots) : true;
+    }
     async function applyChanges() {
       if(!state || state.status!=='active' || !canConnect())return;
       await perform(async valid=>{
@@ -166,7 +191,7 @@
     form.addEventListener('submit',enroll);phone.addEventListener('input',()=>phone.setCustomValidity(''));
     check.addEventListener('click',()=>refresh(true));stop.addEventListener('click',disconnect);update.addEventListener('click',applyChanges);
     render();
-    return {refresh,render,disconnect};
+    return {refresh,render,disconnect,retainSchedule,reconcileSavedPlan};
   }
   globalThis.AlongsideWhatsApp={mount,normalizePhone,activationLink};
 })();

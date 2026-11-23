@@ -850,5 +850,10 @@
   "Set up reminders": "リマインダーを設定",
   "Open reminder settings to review your plan and choose where to receive reminders.": "リマインダー設定で予定を確認し、通知の受取先を選べます。",
   "This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.": "この初回用タブは一時的です。閉じる前にここで連携を解除してください。次回も設定を管理するには通常のプロフィールを使用してください。",
-  "Open a regular profile": "通常のプロフィールを開く"
+  "Open a regular profile": "通常のプロフィールを開く",
+  "Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.": "変更を保存できませんでした。WhatsAppで新しい予定を確認できません。もう一度試すか、WhatsAppでSTOPと返信してください。",
+  "Your changes could not be saved on this device. Please try again.": "この端末に変更を保存できませんでした。もう一度お試しください。",
+  "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "この端末には保存しました。購読カレンダーを更新できませんでした。カレンダー通知でもう一度お試しください。",
+  "Reminder times updated. Your calendar app may show old events until it refreshes.": "通知時刻を更新しました。カレンダーアプリが更新されるまで古い予定が表示される場合があります。",
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsAppで通知時刻を確認できませんでした。リマインダーを開き直すか、WhatsAppでSTOPと返信してください。"
 }

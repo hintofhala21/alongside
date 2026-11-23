@@ -34,7 +34,14 @@ function setup(){
         if(failStop)return new Response(null,{status:503});
         remote=null;return new Response(null,{status:204});
       }
-      if(options.method==='PATCH')Object.assign(remote,body);
+      if(options.method==='PATCH' && body.retainTimes) {
+        if(failStop)return new Response(null,{status:503});
+        const retained=remote.times.filter(t=>body.retainTimes.includes(t));
+        if(!retained.length || (remote.status==='pending' && retained.length!==remote.times.length)){
+          remote=null;return Response.json({status:'cancelled'});
+        }
+        remote.times=retained;
+      }else if(options.method==='PATCH')Object.assign(remote,body);
       return Response.json(remote);
     }
   });
@@ -89,4 +96,41 @@ test('Breeze reminder requests open settings without subscribing or swallowing u
   const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');
   assert.match(html,/<a class="text-button" href="#reminders">Set up reminders<\/a>/);
   assert.doesNotMatch(html,/<input id="whatsapp-consent"[^>]*checked/);
+});
+
+test('removing snacks preserves shared meal times and waits for WhatsApp before saving locally',async()=>{
+  const script=await readFile(new URL('../site/assets/app.js',import.meta.url),'utf8');
+  function source(a,b){return script.slice(script.indexOf(a),script.indexOf(b,script.indexOf(a)+a.length));}
+  const data={settings:{snacks:true,water:false,discreet:true},times:{morning:'08:00',dinner:'20:00'}};
+  const calls=[];let answer,ready;
+  const ui={data,profile:{id:'test'},record:()=>data,zone:()=>'Asia/Riyadh',editingReminders:false,
+    whatsappController:{retainSchedule:slots=>{calls.push(Array.from(slots,s=>s.time));return new Promise(resolve=>{answer=resolve;});},render(){}},
+    persist:()=>{ready=true;return true;},calendarController:{refresh:async()=>true,isConnected:()=>true}};
+  const save=runInNewContext(source('const mealSlots =','const byId =')+source('function activeEatingSlots(', 'function formatTime(')+source('function withinWaterWindow(', 'function renderReminders(')+source('function reminderPlan(', 'function syncReminderPlan(')+';saveReminderChange;',ui);
+  const status={};const first=save({settings:{...data.settings,snacks:false}},status);
+  assert.equal(data.settings.snacks,true);assert.equal(ready,undefined);
+  assert.deepEqual(calls[0],['08:00','12:30','20:00','20:00']);
+  answer(false);assert.equal(await first,false);assert.equal(data.settings.snacks,true);assert.match(status.textContent,/STOP/);
+  const second=save({settings:{...data.settings,snacks:false}},status);
+  answer(true);assert.equal(await second,true);assert.equal(data.settings.snacks,false);assert.equal(ready,true);
+  assert.match(status.textContent,/calendar app/);
+  ui.calendarController.refresh=async()=>false;
+  const third=save({times:{...data.times,dinner:'18:00'}},status);
+  answer(true);assert.equal(await third,true);assert.match(status.textContent,/feed could not update/);
+});
+
+test('WhatsApp browser controller narrows active schedules, clears stale pending links and retains control on a network failure',async()=>{
+  for(const variant of ['pending','active','unconfirmed']){
+    const ui=setup();
+    ui.plan.slots.push({id:'morning',time:'10:30'},{id:'lunch',time:'12:30'});
+    await ui.controller.refresh();await ui.connect();
+    if(variant!=='pending'){ui.remote.status='active';await ui.controller.refresh(true);}
+    if(variant==='unconfirmed')ui.badStop();
+    ui.plan.slots=ui.plan.slots.filter(slot=>slot.id!=='morning');
+    assert.equal(await ui.controller.retainSchedule(ui.plan.slots),variant!=='unconfirmed');
+    assert.deepEqual(JSON.parse(ui.requests.at(-1).body),{retainTimes:['08:00','12:30']});
+    if(variant==='pending'){assert.equal(ui.remote,null);assert.equal(ui.el('activate').hidden,true);}
+    if(variant==='active'){assert.deepEqual(ui.remote.times,['08:00','12:30']);assert.equal(ui.el('stop').hidden,false);}
+    if(variant==='unconfirmed'){assert.equal(ui.data.size,1);assert.ok(ui.remote.times.includes('10:30'));assert.match(ui.el('status').textContent,/STOP/);}
+  }
 });

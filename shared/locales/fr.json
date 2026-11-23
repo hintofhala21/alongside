@@ -850,5 +850,10 @@
   "Set up reminders": "Configurer les rappels",
   "Open reminder settings to review your plan and choose where to receive reminders.": "Ouvrez les réglages des rappels pour revoir votre programme et choisir où les recevoir.",
   "This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.": "Cet onglet de première visite est temporaire. Désactivez ici vos rappels connectés avant de le fermer. Utilisez un profil habituel pour gérer vos rappels à la prochaine visite.",
-  "Open a regular profile": "Ouvrir un profil habituel"
+  "Open a regular profile": "Ouvrir un profil habituel",
+  "Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.": "Modification non enregistrée. WhatsApp n’a pas pu confirmer les nouveaux horaires. Réessayez ou répondez STOP dans WhatsApp.",
+  "Your changes could not be saved on this device. Please try again.": "Impossible d’enregistrer vos modifications sur cet appareil. Réessayez.",
+  "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "Enregistré sur cet appareil. Le calendrier abonné n’a pas pu être mis à jour. Réessayez dans les rappels du calendrier.",
+  "Reminder times updated. Your calendar app may show old events until it refreshes.": "Horaires mis à jour. Votre calendrier peut afficher les anciens événements jusqu’à sa prochaine actualisation.",
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsApp n’a pas pu confirmer vos horaires. Rouvrez les rappels ou répondez STOP dans WhatsApp."
 }

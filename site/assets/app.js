@@ -177,6 +177,7 @@ let conversationState = { recent: [], current: null };
 let chatController;
 let calendarController;
 let whatsappController;
+let editingReminders=false;
 
 function emptyData() {
   return {
@@ -221,7 +222,7 @@ function hasAgeGroup() {
   return ageGroups.includes(profile?.ageGroup);
 }
 
-function persist() {
+function persist(updateReminders=true) {
   try {
     const stored = readProfile();
     if (!profile || stored?.profile.id !== profile.id) {
@@ -230,21 +231,21 @@ function persist() {
     }
     data.settings.meals = true;
     (globalThis.AlongsideAccount?.storage ?? localStorage).setItem(storageKey, JSON.stringify({ profile, data }));
-    syncReminderPlan();
+    if(updateReminders)syncReminderPlan();
     return true;
   } catch { return false; }
 }
 
-function activeEatingSlots() {
-  return mealSlots.filter((slot) => slot.kind === "meals" || record().settings.snacks !== false);
+function activeEatingSlots(plan=record()) {
+  return mealSlots.filter((slot) => slot.kind === "meals" || plan.settings.snacks !== false);
 }
 
-function schedule() {
-  const slots = activeEatingSlots().map((slot) => ({
+function schedule(plan=record()) {
+  const slots = activeEatingSlots(plan).map((slot) => ({
     ...slot,
-    time: record().times?.[slot.id] ?? slot.time
+    time: plan.times?.[slot.id] ?? slot.time
   }));
-  if (record().settings.water) slots.push({ id: "water", name: "Water reminder", time: "16:15", kind: "water" });
+  if (plan.settings.water) slots.push({ id: "water", name: "Water reminder", time: "16:15", kind: "water" });
   return slots.sort((a, b) => a.time.localeCompare(b.time));
 }
 
@@ -442,8 +443,8 @@ function renderTimeFields() {
   byId("water-window").disabled = !hasWater;
 }
 
-function withinWaterWindow(time) {
-  const { start, end } = record().waterWindow ?? defaultWindow;
+function withinWaterWindow(time,plan=record()) {
+  const { start, end } = plan.waterWindow ?? defaultWindow;
   return start < end ? time >= start && time <= end : time >= start || time <= end;
 }
 
@@ -571,7 +572,7 @@ function renderRoute(moveFocus) {
   if (page === "today") { renderToday(); renderTasks(); }
   if (page === "care") renderCare();
   if (page === "learn") renderLearning();
-  if (page === "reminders") { void whatsappController?.refresh(); calendarController?.refresh(); }
+  if (page === "reminders") { if(whatsappController)void reconcileSavedReminders().then(()=>whatsappController.refresh()); calendarController?.refresh(); }
   document.title = translate(pageNames[page]) + " · Alongside";
   if (moveFocus) {
     window.scrollTo(0, 0);
@@ -722,19 +723,13 @@ byId("open-reset").addEventListener("click", () => {
   byId("reset-dialog").showModal();
 });
 
-byId("reset-dialog").addEventListener("close", (event) => {
+byId("reset-dialog").addEventListener("close", async (event) => {
   if (event.target.returnValue !== "reset") return;
-  delete record().times;
-  delete record().waterWindow;
+  if(!await saveReminderChange({times:undefined, waterWindow:undefined}, byId("plan-status"),"Reminder times reset."))return;
   previewIndex = 0;
   showTestPreview = false;
-  const stored = persist();
-  renderToday();
-  renderPlan();
-  renderTimeFields();
-  renderReminders();
+  renderToday();renderPlan();renderTimeFields();renderReminders();
   byId("times-status").textContent = "";
-  byId("plan-status").textContent = stored ? "Reminder times reset." : "Reminder times reset for this visit.";
 });
 
 byId("learn-form").addEventListener("submit", (event) => {
@@ -761,15 +756,20 @@ byId("chat-message").addEventListener("keydown", event => {
 });
 
 for (const key of settings) {
-  byId(key).addEventListener("change", (event) => {
+  byId(key).addEventListener("change", async (event) => {
+    const control=event.currentTarget, enabled=key==="meals" || control.checked;
+    control.checked=Boolean(record().settings[key]);
+    if(editingReminders)return;
     if (key === "snacks") captureGuided();
-    record().settings[key] = key === "meals" ? true : event.target.checked;
+    control.disabled=true;
+    const patch={settings:{...record().settings,[key]:enabled}};
+    const saved=await saveReminderChange(patch,byId("reminder-change-status"));
+    control.disabled=key==="meals";renderReminders();
+    if(!saved)return;
     if (key !== "discreet") {
       previewIndex = 0;
       showTestPreview = false;
     }
-    persist();
-    renderReminders();
     renderTimeFields();
     renderToday();
     renderPlan();
@@ -785,7 +785,7 @@ byId("advance-preview").addEventListener("click", () => {
   renderReminders();
 });
 
-byId("times-form").addEventListener("submit", (event) => {
+byId("times-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const hasWater = record().settings.water;
   const start = byId("water-start").value;
@@ -797,11 +797,11 @@ byId("times-form").addEventListener("submit", (event) => {
     return;
   }
   const fields = new FormData(event.currentTarget);
-  record().times = { ...record().times, ...Object.fromEntries(activeEatingSlots().map((slot) => [slot.id, fields.get(slot.id)])) };
-  if (hasWater) record().waterWindow = { start, end };
+  const patch={times:{...record().times,...Object.fromEntries(activeEatingSlots().map(slot=>[slot.id,fields.get(slot.id)]))}};
+  if(hasWater)patch.waterWindow={start,end};
+  if(!await saveReminderChange(patch,status,"Reminder times saved."))return;
   previewIndex = 0;
   showTestPreview = false;
-  status.textContent = persist() ? "Reminder times saved." : "Reminder times updated for this visit.";
   renderToday();
   renderPlan();
   renderReminders();
@@ -1028,11 +1028,49 @@ chatController = new globalThis.AlongsideChat({
   onAction: (action) => { if(action==="meals"){chatController.openMealIdeas();return;} if (action === "human") { renderHelp(); byId("help-dialog").showModal(); } else location.hash = "#" + ({checkin:"checkins",routine:"today",care:"care",profile:"profile",reminders:"reminders"}[action] || "support"); }
 });
 byId("ask-meals").onclick=()=>chatController.openMealIdeas();
-function reminderPlan() {
-  const slots=schedule().filter(slot=>slot.kind!=="water" || withinWaterWindow(slot.time))
+function reminderPlan(draft=record()) {
+  const slots=schedule(draft).filter(slot=>slot.kind!=="water" || withinWaterWindow(slot.time,draft))
     .map(({id,time})=>({id,time}));
-  slots.push({id:"checkin",time:record().checkinTime || "20:00"});
-  return {timeZone:zone(),discreet:record().settings.discreet!==false,slots};
+  slots.push({id:"checkin",time:draft.checkinTime || "20:00"});
+  return {timeZone:zone(),discreet:draft.settings.discreet!==false,slots};
+}
+async function saveReminderChange(patch,status,success='') {
+  if(editingReminders)return false;
+  const original=record(), owner=profile?.id;
+  if(!owner)return false;
+  const draft={...original,...patch};
+  const previous=reminderPlan(original).slots.filter(s=>s.id!=="checkin");
+  const next=reminderPlan(draft).slots;
+  const nextTimes=new Set(next.filter(s=>s.id!=="checkin").map(s=>s.time));
+  // Removing a category must also correct an older connected plan, even if today’s local
+  // snack happens to overlap lunch. The server intersects with the times it actually has.
+  const optOut=patch.settings && (original.settings.snacks && !draft.settings.snacks || original.settings.water && !draft.settings.water);
+  const mustNarrow=optOut || previous.some(s=>!nextTimes.has(s.time));
+  editingReminders=true;
+  try{
+    status.textContent='';
+    if(mustNarrow && whatsappController && !await whatsappController.retainSchedule(next)){
+      status.textContent='Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.';
+      return false;
+    }
+    if(profile?.id!==owner || record()!==original)return false;
+    const oldValues=Object.fromEntries(Object.keys(patch).map(k=>[k,original[k]]));
+    Object.assign(original,patch);
+    if(!persist(false)){
+      Object.assign(original,oldValues);
+      status.textContent='Your changes could not be saved on this device. Please try again.';
+      return false;
+    }
+    whatsappController?.render();
+    const updated=await calendarController?.refresh();
+    if(profile?.id!==owner || record()!==original)return false;
+    status.textContent=updated===false
+      ? 'Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.'
+      : mustNarrow && calendarController?.isConnected()
+        ? 'Reminder times updated. Your calendar app may show old events until it refreshes.'
+        : success;
+    return true;
+  }finally{editingReminders=false;}
 }
 function syncReminderPlan() {
   whatsappController?.render();
@@ -1052,6 +1090,14 @@ const reminderOptions={document,storage:account?.storage ?? localStorage,getProf
   getPlan:reminderPlan, canShare:()=>hasAgeGroup() && profile?.ageGroup!=="child", canConnect:()=>hasAgeGroup() && profile?.ageGroup!=="child", translate};
 whatsappController=globalThis.AlongsideWhatsApp.mount(reminderOptions);
 calendarController=globalThis.AlongsideCalendar.mount({...reminderOptions,container:byId("calendar-connect")});
+async function reconcileSavedReminders(){
+  const id=profile?.id;
+  if(!id)return;
+  if(!await whatsappController.reconcileSavedPlan(reminderPlan().slots) && profile?.id===id){
+    byId("reminder-change-status").textContent="WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.";
+  }
+}
+void reconcileSavedReminders();
 window.addEventListener("focus",()=>{if(location.hash==="#reminders")void whatsappController.refresh(true);});
 initializeRecoveryUpdate();
 initializeFreeFeatures();

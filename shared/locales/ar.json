@@ -850,5 +850,10 @@
   "Set up reminders": "إعداد التذكيرات",
   "Open reminder settings to review your plan and choose where to receive reminders.": "افتح إعدادات التذكيرات لمراجعة خطتك واختيار أين تريد استلامها.",
   "This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.": "علامة تبويب الزيارة الجديدة مؤقتة. أوقف التذكيرات المرتبطة هنا قبل إغلاقها. استخدم ملفًا عاديًا إذا أردت إدارة تذكيراتك في زيارتك القادمة.",
-  "Open a regular profile": "فتح ملف عادي"
+  "Open a regular profile": "فتح ملف عادي",
+  "Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.": "لم يُحفظ التغيير. تعذّر تأكيد المواعيد الجديدة عبر واتساب. حاول مجددًا أو أرسل STOP في واتساب.",
+  "Your changes could not be saved on this device. Please try again.": "تعذّر حفظ التغييرات على هذا الجهاز. يرجى المحاولة مجددًا.",
+  "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "تم الحفظ على هذا الجهاز، لكن تعذّر تحديث اشتراك التقويم. أعد المحاولة من تذكيرات التقويم.",
+  "Reminder times updated. Your calendar app may show old events until it refreshes.": "تم تحديث مواعيد التذكيرات. قد يعرض تطبيق التقويم المواعيد القديمة حتى يتحدّث.",
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "تعذّر تأكيد مواعيد التذكيرات عبر واتساب. افتح التذكيرات مجددًا للمحاولة أو أرسل STOP في واتساب."
 }

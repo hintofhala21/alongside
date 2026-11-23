@@ -1,13 +1,17 @@
 const minute = 60_000;
 export const day = 24 * 60 * minute;
 
+export function readTimes(times) {
+  if (!Array.isArray(times) || times.length>48 || times.some(t=>typeof t!=='string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(t))) return null;
+  return [...new Set(times)].sort();
+}
+
 export function readSchedule(input) {
-  if (input?.consent !== true || typeof input.timeZone !== 'string' || input.timeZone.length > 80 ||
-      !Array.isArray(input.times) || !input.times.length || input.times.length > 48 ||
-      input.times.some(t => typeof t !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(t))) return null;
+  const times=readTimes(input?.times);
+  if (input?.consent!==true || typeof input.timeZone!=='string' || input.timeZone.length>80 || !times?.length) return null;
   try {
     const zone = new Intl.DateTimeFormat('en', {timeZone: input.timeZone}).resolvedOptions().timeZone;
-    return {timeZone: zone, times: [...new Set(input.times)].sort()};
+    return {timeZone: zone, times};
   } catch { return null; }
 }
 
