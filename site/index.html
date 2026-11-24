@@ -317,6 +317,9 @@
         </form>
         <section class="layout-2 panel stack">
           <h2>Calendar reminders</h2>
+          <div><button type="button" class="action outline" id="test-calendar">Test a calendar alert in 5 minutes</button></div>
+          <p class="muted">Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.</p>
+          <p id="test-calendar-status" class="status" role="status"></p>
           <div id="calendar-connect" class="stack"></div>
           <section class="stack" aria-labelledby="apple-busy-heading">
             <h3 id="apple-busy-heading">Check today’s plan against Apple Calendar</h3>
@@ -433,19 +436,13 @@
     <h2 id="help-title">Get human help</h2>
     <p>Reach out to your care team or a trusted person if you need support. For immediate danger or a medical emergency, contact your local emergency services.</p>
     <p class="muted">Alongside has no live care team.</p>
-    <section class="stack" aria-labelledby="therapy-title">
-      <h3 id="therapy-title">Explore online therapy</h3>
-      <div class="stack" id="adult-therapy" hidden>
-        <p>BetterHelp is for adults aged 18 and over. You can review their services, eligibility, and pricing on their website.</p>
-        <div><a class="action" href="https://www.betterhelp.com/" target="_blank" rel="noopener noreferrer">Visit BetterHelp (18+)</a></div>
-        <small>Opens in a new tab.</small>
-      </div>
+    <div class="stack">
       <p class="muted" id="younger-support" hidden>Your care team or a trusted adult can help you find support for your age.</p>
       <div class="stack" id="age-needed">
         <p>Add your age group to see relevant support options.</p>
         <div><a class="action outline" href="#profile" id="therapy-profile-link">Add your age group</a></div>
       </div>
-    </section>
+    </div>
     <form method="dialog"><button class="action" type="submit">Close</button></form>
   </div>
 </dialog>

@@ -815,7 +815,6 @@ byId("times-form").addEventListener("submit", async (event) => {
   renderReminders();
 });
 function renderHelp() {
-  byId("adult-therapy").hidden = profile?.ageGroup !== "adult";
   byId("younger-support").hidden = !hasAgeGroup() || profile.ageGroup === "adult";
   byId("age-needed").hidden = hasAgeGroup();
 }
@@ -953,6 +952,16 @@ function calendarText() {
  for(let i=0;i<7;i++){const d=new Date(base);d.setUTCDate(d.getUTCDate()+i);const day=d.toISOString().slice(0,10);for(const slot of slots){const time=record().appleDay?.date===day && record().appleDay.zone===zone() ? record().appleDay.moves?.[slot.id] ?? slot.time : slot.time;const start=zonedToUtc(day,time,zone());if(start<new Date())continue;const title=translate(kinds.discreet?'Alongside reminder':slot.name);lines.push('BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(new Date(start.getTime()+5*60000)),'SUMMARY:'+title,'DESCRIPTION:'+translate('Open Alongside for your reminder. Time zone')+' '+zone(),'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:'+translate('Alongside reminder'),'END:VALARM','END:VEVENT');}}
  lines.push('END:VCALENDAR');return lines.map(line=>/^[\x00-\x7F]*$/.test(line)?line.replace(/(.{75})(?=.)/g,'$1\r\n '):line).join('\r\n')+'\r\n';
 }
+function calendarTestEvent(now) {
+ const timestamp=date=>date.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+ const start=new Date(now.getTime()+5*60000);
+ const title=translate('Alongside reminder');
+ const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alongside//Reminders//EN','CALSCALE:GREGORIAN',
+   'BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+timestamp(now),
+   'DTSTART:'+timestamp(start),'DURATION:PT1M','SUMMARY:'+title,
+   'BEGIN:VALARM','ACTION:DISPLAY','TRIGGER:PT0S','DESCRIPTION:'+title,'END:VALARM','END:VEVENT','END:VCALENDAR'];
+ return lines.join('\r\n')+'\r\n';
+}
 function downloadFile(name,content,type) {const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function initializeFreeFeatures() {
  prepareCountryOptions();const timeList=byId('timezone-options');const zones=typeof Intl.supportedValuesOf==='function'?Intl.supportedValuesOf('timeZone'):['UTC','Asia/Riyadh','America/New_York','Europe/London'];for(const tz of [...new Set(['UTC',...zones])]) {const o=element('option','');o.value=tz;timeList.append(o);}
@@ -970,6 +979,10 @@ function initializeFreeFeatures() {
  byId('task-form').addEventListener('submit',e=>{e.preventDefault();const pick=byId('task-type');const text=pick.value==='custom'?byId('task-custom').value.trim():pick.value;if(!text)return;if((record().tasks || []).length>=20){byId('task-status').textContent='You can keep up to 20 daily tasks.';return;}const currentData=record();const currentId=profile?.id;const previous=currentData.tasks || [];currentData.tasks=[...previous,{id:crypto.randomUUID(),text,custom:pick.value==='custom',doneDay:''}];if(!persist()){if(profile?.id===currentId && record()===currentData)currentData.tasks=previous;byId('task-status').textContent='Your task could not be saved.';return;}e.currentTarget.reset();byId('task-custom-field').hidden=true;byId('task-custom').required=false;renderTasks();byId('task-status').textContent='Task added.';});
  byId('task-list').addEventListener('change',e=>{const task=record().tasks?.find(t=>t.id===e.target.dataset.task);if(!task)return;task.doneDay=e.target.checked?dayKey():'';persist();renderTasks();});
  byId('task-list').addEventListener('click',e=>{const id=e.target.closest('[data-remove-task]')?.dataset.removeTask;if(!id)return;record().tasks=(record().tasks || []).filter(t=>t.id!==id);persist();renderTasks();});
+ byId('test-calendar').addEventListener('click',()=>{
+   downloadFile('alongside-calendar-alert.ics',calendarTestEvent(new Date()),'text/calendar;charset=utf-8');
+   byId('test-calendar-status').textContent=translate('Save the downloaded event in Calendar before the alert time.');
+ });
  byId('download-calendar').addEventListener('click',()=>{downloadFile('alongside-reminders.ics',calendarText(),'text/calendar;charset=utf-8');byId('calendar-status').textContent='Calendar downloaded. Import it in your calendar app and allow its reminders.';});
  populateProfileExtras();resetGuided();renderCare();renderLearning();renderTasks();renderDailyPrompt();
  setInterval(()=>{if(profile){renderDailyPrompt();renderTasks();if(location.hash==='#today')renderToday();}},60000);

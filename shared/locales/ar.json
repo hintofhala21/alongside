@@ -268,8 +268,6 @@
   "Reach out to your care team or a trusted person if you need support. For immediate danger or a medical emergency, contact your local emergency services.": "تواصل مع فريق رعايتك أو شخص موثوق إذا احتجت إلى دعم. عند وجود خطر فوري أو حالة طبية طارئة، تواصل مع خدمات الطوارئ المحلية.",
   "Alongside has no live care team.": "لا يوجد فريق رعاية مباشر في Alongside.",
   "Explore online therapy": "استكشاف العلاج النفسي عبر الإنترنت",
-  "BetterHelp is for adults aged 18 and over. You can review their services, eligibility, and pricing on their website.": "خدمة BetterHelp للبالغين من عمر ١٨ سنة فما فوق. يمكنك الاطلاع على خدماتها وشروط الاستفادة والأسعار في موقعها.",
-  "Visit BetterHelp (18+)": "زيارة BetterHelp (١٨+)",
   "Opens in a new tab.": "يُفتح في علامة تبويب جديدة.",
   "Your care team or a trusted adult can help you find support for your age.": "يمكن لفريق رعايتك أو شخص بالغ موثوق مساعدتك في إيجاد دعم مناسب لعمرك.",
   "Add your age group to see relevant support options.": "أضف فئتك العمرية للاطلاع على خيارات الدعم المناسبة.",
@@ -310,7 +308,6 @@
   "Younger builders can run predefined fictional scenarios without sending personal typing. Free-text testing is for invited adult judges who confirm fictional use. An invitation code and a checkbox are not verified medical consent.": "يستطيع المشاركون الأصغر سنًا تجربة مواقف خيالية معدّة سلفًا دون إرسال نصوص شخصية. والكتابة الحرة مخصصة للمحكّمين البالغين المدعوين بعد تأكيدهم استخدام تفاصيل خيالية. لا يمثل رمز الدعوة أو مربع الاختيار موافقة طبية موثّقة.",
   "Private demo sessions expire after 24 hours and are cleaned up periodically. Browser history remains until cleared. Only a conversation reviewed and selected with the separate publisher code appears on the judges’ page. Anyone with its link can read that selected demo; it expires after seven days and can be unpublished sooner. Provider backups and logs have separate retention. OpenAI requests use store:false, which is not a Zero Data Retention arrangement.": "تنتهي صلاحية جلسات العرض الخاصة بعد 24 ساعة وتُحذف دوريًا. ويبقى السجل المحلي إلى أن يُمسح. لا تظهر المحادثة على صفحة اللجنة إلا بعد مراجعتها واختيارها برمز النشر المنفصل. يستطيع من لديه الرابط قراءتها. وتنتهي صلاحيتها بعد سبعة أيام، ويمكن سحبها قبل ذلك. وللنسخ الاحتياطية والسجلات لدى مقدمي الخدمة مدد احتفاظ مستقلة. تستخدم طلبات OpenAI الخيار store:false، وهو لا يعني وجود اتفاق على عدم الاحتفاظ بالبيانات.",
   "External resources": "الموارد الخارجية",
-  "Medical sources, care directories and therapy links open outside Alongside. Those services have their own privacy rules, eligibility and charges. A listing does not promise an appointment or free care. BetterHelp links are available only for visitors who select the adult age group.": "تُفتح المصادر الطبية وأدلة الخدمات وروابط العلاج خارج Alongside. لكل خدمة قواعدها للخصوصية وشروطها ورسومها. الإدراج في الدليل لا يضمن موعدًا أو رعاية مجانية. تتاح روابط BetterHelp لمن اختاروا الفئة العمرية للبالغين فقط.",
   "Before patient use": "قبل الاستخدام مع المرضى",
   "The content still needs clinical review. Guardian verification is not connected. Younger visitors should explore with a parent or trusted adult. Do not use this pilot to share sensitive medical details or as a substitute for care.": "لا يزال المحتوى بحاجة إلى مراجعة سريرية. لم تُفعّل خدمة التحقق من أولياء الأمور. يُفضّل للزوار الأصغر سنًا استكشاف الموقع مع أحد الوالدين أو شخص بالغ موثوق. لا تشارك معلومات طبية حساسة في هذه النسخة التجريبية ولا تستخدمها بديلًا عن الرعاية.",
   "For a medical emergency or immediate danger, contact local emergency services. Alongside has no live care team.": "في حالات الطوارئ الطبية أو الخطر المباشر، اتصل بخدمات الطوارئ المحلية. لا يوجد فريق رعاية يتابع Alongside مباشرة.",
@@ -855,5 +852,10 @@
   "Your changes could not be saved on this device. Please try again.": "تعذّر حفظ التغييرات على هذا الجهاز. يرجى المحاولة مجددًا.",
   "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "تم الحفظ على هذا الجهاز، لكن تعذّر تحديث اشتراك التقويم. أعد المحاولة من تذكيرات التقويم.",
   "Reminder times updated. Your calendar app may show old events until it refreshes.": "تم تحديث مواعيد التذكيرات. قد يعرض تطبيق التقويم المواعيد القديمة حتى يتحدّث.",
-  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "تعذّر تأكيد مواعيد التذكيرات عبر واتساب. افتح التذكيرات مجددًا للمحاولة أو أرسل STOP في واتساب."
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "تعذّر تأكيد مواعيد التذكيرات عبر واتساب. افتح التذكيرات مجددًا للمحاولة أو أرسل STOP في واتساب.",
+  "Test a calendar alert in 5 minutes": "اختبر تنبيهًا في التقويم بعد ٥ دقائق",
+  "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "افتح الحدث الذي نزّلته في تقويم Apple واحفظه. اسمح بإشعارات التقويم، ثم أغلق Alongside وواتساب.",
+  "Save the downloaded event in Calendar before the alert time.": "احفظ الحدث في التقويم قبل موعد التنبيه.",
+  "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "لا يوجد رقم إرسال واتساب متصل بـ Alongside. تنبيهات التقويم متاحة أدناه.",
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "تُفتح المصادر الطبية وأدلة الرعاية خارج Alongside. لكل خدمة قواعدها الخاصة للخصوصية والأهلية والرسوم."
 }

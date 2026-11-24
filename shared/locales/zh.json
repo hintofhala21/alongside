@@ -268,8 +268,6 @@
   "Reach out to your care team or a trusted person if you need support. For immediate danger or a medical emergency, contact your local emergency services.": "如果需要支持，请联系照护团队或信任的人。如有即时危险或医疗紧急情况，请联系当地急救服务。",
   "Alongside has no live care team.": "Alongside 不提供实时医护服务。",
   "Explore online therapy": "了解在线心理治疗",
-  "BetterHelp is for adults aged 18 and over. You can review their services, eligibility, and pricing on their website.": "BetterHelp 面向年满18岁的成年人。请在其网站了解服务、使用条件和费用。",
-  "Visit BetterHelp (18+)": "前往 BetterHelp（18岁及以上）",
   "Opens in a new tab.": "在新标签页中打开。",
   "Your care team or a trusted adult can help you find support for your age.": "照护团队或信任的成年人可以帮你找到适合你年龄的支持。",
   "Add your age group to see relevant support options.": "填写年龄段，查看适合的支持选项。",
@@ -310,7 +308,6 @@
   "Younger builders can run predefined fictional scenarios without sending personal typing. Free-text testing is for invited adult judges who confirm fictional use. An invitation code and a checkbox are not verified medical consent.": "未成年参赛者可使用预设的虚构场景，不会发送自己输入的个人信息。自由输入测试仅供受邀且承诺使用虚构信息的成年评委使用。邀请码和勾选确认不构成经核实的医疗同意。",
   "Private demo sessions expire after 24 hours and are cleaned up periodically. Browser history remains until cleared. Only a conversation reviewed and selected with the separate publisher code appears on the judges’ page. Anyone with its link can read that selected demo; it expires after seven days and can be unpublished sooner. Provider backups and logs have separate retention. OpenAI requests use store:false, which is not a Zero Data Retention arrangement.": "非公开演示会话在24小时后到期，并定期清理。浏览器中的聊天记录会保留，直到被清除。只有经审阅并用单独的发布者代码选中的对话会出现在评委页面。任何持有链接的人都能阅读选中的演示。它会在七天后到期，也可提前撤下。服务商的备份和日志有各自的保留期限。发送给 OpenAI 的请求使用 store:false，这并不等同于“零数据保留”协议。",
   "External resources": "外部资源",
-  "Medical sources, care directories and therapy links open outside Alongside. Those services have their own privacy rules, eligibility and charges. A listing does not promise an appointment or free care. BetterHelp links are available only for visitors who select the adult age group.": "医学信息来源、医疗目录和治疗链接会在 Alongside 以外的网站打开。这些服务有各自的隐私规则、资格要求和收费方式。列在目录中不保证可以预约或免费就诊。BetterHelp 链接只向选择成年年龄段的访客显示。",
   "Before patient use": "供患者使用前的说明",
   "The content still needs clinical review. Guardian verification is not connected. Younger visitors should explore with a parent or trusted adult. Do not use this pilot to share sensitive medical details or as a substitute for care.": "内容仍需临床审核。监护人身份验证尚未接入。低龄访客请和家长或信任的成年人一起体验。请勿使用此试用版分享敏感医疗信息或代替专业照护。",
   "For a medical emergency or immediate danger, contact local emergency services. Alongside has no live care team.": "如遇医疗紧急情况或面临即时危险，请联系当地急救服务。Alongside 不提供实时医护服务。",
@@ -855,5 +852,10 @@
   "Your changes could not be saved on this device. Please try again.": "无法在此设备上保存更改。请重试。",
   "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "已保存到此设备。订阅日历未能更新。请在“日历提醒”中重试。",
   "Reminder times updated. Your calendar app may show old events until it refreshes.": "提醒时间已更新。日历应用刷新前可能仍显示旧事件。",
-  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsApp 未能确认提醒时间。请重新打开提醒页面以重试，或在 WhatsApp 中回复 STOP。"
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsApp 未能确认提醒时间。请重新打开提醒页面以重试，或在 WhatsApp 中回复 STOP。",
+  "Test a calendar alert in 5 minutes": "测试 5 分钟后的日历提醒",
+  "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "在 Apple 日历中打开并保存下载的日程。允许日历发送通知，然后关闭 Alongside 和 WhatsApp。",
+  "Save the downloaded event in Calendar before the alert time.": "请在提醒时间之前将下载的日程保存到日历。",
+  "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "Alongside 尚未连接 WhatsApp 发送号码。你可以使用下方的日历提醒。",
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医疗信息来源和医疗服务目录会在 Alongside 之外打开。各服务自行制定隐私规则、使用条件和收费标准。"
 }

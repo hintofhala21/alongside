@@ -268,8 +268,6 @@
   "Reach out to your care team or a trusted person if you need support. For immediate danger or a medical emergency, contact your local emergency services.": "サポートが必要なときは、ケアチームや信頼できる人に相談してください。差し迫った危険や医療上の緊急事態では、地域の緊急通報窓口に連絡してください。",
   "Alongside has no live care team.": "Alongside にはリアルタイムで対応する医療チームはいません。",
   "Explore online therapy": "オンラインの心理療法について",
-  "BetterHelp is for adults aged 18 and over. You can review their services, eligibility, and pricing on their website.": "BetterHelp は18歳以上の成人向けです。サービス内容、利用条件、料金は同社のウェブサイトで確認できます。",
-  "Visit BetterHelp (18+)": "BetterHelp を開く（18歳以上）",
   "Opens in a new tab.": "新しいタブで開きます。",
   "Your care team or a trusted adult can help you find support for your age.": "ケアチームや信頼できる大人と一緒に、年齢に合った支援を探せます。",
   "Add your age group to see relevant support options.": "年齢層を登録すると、年齢に合ったサポートが表示されます。",
@@ -310,7 +308,6 @@
   "Younger builders can run predefined fictional scenarios without sending personal typing. Free-text testing is for invited adult judges who confirm fictional use. An invitation code and a checkbox are not verified medical consent.": "若い参加者は、自分で入力した情報を送らずに、用意された架空の場面を試せます。自由入力のテストは、架空の情報のみを使うことを確認した、招待済みの成人審査員が対象です。招待コードやチェック欄によって医療上の同意が確認されるわけではありません。",
   "Private demo sessions expire after 24 hours and are cleaned up periodically. Browser history remains until cleared. Only a conversation reviewed and selected with the separate publisher code appears on the judges’ page. Anyone with its link can read that selected demo; it expires after seven days and can be unpublished sooner. Provider backups and logs have separate retention. OpenAI requests use store:false, which is not a Zero Data Retention arrangement.": "非公開デモのセッションは24時間で期限が切れ、定期的に消去されます。ブラウザー内の履歴は消去するまで残ります。審査員ページに載るのは、内容を確認して専用の公開用コードで選んだ会話だけです。リンクを知る人は誰でもそのデモを閲覧できます。公開期間は7日で、早めに取り下げることもできます。サービス提供者のバックアップとログには別の保存期間が適用されます。OpenAI へのリクエストには store:false を指定しますが、データを一切保持しない取り決めではありません。",
   "External resources": "外部の情報・相談先",
-  "Medical sources, care directories and therapy links open outside Alongside. Those services have their own privacy rules, eligibility and charges. A listing does not promise an appointment or free care. BetterHelp links are available only for visitors who select the adult age group.": "医療情報の出典や医療機関の案内、心理療法のリンクは外部サイトで開きます。それぞれに独自のプライバシー方針、利用条件、料金があります。掲載は予約や無料での受診を保証するものではありません。BetterHelp へのリンクは、成人の年齢層を選択した方にのみ表示されます。",
   "Before patient use": "患者さんによる利用について",
   "The content still needs clinical review. Guardian verification is not connected. Younger visitors should explore with a parent or trusted adult. Do not use this pilot to share sensitive medical details or as a substitute for care.": "内容はまだ臨床の専門家による確認を必要としています。保護者確認機能は未接続です。年少の方は保護者や信頼できる大人と一緒にお試しください。機微な医療情報を共有したり、医療の代わりとして利用したりしないでください。",
   "For a medical emergency or immediate danger, contact local emergency services. Alongside has no live care team.": "医療上の緊急事態や差し迫った危険がある場合は、地域の緊急通報窓口に連絡してください。Alongside にリアルタイムで対応する医療チームはいません。",
@@ -855,5 +852,10 @@
   "Your changes could not be saved on this device. Please try again.": "この端末に変更を保存できませんでした。もう一度お試しください。",
   "Saved on this device. Your calendar feed could not update. Retry in Calendar reminders.": "この端末には保存しました。購読カレンダーを更新できませんでした。カレンダー通知でもう一度お試しください。",
   "Reminder times updated. Your calendar app may show old events until it refreshes.": "通知時刻を更新しました。カレンダーアプリが更新されるまで古い予定が表示される場合があります。",
-  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsAppで通知時刻を確認できませんでした。リマインダーを開き直すか、WhatsAppでSTOPと返信してください。"
+  "WhatsApp could not confirm your reminder times. Reopen Reminders to retry or reply STOP in WhatsApp.": "WhatsAppで通知時刻を確認できませんでした。リマインダーを開き直すか、WhatsAppでSTOPと返信してください。",
+  "Test a calendar alert in 5 minutes": "5分後のカレンダー通知を試す",
+  "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "ダウンロードした予定をAppleのカレンダーで開いて保存してください。カレンダーの通知を許可したら、AlongsideとWhatsAppを閉じてください。",
+  "Save the downloaded event in Calendar before the alert time.": "通知時刻の前に、ダウンロードした予定をカレンダーに保存してください。",
+  "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "AlongsideにはWhatsAppの送信元が接続されていません。下のカレンダー通知を利用できます。",
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医療情報源や医療機関の一覧は外部サイトで開きます。プライバシーに関する規定、利用条件、料金は各サービスが定めています。"
 }

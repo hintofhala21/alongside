@@ -5,6 +5,7 @@
     idle: 'WhatsApp reminders are off.',
     checking: 'Checking the WhatsApp connection…',
     offline: 'WhatsApp reminders are currently unavailable. You can use calendar reminders.',
+    unconfigured: 'Alongside has no WhatsApp sender connected. Calendar alerts are available below.',
     pending: 'Send the prepared message from your number within 15 minutes, then check the status here.',
     active: 'WhatsApp reminders are on. Reply STOP in WhatsApp or turn them off here.',
     changed: 'Your reminder times have changed. Choose “Follow my plan and renew for 30 days” to update and renew WhatsApp reminders.',
@@ -115,15 +116,16 @@
       checkedAt=Date.now();
       await perform(async valid=>{
         message='checking';render();
+        let unavailable='unconfigured';
         try{const result=await request('/status'); if(!valid())return;available=result.available===true;}
-        catch{if(!valid())return;available=false;}
+        catch{if(!valid())return;available=false;unavailable='offline';}
         if(state){
           const token=state.token;
           const result=await request(path(state),'GET',undefined,token);
           if(!valid() || load(current)?.token!==token)return;
           save({...state,...details(result),activationUrl:result.status==='pending'?state.activationUrl:''});
-          message=available?'idle':'offline';
-        }else message=available?'idle':'offline';
+          message=available?'idle':unavailable;
+        }else message=available?'idle':unavailable;
       });
     }
     function details(result) {
