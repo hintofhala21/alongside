@@ -4,7 +4,7 @@
   "compatibility_date":"2026-11-20",
   "workers_dev":true,
   "observability":{"enabled":false},
-  "vars":{"ALLOWED_ORIGIN":"https://hintofhala21.github.io"},
+  "vars":{"ALLOWED_ORIGIN":"https://hintofhala21.github.io","PERSONAL_STOP_AT":"2026-12-08T00:00:00+03:00"},
   "durable_objects":{"bindings":[{"name":"CALENDARS","class_name":"CalendarPlan"}]},
   "migrations":[{"tag":"v1","new_sqlite_classes":["CalendarPlan"]}],
   "ratelimits":[{"name":"WRITE_LIMIT","namespace_id":"24031","simple":{"limit":60,"period":60}}]

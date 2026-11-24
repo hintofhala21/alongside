@@ -21,7 +21,7 @@ const stamp = ms => new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\
 
 // A feed publishes individual UTC events. Calendar apps need no matching time-zone definition,
 // and events retain their UID across schedule changes, including a change of time zone.
-export function calendarFeed(plan, {uid, revised, sequence, expires}, now) {
+export function* calendarOccurrences(plan, {expires}, now, days = 28) {
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone: plan.timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
@@ -32,9 +32,7 @@ export function calendarFeed(plan, {uid, revised, sequence, expires}, now) {
   }
   const offset = t => scene(t) - t;
   const today = Math.floor(scene(now) / DAY)*DAY;
-  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alongside//Plan//EN','CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH','X-WR-CALNAME:Alongside reminders','REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H'];
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < days; i++) {
     const day = today + i*DAY;
     // Surround each local date with offsets on both sides, including half-hour DST changes.
     const earlier = offset(day-DAY);
@@ -49,12 +47,19 @@ export function calendarFeed(plan, {uid, revised, sequence, expires}, now) {
         start = candidates.find(t => scene(t) === wall) ?? wall-earlier;
       }
       if (start >= expires) continue;
-      const title = plan.discreet ? 'Reminder' : names[slot.id];
-      const date = stamp(day).slice(0,8);
-      lines.push('BEGIN:VEVENT', 'UID:'+uid+'-'+date+'-'+Object.keys(names).indexOf(slot.id)+'@alongside', 'DTSTAMP:'+stamp(revised),
+      yield {slot, start, date: stamp(day).slice(0,8)};
+    }
+  }
+}
+
+export function calendarFeed(plan, {uid, revised, sequence, expires}, now) {
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alongside//Plan//EN','CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH','X-WR-CALNAME:Alongside reminders','REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H'];
+  for (const {slot,start,date} of calendarOccurrences(plan,{expires},now)) {
+    const title = plan.discreet ? 'Reminder' : names[slot.id];
+    lines.push('BEGIN:VEVENT', 'UID:'+uid+'-'+date+'-'+Object.keys(names).indexOf(slot.id)+'@alongside', 'DTSTAMP:'+stamp(revised),
         'SEQUENCE:'+sequence,'DTSTART:'+stamp(start),'DTEND:'+stamp(start+5*60000),'SUMMARY:'+title,'TRANSP:TRANSPARENT',
         'BEGIN:VALARM','ACTION:DISPLAY','TRIGGER:PT0S','DESCRIPTION:'+title,'END:VALARM','END:VEVENT');
-    }
   }
   return [...lines,'END:VCALENDAR',''].join('\r\n');
 }

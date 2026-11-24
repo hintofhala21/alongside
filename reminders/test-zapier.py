@@ -49,12 +49,12 @@ def send_test(url):
                               "clientInfo": {"name": "alongside-owner-reminders", "version": "1"}}, 1)
     headers["MCP-Protocol-Version"] = init["protocolVersion"]
     rpc("notifications/initialized", {})
-    now = datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
+    now = datetime.datetime.now().astimezone().strftime("%I:%M %p").lstrip("0")
     result = rpc("tools/call", {"name": "execute_zapier_write_action", "arguments": {
         "selected_api": "WhatsAppNotificationsCLIAPI", "action": "send_message",
         "tool_name": "whatsapp_notifications_send_message", "params": {
-            "template": "calendar_reminder", "event_name": "Meal time",
-            "dynamic_properties": {"date_and_time": "Alongside test reminder · " + now}
+            "template": "calendar_reminder",
+            "dynamic_properties": {"event_name": "A little reminder from Breeze 🌿", "date_and_time": now}
         }
     }}, 2)
     if result.get("isError"):

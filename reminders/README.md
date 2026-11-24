@@ -37,8 +37,14 @@ Run `node --test tests/whatsapp-reminders.test.mjs` from the repository root to 
 
 ## Personal Zapier WhatsApp test
 
-The project owner can send one reminder to the WhatsApp number linked to their Zapier account. In the Zapier MCP server, configure WhatsApp Notifications → Send Message with the Calendar Reminder template and event name “Meal time”. Check the plan allowance first. Run `python3 reminders/test-zapier.py` from the project root and paste the private connection URL at the hidden prompt. The test also accepts the URL from a private `ZAPIER_MCP_URL` environment variable. Keep it out of the website and repository.
+The project owner can send one reminder to the WhatsApp number linked to their Zapier account. In the Zapier MCP server, configure WhatsApp Notifications → Send Message with the Calendar Reminder template. Leave Event name and Date and time available to the client. Check the plan allowance first. Run `python3 reminders/test-zapier.py` from the project root and paste the private connection URL at the hidden prompt. The test also accepts the URL from a private `ZAPIER_MCP_URL` environment variable. Keep it out of the website and repository.
 
 The command sends once. Check the Send Message entry in Zapier MCP History and the linked phone for receipt. If a connection times out after submission, check History before another attempt. The shared website's reminder subscriptions use their own sender. This personal integration can only reach the account owner's phone. Zapier lists WhatsApp Notifications as a premium app.
 
 [Zapier WhatsApp Notifications requirements](https://help.zapier.com/hc/en-us/articles/40852749640589-How-to-get-started-with-WhatsApp-Notifications-on-Zapier)
+
+## Personal meal reminders during the Zapier trial
+
+The calendar service can attach personal WhatsApp reminders to one explicitly selected calendar subscription. It uses the stored Alongside plan that produces the subscribed calendar. Only breakfast, lunch and dinner create WhatsApp alarms. Saving a new meal time updates the alarm. Stopping calendar sharing or reaching the trial cutoff ends these sends. Discreet calendar settings also hide the meal name in WhatsApp.
+
+The owner configures two secrets and a cutoff on the calendar Worker: `PERSONAL_FEED_ID` (the read ID from the owner's connected Alongside calendar), `PERSONAL_ZAPIER_URL` (the private MCP connection), and `PERSONAL_STOP_AT` (the configured stop time, midnight on December 8, 2026 in Riyadh). After setup, use **Update or renew subscription** on that profile to start the alarms. The personal sender stays inactive without all three settings. Each alarm calls only the WhatsApp Notifications action. The message uses the short local time and Breeze's meal label inside Zapier's template.

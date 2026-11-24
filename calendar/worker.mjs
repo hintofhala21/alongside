@@ -1,5 +1,7 @@
 import {calendarFeed, DAY, normalizePlan} from './feed.mjs';
 
+import {nextPersonalMeal,sendPersonalMeal} from '../reminders/personal-meals.mjs';
+
 const headers = {'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
 const respond = (status, body = null, extra = {}) => new Response(body, {status, headers:{...headers,...extra}});
 const keyPattern = /^[a-f0-9]{64}$/;
@@ -22,7 +24,19 @@ async function readPlan(request) {
   return normalizePlan(JSON.parse(new TextDecoder().decode(bytes)));
 }
 export class CalendarPlan {
-  constructor(ctx) {this.ctx=ctx;this.store=ctx.storage;}
+  constructor(ctx,env) {this.ctx=ctx;this.store=ctx.storage;this.env=env;}
+  personalUntil() {
+    const env=this.env;
+    if (!env?.PERSONAL_FEED_ID || !env.PERSONAL_ZAPIER_URL ||
+        !this.ctx.id.equals(env.CALENDARS.idFromName(env.PERSONAL_FEED_ID))) return 0;
+    return Date.parse(env.PERSONAL_STOP_AT);
+  }
+  async schedule(record,now,sent=[]) {
+    const due=nextPersonalMeal(record,now,this.personalUntil(),sent);
+    if (due) await this.store.put('personalDue',due);
+    else await this.store.delete('personalDue');
+    await this.store.setAlarm(due?.start ?? record.expires);
+  }
   async fetch(request) {
     const now=Date.now();
     if (request.method==='GET' || request.method==='HEAD') {
@@ -40,6 +54,7 @@ export class CalendarPlan {
       if(request.method==='DELETE'){
         // A late update or retry must never turn a revoked feed back on.
         await this.store.delete('plan');
+        await this.store.delete('personalDue');
         await this.store.put('revoked',true);
         await this.store.setAlarm(now+DAY);
         return respond(204);
@@ -54,14 +69,28 @@ export class CalendarPlan {
         sequence:same?data.sequence:(data?.sequence||0)+1, expires:now+90*DAY, plan
       };
       await this.store.put('plan',saved);
-      await this.store.setAlarm(saved.expires);
+      await this.schedule(saved,now,(await this.store.get('personalSent')) || []);
       return respond(200,JSON.stringify({expires:saved.expires}),{'Content-Type':'application/json'});
     });
   }
   async alarm() {
-    const plan=await this.store.get('plan');
-    if (plan?.expires>Date.now()) {await this.store.setAlarm(plan.expires);return;}
-    await this.store.deleteAll();
+    const pending=await this.ctx.blockConcurrencyWhile(async()=>{
+      const now=Date.now(),record=await this.store.get('plan');
+      if (!record || record.expires<=now) {await this.store.deleteAll();return;}
+      const due=await this.store.get('personalDue'), stopAt=this.personalUntil();
+      const sent=(await this.store.get('personalSent')) || [];
+      const current=due && nextPersonalMeal(record,due.start-1,stopAt,sent);
+      const shouldSend=now<stopAt && due && now>=due.start && now-due.start<120000 &&
+        current?.key===due.key && current.start===due.start;
+      if (shouldSend) {
+        sent.push(due.key);
+        await this.store.put('personalSent',sent.slice(-12));
+      }
+      await this.schedule(record,now,sent);
+      // Reserve the occurrence before delivery. An ambiguous provider response must never trigger a duplicate.
+      return shouldSend ? {due,plan:record.plan} : null;
+    });
+    if (pending) await sendPersonalMeal(this.env.PERSONAL_ZAPIER_URL,pending.due,pending.plan);
   }
 }
 
