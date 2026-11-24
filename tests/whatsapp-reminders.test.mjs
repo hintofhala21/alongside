@@ -267,3 +267,21 @@ test('automatic schedule changes retain the original expiry when all meal times 
   const changed=await (await e.manage('PATCH',{...good,times:['09:00','14:00','19:00'],renew:false})).json();
   assert.deepEqual(changed.times,['09:00','14:00','19:00']);assert.equal(changed.expiresAt,original.expiresAt);
 });
+
+test('dated WhatsApp times replace a single local day and a narrow update can only remove times',async t=>{
+  const now=Date.parse('2026-11-24T06:00:00Z'); t.mock.method(Date,'now',()=>now);
+  const {enroll,hook,req}=fixture();
+  const plan={...good,times:['12:30','19:00'],dayTimes:{date:'2026-11-24',times:['14:30','19:00']}};
+  const subscription=await enroll(plan);await hook({text:subscription.command});
+  const updated=await (await subscription.manage()).json();
+  assert.deepEqual(updated.dayTimes,plan.dayTimes);
+  assert.equal(nextSlot(updated,now).key,'2026-11-24T14:30');
+  assert.equal(nextSlot(updated,Date.parse('2026-11-24T18:30:00Z')).key,'2026-11-25T12:30');
+  assert.equal((await req('/subscriptions','POST',{...plan,dayTimes:{...plan.dayTimes,date:'2026-02-30'}})).status,400);
+  const result=await(await subscription.manage('PATCH',{retainTimes:['12:30','19:00'],retainDayTimes:{
+    date:'2026-11-24',times:['15:00','19:00']}})).json();
+  assert.deepEqual(result.dayTimes.times,['19:00']);
+  assert.equal(result.expiresAt,updated.expiresAt);assert.equal(nextSlot(result,now).key,'2026-11-24T19:00');
+  const cleared=await(await subscription.manage('PATCH',{...good,times:plan.times,renew:false})).json();
+  assert.equal(cleared.dayTimes,undefined);assert.equal(nextSlot(cleared,now).key,'2026-11-24T12:30');
+});

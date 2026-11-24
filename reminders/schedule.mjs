@@ -1,3 +1,5 @@
+import {isLocalDate} from '../calendar/feed.mjs';
+
 const minute = 60_000;
 export const day = 24 * 60 * minute;
 
@@ -6,12 +8,24 @@ export function readTimes(times) {
   return [...new Set(times)].sort();
 }
 
+export function readDayTimes(value) {
+  if (!value || Object.keys(value).some(k=>k!=='date' && k!=='times') || !isLocalDate(value.date)) return null;
+  const times=readTimes(value.times);
+  return times ? {date:value.date,times} : null;
+}
+
+export function timesOnDate(plan, date) {
+  return plan.dayTimes?.date === date ? plan.dayTimes.times : plan.times;
+}
+
 export function readSchedule(input) {
   const times=readTimes(input?.times);
   if (input?.consent!==true || typeof input.timeZone!=='string' || input.timeZone.length>80 || !times?.length) return null;
   try {
     const zone = new Intl.DateTimeFormat('en', {timeZone: input.timeZone}).resolvedOptions().timeZone;
-    return {timeZone: zone, times};
+    if (input.dayTimes===undefined) return {timeZone:zone,times};
+    const dayTimes=readDayTimes(input.dayTimes);
+    return dayTimes ? {timeZone:zone,times,dayTimes} : null;
   } catch { return null; }
 }
 
@@ -35,7 +49,7 @@ export function nextSlot(plan, now, lastKey = '') {
       const p = localParts(format, instant);
       offsets.add(Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute)-instant);
     }
-    for (const time of plan.times) {
+    for (const time of timesOnDate(plan,dateKey)) {
       const key = dateKey+'T'+time;
       if (key === lastKey) continue;
       const [h,m] = time.split(':').map(Number);

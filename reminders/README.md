@@ -48,3 +48,9 @@ The command sends once. Check the Send Message entry in Zapier MCP History and t
 The calendar service can attach personal WhatsApp reminders to one explicitly selected calendar subscription. It uses the stored Alongside plan that produces the subscribed calendar. Breakfast, lunch, dinner and enabled snacks create personal WhatsApp alarms. Saving a new meal time updates the alarm. Stopping calendar sharing or reaching the trial cutoff ends these sends. Discreet calendar settings also hide the meal name in WhatsApp.
 
 The owner configures two secrets and a cutoff on the calendar Worker: `PERSONAL_FEED_ID` (the read ID from the owner's connected Alongside calendar), `PERSONAL_ZAPIER_URL` (the private MCP connection), and `PERSONAL_STOP_AT` (the configured stop time, midnight on December 8, 2026 in Riyadh). After setup, use **Update or renew subscription** on that profile to start the alarms. The personal sender stays inactive without all three settings. Each alarm calls only the WhatsApp Notifications action. The message uses the short local time and Breeze's meal label inside Zapier's template.
+
+### Apple Calendar overlap alerts
+
+A user runs the Calendar helper and chooses today's busy appointments. Alongside compares their start and end times on the device and offers to keep the reminder or move it for that date. A subscribed calendar picks up saved changes when the calendar app refreshes.
+
+For the linked personal trial calendar, the user can also allow overlap alerts for today. Alongside shares the affected reminder and time with the reminder service. Zapier delivers the WhatsApp message to the linked phone using its own template. Appointment names, locations and descriptions stay on the device. A new or changed appointment needs a new check.

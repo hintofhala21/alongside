@@ -1,4 +1,4 @@
-import {day, nextSlot, readSchedule, readTimes} from './schedule.mjs';
+import {day, nextSlot, readDayTimes, readSchedule, readTimes, timesOnDate} from './schedule.mjs';
 
 const pendingLife = 15 * 60_000;
 const activeLife = 30 * day;
@@ -103,14 +103,16 @@ async function siteRequest(request,env,path) {
   if (!match || !['GET','PATCH','DELETE'].includes(method)) return err(404,'Not found');
   const token=tokenFrom(request);
   if (!token) return err(404,'Subscription not found');
-  let plan,id,retainTimes,renew=true;
+  let plan,id,retainTimes,retainDayTimes,renew=true;
   try {id=env.REMINDERS.idFromString(match[1]);} catch {return err(404,'Subscription not found');}
   if (method==='PATCH') {
     let input;
     try {input=JSON.parse(new TextDecoder().decode(await readLimited(request,8192)));} catch {}
     if(input && Object.hasOwn(input,'retainTimes')){
       retainTimes=readTimes(input.retainTimes);
-      if(!retainTimes || Object.keys(input).length!==1)return err(400,'Choose valid retained times');
+      if(input.retainDayTimes!==undefined)retainDayTimes=readDayTimes(input.retainDayTimes);
+      if(!retainTimes || (input.retainDayTimes!==undefined && !retainDayTimes) ||
+        Object.keys(input).some(k=>k!=='retainTimes' && k!=='retainDayTimes'))return err(400,'Choose valid retained times');
     }else{
       if(input?.renew!==undefined && typeof input.renew!=='boolean')return err(400,'Invalid renewal option');
       renew=input?.renew!==false;
@@ -118,7 +120,7 @@ async function siteRequest(request,env,path) {
       if(!plan)return err(400,'Choose a valid schedule and confirm consent');
     }
   }
-  return call(env,id,'manage',{method,plan,retainTimes,renew,tokenHash:await hash(token)});
+  return call(env,id,'manage',{method,plan,retainTimes,retainDayTimes,renew,tokenHash:await hash(token)});
 }
 
 export default {async fetch(request,env) {
@@ -197,7 +199,9 @@ export class ReminderStore {
       const expiresAt=now+pendingLife;
       state.pending.push({tokenHash:await hash(token),codeHash:await hash(code),phone:data.phone,plan:data.plan,expiresAt,requestedAt:now});
       await this.save(state);
-      const message='START '+code+'\nI agree to receive daily Alongside reminders at '+data.plan.times.join(', ')+' ('+data.plan.timeZone+'). I can reply STOP anytime.';
+      const exception=data.plan.dayTimes;
+      const dated=exception ? ' On '+exception.date+': '+(exception.times.join(', ') || 'no reminders')+'.' : '';
+      const message='START '+code+'\nI agree to receive daily Alongside reminders at '+data.plan.times.join(', ')+' ('+data.plan.timeZone+').'+dated+' I can reply STOP anytime.';
       return json({id:data.id,token,status:'pending',expiresAt,activationUrl:'https://wa.me/'+this.env.WA_BUSINESS_NUMBER+'?text='+encodeURIComponent(message)},201);
     }
     const active=state.active;
@@ -233,7 +237,28 @@ export class ReminderStore {
     if (!selected) return err(404,'Subscription not found');
     // A local opt-out may narrow this subscription, but cannot add reminders or renew consent.
     const retain=data.retainTimes && selected.plan.times.filter(time=>data.retainTimes.includes(time));
-    const narrower=retain && retain.length<selected.plan.times.length;
+    let narrowedPlan;
+    if (retain) {
+      const previous=selected.plan;
+      narrowedPlan={...previous,times:retain};
+      // For each dated exception intersect the old permission with the new allowed times.
+      // An old exception on a different date must not be lost by broadening that day's times.
+      const dates=new Set([previous.dayTimes?.date,data.retainDayTimes?.date].filter(Boolean));
+      delete narrowedPlan.dayTimes;
+      for(const date of [...dates].sort().reverse()) {
+        const allowed=data.retainDayTimes?.date===date ? data.retainDayTimes.times : data.retainTimes;
+        const times=timesOnDate(previous,date).filter(t=>allowed.includes(t));
+        if(JSON.stringify(times)===JSON.stringify(retain))continue;
+        if(narrowedPlan.dayTimes) {
+          // This representation carries one date. Preserve consent by declining an ambiguous update.
+          const today=new Intl.DateTimeFormat('en-CA',{timeZone:previous.timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+          if (date>=today)return err(409,'Refresh dated reminder times before retrying');
+          continue;
+        }
+        narrowedPlan.dayTimes={date,times};
+      }
+    }
+    const narrower=retain && JSON.stringify(selected.plan)!==JSON.stringify(narrowedPlan);
     if (data.method==='DELETE' || (narrower && (selected!==active || !retain.length))) {
       if (selected===active) {delete state.active;state.pending=[];}
       else state.pending=state.pending.filter(p=>p!==selected);
@@ -241,18 +266,19 @@ export class ReminderStore {
       return json({status:'cancelled'});
     }
     if (narrower) {
-      const removed=selected.plan.times.filter(time=>!retain.includes(time));
-      state.pending=state.pending.filter(p=>!p.plan.times.some(time=>removed.includes(time)));
-      selected.plan={...selected.plan,times:retain};
-      // A kept breakfast or water alarm may already be due while a snack is removed.
-      if (!retain.includes(selected.next.key.slice(-5))) selected.next=nextSlot(selected.plan,now,selected.lastKey);
+      state.pending=[];
+      selected.plan=narrowedPlan;
+      const due=selected.next.key;
+      if (!timesOnDate(narrowedPlan,due.slice(0,10)).includes(due.slice(-5)))
+        selected.next=nextSlot(selected.plan,now,selected.lastKey);
       await this.save(state);
     }
     if (data.method==='PATCH' && !retain) {
       if (selected!==active) return err(409,'Confirm the number before changing the schedule');
       const keepDue=selected.next.at<=now && selected.plan.timeZone===data.plan.timeZone &&
-        data.plan.times.includes(selected.next.key.slice(-5));
-      if (selected.plan.times.some(time=>!data.plan.times.includes(time)) || selected.plan.timeZone!==data.plan.timeZone)
+        timesOnDate(data.plan,selected.next.key.slice(0,10)).includes(selected.next.key.slice(-5));
+      if (JSON.stringify(selected.plan.dayTimes)!==JSON.stringify(data.plan.dayTimes) ||
+          selected.plan.times.some(time=>!data.plan.times.includes(time)) || selected.plan.timeZone!==data.plan.timeZone)
         state.pending=[];
       selected.plan=data.plan;
       if(!keepDue) selected.next=nextSlot(data.plan,now,selected.lastKey);

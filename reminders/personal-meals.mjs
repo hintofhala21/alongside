@@ -16,7 +16,21 @@ export function nextPersonalMeal(record, now, stopAt, alreadySent = []) {
   return next;
 }
 
-export async function sendPersonalMeal(endpoint, due, plan, fetcher = fetch) {
+// The website submits only reminder occurrences the owner has agreed to flag.
+// A conflict's deduplication key is stable even after the user adjusts its time.
+export function firstPendingConflict(record, now, stopAt, sent = []) {
+  if (!record?.plan.conflicts?.length || !Number.isFinite(stopAt) || now >= stopAt) return null;
+  for (const {slot,start,date} of calendarOccurrences(record.plan,record,now,1)) {
+    if (start <= now || start >= stopAt) continue;
+    const key='overlap-'+date+'-'+slot.id;
+    if (!sent.includes(key) && record.plan.conflicts.some(c=>c.date.replaceAll('-','')===date &&
+        c.id===slot.id && c.time===slot.time))
+      return {key,start,meal:slot.id,kind:'overlap'};
+  }
+  return null;
+}
+
+export async function sendPersonalMeal(endpoint, due, plan, fetcher = fetch, stillAllowed = async()=>true) {
   const url = new URL(endpoint);
   if (url.origin !== 'https://mcp.zapier.com' || url.pathname !== '/api/v1/connect' || url.username || url.password)
     throw Error('Invalid Zapier endpoint');
@@ -40,8 +54,15 @@ export async function sendPersonalMeal(endpoint, due, plan, fetcher = fetch) {
   headers['MCP-Protocol-Version'] = init.protocolVersion;
   await rpc('notifications/initialized',{});
   const time = new Intl.DateTimeFormat('en',{hour:'numeric',minute:'2-digit',timeZone:plan.timeZone}).format(due.start);
-  const event = plan.discreet ? 'A little reminder from Breeze 🌿' :
+  let event = plan.discreet ? 'A little reminder from Breeze 🌿' :
     'A little reminder from Breeze: it’s '+labels.get(due.meal)+' 🌿';
+  if (due.kind==='overlap') {
+    const reminder = {breakfast:'breakfast',lunch:'lunch',dinner:'dinner',morning:'morning snack',
+      afternoon:'afternoon snack',evening:'evening snack',water:'water reminder',checkin:'check-in'}[due.meal];
+    const label = plan.discreet ? 'Your reminder' : 'Your '+reminder;
+    event = label+' overlaps with something on your calendar. Open Reminders in Alongside to keep the time or choose another time for today.';
+  }
+  if (!await stillAllowed()) return;
   await rpc('tools/call',{name:'execute_zapier_write_action',arguments:{selected_api:'WhatsAppNotificationsCLIAPI',
     action:'send_message',tool_name:'whatsapp_notifications_send_message',params:{template:'calendar_reminder',
       dynamic_properties:{event_name:event,date_and_time:time}}}},2);

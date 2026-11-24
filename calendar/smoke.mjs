@@ -69,6 +69,15 @@ export async function checkCalendarService(fetcher=fetch) {
         else assert.ok(updated.events.get(occurrence)===uid,'A retained meal changed event identity');
       }
     }
+    const [first,second]=[...updated.dates].sort();
+    const localDate=first.slice(0,4)+'-'+first.slice(4,6)+'-'+first.slice(6);
+    plan.overrides=[{date:localDate,id:'lunch',time:'14:00'}];
+    assert.equal((await request('PUT')).status,200,'date-specific edit');
+    const adjusted=await (await request('GET',true)).text();
+    for(const [date,utc] of [[first,'110000Z'],[second,'093000Z']]){
+      const event=adjusted.split('BEGIN:VEVENT').find(entry=>entry.includes('UID:'+updated.events.get(date+'/lunch')+'\r\n'));
+      assert.ok(event?.includes('DTSTART:'+date+'T'+utc+'\r\n'),'The edited day moves and the following day keeps its usual lunch');
+    }
     return {days:updated.dates.size,meals:updated.events.size,snacks:initial.events.size-updated.events.size};
   } finally {
     if(attempted){

@@ -178,6 +178,7 @@ let chatController;
 let calendarController;
 let whatsappController;
 let editingReminders=false;
+let pendingAppleCheck=null;
 
 function emptyData() {
   return {
@@ -240,10 +241,10 @@ function activeEatingSlots(plan=record()) {
   return mealSlots.filter((slot) => slot.kind === "meals" || plan.settings.snacks !== false);
 }
 
-function schedule(plan=record()) {
+function schedule(plan=record(),date=null) {
   const slots = activeEatingSlots(plan).map((slot) => ({
     ...slot,
-    time: plan.times?.[slot.id] ?? slot.time
+    time: (date && plan.appleDay?.date===date && plan.appleDay.zone===zone() ? plan.appleDay.moves?.[slot.id] : null) ?? plan.times?.[slot.id] ?? slot.time
   }));
   if (plan.settings.water) slots.push({ id: "water", name: "Water reminder", time: "16:15", kind: "water" });
   return slots.sort((a, b) => a.time.localeCompare(b.time));
@@ -260,7 +261,7 @@ function reviews() {
   return record().reviews.seen;
 }
 
-function nextReminder(items = schedule()) {
+function nextReminder(items = schedule(record(),dayKey())) {
   const seen = reviews();
   return items.find((item) => !seen.includes(item.id));
 }
@@ -306,7 +307,7 @@ function scheduleList(items, next, reviewable = false) {
 }
 
 function renderToday() {
-  const items = schedule();
+  const items = schedule(record(),dayKey());
   const upcoming = nextReminder(items);
   byId("today-date").textContent = new Intl.DateTimeFormat(interfaceLocale(), { timeZone: zone(), weekday: "long", month: "long", day: "numeric" }).format(new Date()) + " · Your schedule";
   byId("next-title").textContent = upcoming?.name ?? "Reminders reviewed";
@@ -449,6 +450,7 @@ function withinWaterWindow(time,plan=record()) {
 }
 
 function renderReminders() {
+  renderAppleReview();
   const choices = record().settings;
   choices.meals = true;
   const waterTime = record().settings.water ? "16:15" : null;
@@ -549,6 +551,12 @@ function renderProfile() {
 
 const pageNames = { profile: "Profile", today: "Today", plan: "My plan", support: "Chat with Alongside", checkins: "Check-ins", reminders: "Reminders", sources: "Medical sources", settings: "Settings", care: "Find care", learn: "Learn" };
 function renderRoute(moveFocus) {
+  if(location.hash.startsWith('#apple-busy=')){
+    const fragment=location.hash;
+    history.replaceState(null,'','#reminders');
+    try {pendingAppleCheck={owner:profile?.id,date:dayKey(),ranges:AlongsideAppleCalendar.parseFragment(fragment)};}
+    catch {pendingAppleCheck={owner:profile?.id,date:dayKey(),error:true};}
+  }
   const requested = location.hash.slice(1);
   document.body.classList.toggle("basic-setup", !hasAgeGroup());
   document.querySelector(".sidebar").classList.remove("menu-open");
@@ -572,7 +580,7 @@ function renderRoute(moveFocus) {
   if (page === "today") { renderToday(); renderTasks(); }
   if (page === "care") renderCare();
   if (page === "learn") renderLearning();
-  if (page === "reminders") { if(whatsappController)void whatsappController.refresh().then(()=>reconcileSavedReminders()); calendarController?.refresh(); }
+  if (page === "reminders") { renderAppleReview(); if(whatsappController)void whatsappController.refresh().then(()=>reconcileSavedReminders()); calendarController?.refresh(); }
   document.title = translate(pageNames[page]) + " · Alongside";
   if (moveFocus) {
     window.scrollTo(0, 0);
@@ -713,7 +721,7 @@ byId("acknowledge").addEventListener("click", () => {
 byId("today-schedule").addEventListener("change", (event) => {
   const id = event.target.dataset.review;
   if (!id) return;
-  const item = schedule().find((slot) => slot.id === id);
+  const item = schedule(record(),dayKey()).find((slot) => slot.id === id);
   setReviewed(item, event.target.checked);
   byId("today-schedule").querySelector('[data-review="' + id + '"]')?.focus({ preventScroll: true });
 });
@@ -942,7 +950,7 @@ function calendarText() {
  const kinds=record().settings;const slots=schedule().filter(s=>(s.kind==='meals'?true:s.kind==='snacks'?kinds.snacks:kinds.water)&& (s.kind!=='water'||withinWaterWindow(s.time)));
  slots.push({id:'checkin',name:'Daily check-in',time:record().checkinTime || '20:00'});
  const today=dayKey();const base=new Date(today+'T12:00:00Z');
- for(let i=0;i<7;i++){const d=new Date(base);d.setUTCDate(d.getUTCDate()+i);const day=d.toISOString().slice(0,10);for(const slot of slots){const start=zonedToUtc(day,slot.time,zone());if(start<new Date())continue;const title=translate(kinds.discreet?'Alongside reminder':slot.name);lines.push('BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(new Date(start.getTime()+5*60000)),'SUMMARY:'+title,'DESCRIPTION:'+translate('Open Alongside for your reminder. Time zone')+' '+zone(),'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:'+translate('Alongside reminder'),'END:VALARM','END:VEVENT');}}
+ for(let i=0;i<7;i++){const d=new Date(base);d.setUTCDate(d.getUTCDate()+i);const day=d.toISOString().slice(0,10);for(const slot of slots){const time=record().appleDay?.date===day && record().appleDay.zone===zone() ? record().appleDay.moves?.[slot.id] ?? slot.time : slot.time;const start=zonedToUtc(day,time,zone());if(start<new Date())continue;const title=translate(kinds.discreet?'Alongside reminder':slot.name);lines.push('BEGIN:VEVENT','UID:'+crypto.randomUUID()+'@alongside','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(new Date(start.getTime()+5*60000)),'SUMMARY:'+title,'DESCRIPTION:'+translate('Open Alongside for your reminder. Time zone')+' '+zone(),'BEGIN:VALARM','TRIGGER:PT0S','ACTION:DISPLAY','DESCRIPTION:'+translate('Alongside reminder'),'END:VALARM','END:VEVENT');}}
  lines.push('END:VCALENDAR');return lines.map(line=>/^[\x00-\x7F]*$/.test(line)?line.replace(/(.{75})(?=.)/g,'$1\r\n '):line).join('\r\n')+'\r\n';
 }
 function downloadFile(name,content,type) {const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -1032,7 +1040,18 @@ function reminderPlan(draft=record()) {
   const slots=schedule(draft).filter(slot=>slot.kind!=="water" || withinWaterWindow(slot.time,draft))
     .map(({id,time})=>({id,time}));
   slots.push({id:"checkin",time:draft.checkinTime || "20:00"});
-  return {timeZone:zone(),discreet:draft.settings.discreet!==false,slots};
+  const result={timeZone:zone(),discreet:draft.settings.discreet!==false,slots};
+  const review=draft.appleDay;
+  if(!review || review.zone!==result.timeZone || review.date!==dayKey())return result;
+  const overrides=slots.filter(slot=>review.moves?.[slot.id] && review.moves[slot.id]!==slot.time)
+    .map(slot=>({date:review.date,id:slot.id,time:review.moves[slot.id]}));
+  if(overrides.length)result.overrides=overrides;
+  if(review.share){
+    const conflicts=review.items.filter(item=>slots.some(slot=>slot.id===item.id && (review.moves?.[slot.id] ?? slot.time)===item.time))
+      .map(({date,id,time})=>({date,id,time}));
+    if(conflicts.length)result.conflicts=conflicts;
+  }
+  return result;
 }
 async function saveReminderChange(patch,status,success='') {
   if(editingReminders)return false;
@@ -1040,7 +1059,7 @@ async function saveReminderChange(patch,status,success='') {
   if(!owner)return false;
   const draft={...original,...patch};
   const previous=reminderPlan(original).slots.filter(s=>s.id!=="checkin");
-  const next=reminderPlan(draft).slots;
+  const nextPlan=reminderPlan(draft), next=nextPlan.slots;
   const nextTimes=new Set(next.filter(s=>s.id!=="checkin").map(s=>s.time));
   // Removing a category must also correct an older connected plan, even if today’s local
   // snack happens to overlap lunch. The server intersects with the times it actually has.
@@ -1049,7 +1068,7 @@ async function saveReminderChange(patch,status,success='') {
   editingReminders=true;
   try{
     status.textContent='';
-    if(whatsappController && !await whatsappController.reconcileSavedPlan(next)){
+    if(whatsappController && !await whatsappController.reconcileSavedPlan(next,nextPlan)){
       status.textContent='Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.';
       return false;
     }
@@ -1073,6 +1092,70 @@ async function saveReminderChange(patch,status,success='') {
     return true;
   }finally{editingReminders=false;}
 }
+function renderAppleReview(){
+  const out=byId('apple-busy-review'), status=byId('apple-busy-status');
+  if(!out)return;
+  out.replaceChildren();
+  const owner=profile?.id, date=dayKey(), timeZone=zone();
+  if(!owner || !hasAgeGroup()){pendingAppleCheck=null;return;}
+  if(pendingAppleCheck && (pendingAppleCheck.owner!==owner || pendingAppleCheck.date!==date))pendingAppleCheck=null;
+  const review=record().appleDay;
+  const today=review?.date===date && review.zone===timeZone ? review : {date,zone:timeZone,moves:{},items:[],kept:[],share:false};
+  const slots=schedule(record(),date).filter(s=>s.kind==='meals'||s.kind==='snacks');
+  function text(line){out.append(element('p',line));}
+  function action(label,handler){
+    const b=element('button',label,'action outline');b.type='button';
+    b.addEventListener('click',async()=>{if(editingReminders)return;b.disabled=true;try{await handler();}finally{b.disabled=false;}});out.append(b);
+  }
+  async function save(next,message){
+    if(profile?.id!==owner || dayKey()!==date || zone()!==timeZone)return false;
+    if(!await saveReminderChange({appleDay:next},status,message))return false;
+    renderToday();renderAppleReview();return true;
+  }
+  if(pendingAppleCheck?.error){
+    text('This calendar check could not be read. Run the shortcut again.');return;
+  }
+  if(pendingAppleCheck){
+    const incoming=pendingAppleCheck;
+    text('Compare these appointment times with today’s meals and snacks on this device?');
+    action('Check for overlaps',async()=>{
+      const found=AlongsideAppleCalendar.compare(slots,incoming.ranges,date,timeZone,zonedToUtc);
+      const items=found.filter(i=>!today.kept?.includes(i.id+'@'+i.time));
+      if(await save({...today,items,checked:true},'Calendar check saved.')){
+        pendingAppleCheck=null;renderAppleReview();
+      }
+    });
+    action('Discard calendar check',()=>{pendingAppleCheck=null;renderAppleReview();});return;
+  }
+  if(!today.checked)return;
+  const items=today.items.filter(i=>slots.some(s=>s.id===i.id && s.time===i.time) && +zonedToUtc(date,i.time,timeZone)>Date.now());
+  if(!items.length)text('Today’s check has no remaining overlaps to review.');
+  for(const item of items){
+    const slot=slots.find(s=>s.id===item.id);
+    text(slot.name+' at '+formatTime(item.time)+' overlaps with a busy time today. Keep it or move just today’s reminder.');
+    async function decide(time){
+      const next={...today,items:today.items.filter(i=>i.id!==item.id),kept:[...(today.kept||[]),item.id+'@'+item.time]};
+      if(time){
+        if(+zonedToUtc(date,time,timeZone)<=Date.now() || slots.some(s=>s.id!==item.id && s.time===time)){
+          status.textContent='That time is no longer available. Run the shortcut again.';return;
+        }
+        next.moves={...today.moves,[item.id]:time};
+      }
+      await save(next,time?'Today’s reminder moved to '+formatTime(time)+'.':'Today’s reminder keeps its original time.');
+    }
+    action('Keep '+formatTime(item.time),()=>decide(''));
+    for(const [label,time] of [['Earlier',item.earlier],['Later',item.later]]){
+      if(time && +zonedToUtc(date,time,timeZone)>Date.now())action(label+' · '+formatTime(time),()=>decide(time));
+    }
+  }
+  if(items.length && calendarController?.personalAlertsAvailable() && !today.share){
+    text('Send a WhatsApp overlap alert to the linked trial number through Zapier? Only the affected reminder and its time are shared.');
+    action('Allow alerts for today',()=>save({...today,share:true},'Permission saved for today.'));
+  }
+  if(today.share)action('Turn off today’s overlap alerts',()=>save({...today,share:false},'Overlap alerts turned off.'));
+  action('Clear this calendar check',()=>save({...today,checked:false,share:false,items:[],kept:[]},'Calendar check cleared. Your chosen reminder times were kept.'));
+}
+
 function syncReminderPlan() {
   if(whatsappController && !editingReminders)void reconcileSavedReminders();
   whatsappController?.render();

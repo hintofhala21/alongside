@@ -49,11 +49,17 @@
       else storage.removeItem(key(current));
       state=next;
     }
-    function plan({timeZone,slots}=getPlan()) {
-      return {timeZone, times:[...new Set(slots.filter(s=>s.id!=='checkin').map(s=>s.time))].sort()};
+    function plan({timeZone,slots,overrides=[]}=getPlan()) {
+      const eligible=slots.filter(s=>s.id!=='checkin');
+      const times=[...new Set(eligible.map(s=>s.time))].sort();
+      if(!overrides.length)return {timeZone,times};
+      const changes=new Map(overrides.map(o=>[o.id,o.time]));
+      const dayTimes={date:overrides[0].date,times:[...new Set(eligible.map(s=>changes.get(s.id) ?? s.time))].sort()};
+      return {timeZone,times,dayTimes};
     }
     function matchesPlan(p=plan()) {
-      return state?.timeZone===p.timeZone && JSON.stringify([...state.times].sort())===JSON.stringify(p.times);
+      return state?.timeZone===p.timeZone && JSON.stringify([...state.times].sort())===JSON.stringify(p.times) &&
+        JSON.stringify(state.dayTimes ?? null)===JSON.stringify(p.dayTimes ?? null);
     }
     function render() {
       selectProfile();
@@ -122,7 +128,7 @@
     }
     function details(result) {
       if(!['pending','active'].includes(result.status) || !Array.isArray(result.times) || typeof result.timeZone!=='string')throw Error('Unexpected response');
-      return {status:result.status,times:result.times,timeZone:result.timeZone,expiresAt:result.expiresAt,lastDelivery:result.lastDelivery};
+      return {status:result.status,times:result.times,dayTimes:result.dayTimes,timeZone:result.timeZone,expiresAt:result.expiresAt,lastDelivery:result.lastDelivery};
     }
     async function enroll(e) {
       e.preventDefault();selectProfile();
@@ -152,7 +158,7 @@
         return true;
       });
     }
-    async function retainSchedule(slots) {
+    async function retainSchedule(slots,dayTimes) {
       const id=getProfileId();
       selectProfile();
       while(busy && working){await working;selectProfile();}
@@ -162,7 +168,7 @@
       return perform(async valid=>{
         const token=state.token;
         let result;
-        try{result=await request(path(state),'PATCH',{retainTimes:times},token);}
+        try{result=await request(path(state),'PATCH',{retainTimes:times,...(dayTimes?{retainDayTimes:dayTimes}:{})},token);}
         catch(e){if(e.status!==404)throw e;result={status:'cancelled'};}
         if(!valid() || (load(current) && load(current).token!==token))return false;
         if(result.status==='cancelled'){save(null);message='ended';}
@@ -170,16 +176,18 @@
         return true;
       });
     }
-    async function reconcileSavedPlan(slots) {
+    async function reconcileSavedPlan(slots,source=getPlan()) {
       const id=getProfileId();
       selectProfile();
       while(busy && working){await working;selectProfile();}
       if(!id || id!==current)return false;
       if(!state)return true;
-      const requested=plan({...getPlan(),slots});
+      const requested=plan({...source,slots});
       if(matchesPlan(requested))return true;
       if(state.status==='active' && state.followPlan && canConnect())return updatePlan(requested,false);
-      return state.times.some(t=>!requested.times.includes(t)) ? retainSchedule(slots) : true;
+      const oldTimes=state.dayTimes?.date===requested.dayTimes?.date ? state.dayTimes?.times : state.times;
+      const datedRemoval=requested.dayTimes && oldTimes?.some(t=>!requested.dayTimes.times.includes(t));
+      return state.times.some(t=>!requested.times.includes(t)) || datedRemoval ? retainSchedule(slots,requested.dayTimes) : true;
     }
     async function updatePlan(requested,renew) {
       return perform(async valid=>{

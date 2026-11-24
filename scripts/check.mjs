@@ -6,7 +6,7 @@ import { Script } from 'node:vm';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const skipped = new Set(['.git', 'node_modules', '__pycache__', 'build', '.wrangler', 'outputs', '.setup-tools']);
-const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', 'waicy-conversation.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/calendar.js', 'assets/whatsapp.js', 'assets/meal-ideas.js', 'assets/app.js', 'assets/accounts.js', 'assets/chat.js', 'assets/kids-chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
+const allowedPublic = new Set(['index.html', 'privacy.html', 'history.html', 'credits.html', 'waicy-conversation.html', '404.html', 'config.json', 'robots.txt', '.nojekyll', 'assets/calendar.js', 'assets/apple-calendar.js', 'apple-calendar.html', 'assets/Alongside-Calendar.applescript', 'assets/whatsapp.js', 'assets/meal-ideas.js', 'assets/app.js', 'assets/accounts.js', 'assets/chat.js', 'assets/kids-chat.js', 'assets/history.js', 'assets/styles.css', 'assets/favicon.svg', 'assets/flowers.jpg', 'assets/garden.jpg']);
 
 export function assertNoSecret(contents, name) {
   // Detect common credential formats without printing the value or matching line.
@@ -54,7 +54,7 @@ export async function check() {
         if (!contents.includes('Content-Security-Policy')) throw new Error(`Missing security policy in ${name}.`);
         for (const match of contents.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
           if (match[1].includes('application/json')) JSON.parse(match[2]);
-          else if (!/src="(?:\.|\/alongside)\/assets\/(?:app|calendar|whatsapp|meal-ideas|chat|kids-chat|history|library|locales)\.js"/.test(match[1]) || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
+          else if (!/src="(?:\.|\/alongside)\/assets\/(?:app|apple-calendar|calendar|whatsapp|meal-ideas|chat|kids-chat|history|library|locales)\.js"/.test(match[1]) || match[2].trim()) throw new Error(`Unexpected executable script in ${name}.`);
         }
       }
     }

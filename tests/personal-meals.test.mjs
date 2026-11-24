@@ -63,3 +63,41 @@ test('only the selected subscription sends one Breeze alert per meal, respecting
   await calendar.alarm();
   assert.equal(calls[1].event_name,'A little reminder from Breeze 🌿');
 });
+
+test('an opted-in conflict alert goes once, omits event details, and is withdrawn on keep or date-only reschedule',async t=>{
+  const {CalendarPlan}=await import('../calendar/worker.mjs');
+  let now=Date.parse('2026-11-24T08:00:00Z'); t.mock.method(Date,'now',()=>now);
+  const env={PERSONAL_FEED_ID:'owner',PERSONAL_STOP_AT:'2026-12-01T00:00:00Z',
+    PERSONAL_ZAPIER_URL:'https://mcp.zapier.com/api/v1/connect',CALENDARS:{idFromName:x=>x}};
+  const values=new Map(),sends=[];
+  const storage={get:k=>values.get(k),put:(k,v)=>values.set(k,v),delete:k=>values.delete(k),setAlarm:at=>values.set('alarm',at)};
+  const service=new CalendarPlan({id:{equals:v=>v==='owner'},storage,blockConcurrencyWhile:fn=>fn()},env);
+  const mark={date:'2026-11-24',id:'lunch',time:'14:00'};
+  const mark2={date:'2026-11-24',id:'dinner',time:'19:00'};
+  const base={timeZone:'Asia/Riyadh',discreet:true,slots:[{id:'lunch',time:'14:00'},{id:'dinner',time:'19:00'}]};
+  const save=async changes=>{
+    const reply=await service.fetch(new Request('https://calendar.example',{method:'PUT',headers:{
+      'Content-Type':'application/json',...(!values.has('plan')?{'If-None-Match':'*'}:{})},body:JSON.stringify({...base,...changes})}));
+    assert.equal((await reply.json()).personalAlertsAvailable,true);
+  };
+  let onInitialize;
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    const body=JSON.parse(options.body);
+    if(body.method==='initialize' && onInitialize)await onInitialize();
+    if(body.method==='notifications/initialized')return new Response(null,{status:202});
+    if(body.method==='tools/call')sends.push(body.params.arguments.params.dynamic_properties);
+    return Response.json({id:body.id,result:{protocolVersion:'2025-03-26'}});
+  });
+  await save({conflicts:[mark]});const alertTime=values.get('alarm');now+=300;
+  await save({conflicts:[mark]});assert.equal(values.get('alarm'),alertTime);
+  await save({conflicts:[]});assert.equal(values.get('personalDue').kind,undefined);
+  now=alertTime;await service.alarm();assert.equal(sends.length,0);
+  await save({conflicts:[mark]});now=values.get('alarm');await service.alarm();
+  assert.match(sends[0].event_name,/overlaps.*keep the time or choose another time for today/);
+  assert.doesNotMatch(sends[0].event_name,/lunch|conference/);
+  await save({conflicts:[mark]});await service.alarm();assert.equal(sends.length,1);
+  await save({conflicts:[mark2]});now=values.get('alarm');
+  onInitialize=async()=>{onInitialize=null;await save({overrides:[{...mark2,time:'19:30'}]});};
+  await service.alarm();assert.equal(sends.length,1);
+  assert.equal(values.get('personalDue').start,Date.parse('2026-11-24T11:00:00Z'));
+});

@@ -1,6 +1,6 @@
 import {calendarFeed, DAY, normalizePlan} from './feed.mjs';
 
-import {nextPersonalMeal,sendPersonalMeal} from '../reminders/personal-meals.mjs';
+import {firstPendingConflict,nextPersonalMeal,sendPersonalMeal} from '../reminders/personal-meals.mjs';
 
 const headers = {'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff','X-Robots-Tag':'noindex, nofollow'};
 const respond = (status, body = null, extra = {}) => new Response(body, {status, headers:{...headers,...extra}});
@@ -32,10 +32,18 @@ export class CalendarPlan {
     return Date.parse(env.PERSONAL_STOP_AT);
   }
   async schedule(record,now,sent=[]) {
-    const due=nextPersonalMeal(record,now,this.personalUntil(),sent);
+    const stopAt=this.personalUntil();
+    const meal=nextPersonalMeal(record,now,stopAt,sent);
+    const conflict=firstPendingConflict(record,now,stopAt,sent);
+    // An ordinary reminder already due in the next second has priority.
+    const due=conflict && (!meal || meal.start>now+1000) ? {...conflict,notifyAt:now+1000} : meal;
+    if (due?.kind==='overlap') {
+      const previous=await this.store.get('personalDue');
+      if (previous?.key===due.key && previous.start===due.start) due.notifyAt=previous.notifyAt;
+    }
     if (due) await this.store.put('personalDue',due);
     else await this.store.delete('personalDue');
-    await this.store.setAlarm(due?.start ?? record.expires);
+    await this.store.setAlarm(due?.notifyAt ?? due?.start ?? record.expires);
   }
   async fetch(request) {
     const now=Date.now();
@@ -62,6 +70,12 @@ export class CalendarPlan {
       if(await this.store.get('revoked'))return respond(410);
       const creating=request.headers.get('If-None-Match')==='*';
       if ((!data || data.expires<=now) && !creating)return respond(410);
+      const personalAlertsAvailable=this.personalUntil()>now;
+      if (plan.conflicts) {
+        const today=new Intl.DateTimeFormat('en-CA',{timeZone:plan.timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+        plan.conflicts=personalAlertsAvailable ? plan.conflicts.filter(row=>row.date===today) : [];
+        if(!plan.conflicts.length)delete plan.conflicts;
+      }
       const same=JSON.stringify(data?.plan)===JSON.stringify(plan);
       if (data && data.expires>now && creating && !same)return respond(409);
       const saved={
@@ -70,7 +84,7 @@ export class CalendarPlan {
       };
       await this.store.put('plan',saved);
       await this.schedule(saved,now,(await this.store.get('personalSent')) || []);
-      return respond(200,JSON.stringify({expires:saved.expires}),{'Content-Type':'application/json'});
+      return respond(200,JSON.stringify({expires:saved.expires,personalAlertsAvailable}),{'Content-Type':'application/json'});
     });
   }
   async alarm() {
@@ -79,18 +93,40 @@ export class CalendarPlan {
       if (!record || record.expires<=now) {await this.store.deleteAll();return;}
       const due=await this.store.get('personalDue'), stopAt=this.personalUntil();
       const sent=(await this.store.get('personalSent')) || [];
-      const current=due && nextPersonalMeal(record,due.start-1,stopAt,sent);
-      const shouldSend=now<stopAt && due && now>=due.start && now-due.start<120000 &&
-        current?.key===due.key && current.start===due.start;
+      const overlap=due?.kind==='overlap';
+      const current=due && (overlap ? firstPendingConflict(record,now,stopAt,sent) :
+        nextPersonalMeal(record,due.start-1,stopAt,sent));
+      const at=due?.notifyAt ?? due?.start;
+      const shouldSend=now<stopAt && now>=at && now-at<120000 &&
+        Boolean(due && current && current.key===due.key && current.start===due.start);
+      // Suppress late overlap notifications as well, so an alarm retry cannot replay a missed ping.
+      if (overlap && now>=at && !shouldSend && current?.key===due.key) {
+        sent.push(due.key);
+        await this.store.put('personalSent',sent.slice(-40));
+      }
       if (shouldSend) {
         sent.push(due.key);
-        await this.store.put('personalSent',sent.slice(-12));
+        await this.store.put('personalSent',sent.slice(-40));
       }
       await this.schedule(record,now,sent);
       // Reserve the occurrence before delivery. An ambiguous provider response must never trigger a duplicate.
       return shouldSend ? {due,plan:record.plan} : null;
     });
-    if (pending) await sendPersonalMeal(this.env.PERSONAL_ZAPIER_URL,pending.due,pending.plan);
+    if (pending) {
+      // Opening an MCP session can take time. Recheck the latest saved plan just
+      // before the action so a keep, move or disconnect cancels an in-flight alert.
+      const {due,plan}=pending;
+      await sendPersonalMeal(this.env.PERSONAL_ZAPIER_URL,due,plan,fetch,async()=>{
+        const record=await this.store.get('plan'),now=Date.now(),end=this.personalUntil();
+        if(!record || record.expires<=now || now>=end || record.plan.timeZone!==plan.timeZone ||
+            record.plan.discreet!==plan.discreet) return false;
+        if(due.kind==='overlap' && now>=due.start)return false;
+        const current=due.kind==='overlap' ? firstPendingConflict({...record,plan:{...record.plan,
+          conflicts:record.plan.conflicts?.filter(c=>c.id===due.meal)}},now,end) :
+          nextPersonalMeal(record,due.start-1,end);
+        return current?.key===due.key && current.start===due.start;
+      });
+    }
   }
 }
 

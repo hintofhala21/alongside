@@ -23,7 +23,8 @@ globalThis.AlongsideCalendar = (() => {
     function planFor(id) {
       if (!id || getProfileId()!==id || canShare?.()!==true)return null;
       const plan=getPlan();
-      return {timeZone:plan.timeZone,discreet:plan.discreet,slots:plan.slots.map(s=>({id:s.id,time:s.time}))};
+      return {timeZone:plan.timeZone,discreet:plan.discreet,slots:plan.slots.map(s=>({id:s.id,time:s.time})),
+        ...(plan.overrides?.length?{overrides:plan.overrides}:{}),...(plan.conflicts?.length?{conflicts:plan.conflicts}:{})};
     }
     async function makeEntry(id) {
       const key=hex(crypto.getRandomValues(new Uint8Array(32)));
@@ -46,10 +47,10 @@ globalThis.AlongsideCalendar = (() => {
       const reply=await fetcher(base+'/v1/plans/'+entry.id,{method:'PUT',headers,body:signature,credentials:'omit',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(15000)});
       if(reply.status===410){clear(id);throw Error('expired');}
       if(!reply.ok)throw Error('update');
-      const {expires}=await reply.json();
+      const {expires,personalAlertsAvailable}=await reply.json();
       // Other tabs may have just disconnected while this tab waited for a reply.
       if (read(id)?.key!==entry.key)return;
-      save(id,{...entry,active:true,signature,expires});
+      save(id,{...entry,active:true,signature,expires,personalAlertsAvailable:personalAlertsAvailable===true});
     }
     async function disconnect() {
       const id=getProfileId();
@@ -139,7 +140,7 @@ globalThis.AlongsideCalendar = (() => {
       });
     }
     refresh();
-    return {refresh,disconnect,isConnected:()=>Boolean(read(getProfileId())?.active)};
+    return {refresh,disconnect,personalAlertsAvailable:()=>Boolean(read(getProfileId())?.personalAlertsAvailable),isConnected:()=>Boolean(read(getProfileId())?.active)};
   }
   return {mount};
 })();

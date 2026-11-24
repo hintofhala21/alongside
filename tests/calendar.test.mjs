@@ -117,3 +117,25 @@ test('calendar consent, owner confirmation, retries, updates, disconnect and age
  assert.equal((await request(new URL(link.href).pathname)).status,404);
  shared=false;await controller.refresh();assert.equal(container.hidden,true);assert.equal(button('Review calendar connection'),undefined);
 });
+
+test('a dated edit moves one event on its original UID, omits busy details and cannot activate another feed',async t=>{
+  const now=Date.parse('2026-11-24T06:00:00Z'); t.mock.method(Date,'now',()=>now);
+  const {request,env}=service();
+  const response=await request(path,write('PUT',plan,{'If-None-Match':'*'}));
+  assert.equal((await response.json()).personalAlertsAvailable,false);
+  const get=async()=> (await request(path+'.ics')).text();
+  const event=(feed,date)=>feed.split('BEGIN:VEVENT').find(e=>e.includes('-'+date+'-2@alongside'));
+  const old=event(await get(),'20261124');const uid=old.match(/UID:[^\r]+/)[0];
+  const change={date:'2026-11-24',id:'lunch',time:'14:30'};
+  const changed={...plan,overrides:[change],conflicts:[change]};
+  assert.equal((await request(path,write('PUT',changed))).status,200);
+  const feed=await get();
+  assert.ok(event(feed,'20261124').includes(uid));assert.match(event(feed,'20261124'),/DTSTART:20261124T113000Z/);
+  assert.match(event(feed,'20261125'),/DTSTART:20261125T093000Z/);
+  assert.doesNotMatch(feed,/overlap|conflict|busy/i);
+  assert.equal((await env.CALENDARS.get(id).store.get('plan')).plan.conflicts,undefined);
+  for (const invalid of [{...change,title:'Private meeting'},{...change,date:'2026-02-30'},{...change,id:'unknown'}])
+    assert.equal((await request(path,write('PUT',{...plan,overrides:[invalid]}))).status,400);
+  assert.equal((await request(path,write('PUT',plan))).status,200);
+  assert.match(event(await get(),'20261124'),/DTSTART:20261124T093000Z/);
+});

@@ -318,6 +318,13 @@
         <section class="layout-2 panel stack">
           <h2>Calendar reminders</h2>
           <div id="calendar-connect" class="stack"></div>
+          <section class="stack" aria-labelledby="apple-busy-heading">
+            <h3 id="apple-busy-heading">Check today’s plan against Apple Calendar</h3>
+            <p>Use the Calendar helper on Mac or Shortcuts on iPhone to check today’s appointment times. You choose which calendar to share. Run a fresh check after an appointment changes.</p>
+            <div><a class="action outline" href="./apple-calendar.html" target="_blank" rel="noopener noreferrer">Set up an Apple Calendar check</a></div>
+            <div id="apple-busy-review" class="stack"></div>
+            <p id="apple-busy-status" class="status" role="status"></p>
+          </section>
           <details><summary>Download a week instead</summary>
             <p>Download the next seven days of meal, snack, optional water, and check-in reminders using your chosen time zone.</p>
             <button type="button" id="download-calendar" class="action outline">Download calendar reminders</button>
@@ -472,6 +479,7 @@
 <script src="./assets/library.js" defer></script>
 <script src="./assets/meal-ideas.js" defer></script>
 
+<script src="./assets/apple-calendar.js" defer></script>
 <script src="./assets/calendar.js" defer></script>
 <script src="./assets/whatsapp.js" defer></script>
 <script src="./assets/chat.js" defer></script>

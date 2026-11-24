@@ -3,19 +3,45 @@ const names = Object.freeze({
   dinner: 'Dinner', evening: 'Evening snack', water: 'Water reminder', checkin: 'Daily check-in'
 });
 export const DAY = 86400000;
+export function isLocalDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const stamp = Date.parse(value+'T00:00:00Z');
+  return Number.isFinite(stamp) && new Date(stamp).toISOString().slice(0,10) === value;
+}
+
+const wallTime = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+function datedEntries(rows, slotIds) {
+  if (!Array.isArray(rows) || rows.length > 8) throw Error('Invalid dated reminders');
+  const seen = new Set();
+  return rows.map(row=>{
+    if (!row || Object.keys(row).some(k=>!['date','id','time'].includes(k)) ||
+        !isLocalDate(row.date) || !slotIds.has(row.id) || typeof row.time !== 'string' || !wallTime.test(row.time))
+      throw Error('Invalid dated reminder');
+    const key=row.date+'/'+row.id;
+    if (seen.has(key)) throw Error('Duplicate dated reminder');
+    seen.add(key);
+    return {date:row.date,id:row.id,time:row.time};
+  });
+}
 export function normalizePlan(input) {
-  if (!input || Object.keys(input).some(key => !['slots', 'timeZone', 'discreet'].includes(key)) ||
+  if (!input || Object.keys(input).some(key => !['slots','timeZone','discreet','overrides','conflicts'].includes(key)) ||
       typeof input.timeZone !== 'string' || input.timeZone.length > 80 || typeof input.discreet !== 'boolean' ||
       !Array.isArray(input.slots) || input.slots.length < 1 || input.slots.length > 8) throw Error('Invalid plan');
   const zone = new Intl.DateTimeFormat('en', {timeZone: input.timeZone}).resolvedOptions().timeZone;
   const seen = new Set();
   const slots = input.slots.map(slot => {
     if (!slot || Object.keys(slot).some(key => !['id', 'time'].includes(key)) || typeof slot.id !== 'string' || !Object.hasOwn(names, slot.id) ||
-        seen.has(slot.id) || typeof slot.time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(slot.time)) throw Error('Invalid reminder');
+        seen.has(slot.id) || typeof slot.time !== 'string' || !wallTime.test(slot.time)) throw Error('Invalid reminder');
     seen.add(slot.id);
     return {id: slot.id, time: slot.time};
   });
-  return {timeZone: zone, discreet: input.discreet, slots};
+  const plan = {timeZone: zone, discreet: input.discreet, slots};
+  for (const key of ['overrides','conflicts']) {
+    if (input[key] === undefined) continue;
+    const entries = datedEntries(input[key],seen);
+    if (entries.length) plan[key] = entries;
+  }
+  return plan;
 }
 const stamp = ms => new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 
@@ -37,7 +63,10 @@ export function* calendarOccurrences(plan, {expires}, now, days = 28) {
     // Surround each local date with offsets on both sides, including half-hour DST changes.
     const earlier = offset(day-DAY);
     const later = offset(day+DAY);
-    for (const slot of plan.slots) {
+    const date = new Date(day).toISOString().slice(0,10);
+    for (const recurring of plan.slots) {
+      const override = plan.overrides?.find(row=>row.date===date && row.id===recurring.id);
+      const slot = override ? {id:recurring.id,time:override.time} : recurring;
       const [hour, minute] = slot.time.split(':').map(Number);
       const wall = day + (hour*60+minute)*60000;
       let start = wall-earlier;
@@ -47,7 +76,7 @@ export function* calendarOccurrences(plan, {expires}, now, days = 28) {
         start = candidates.find(t => scene(t) === wall) ?? wall-earlier;
       }
       if (start >= expires) continue;
-      yield {slot, start, date: stamp(day).slice(0,8)};
+      yield {slot, start, date: date.replaceAll('-','')};
     }
   }
 }

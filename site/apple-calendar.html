@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Check Apple Calendar · Alongside</title>
+<link rel="stylesheet" href="./assets/styles.css">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<main class="legal-page stack">
+<a href="./#reminders">Return to reminders</a>
+<h1>Check Apple Calendar</h1>
+<p>Choose the appointments that make you busy today. Alongside compares the selected times with your plan. First, finish your profile and save your plan on the <a href="https://hintofhala21.github.io/alongside/">regular Alongside website</a> in your default browser on this device. The helper opens that plan when you run it.</p>
+<section class="panel stack">
+<h2>On a Mac</h2>
+<div><a class="action" href="./assets/Alongside-Calendar.applescript" download="Alongside-Calendar.applescript">Download the Calendar helper</a></div>
+<ol>
+<li>Open the downloaded file in <strong>Script Editor</strong>, which comes with your Mac. Click the triangular <strong>Run</strong> button.</li>
+<li>Choose <strong>Choose calendars</strong>. Allow Script Editor to access Calendar if your Mac asks. Select your appointment calendar.</li>
+<li>Pick the appointments that make you busy. Leave free time and Alongside reminders unchecked. Choose <strong>Open Alongside</strong> to review any overlaps.</li>
+</ol>
+<p>The helper shows timed entries Calendar makes available for today, up to 100. Check the list before continuing. For a repeating appointment missing from the list, use the Shortcuts steps below on Mac or iPhone.</p>
+</section>
+<section class="panel stack">
+<h2>On an iPhone or iPad</h2>
+<p>Use Apple’s <strong>Shortcuts</strong> app to create this check once. Then tap the shortcut whenever you want to check today’s plan.</p>
+<details><summary>Build the Calendar shortcut</summary>
+<ol>
+<li>Tap <strong>+</strong> in Shortcuts. Name the shortcut <strong>Alongside Calendar</strong>. Add <strong>Find Calendar Events</strong>. Set <strong>Start Date is today</strong> and <strong>Is All Day is false</strong>. Set the limit to 100.</li>
+<li>Add <strong>Choose from List</strong> using the calendar events. Turn on <strong>Select Multiple</strong>. Leave <strong>Select All Initially</strong> off.</li>
+<li>Add <strong>Repeat with Each</strong> using <strong>Selected Items</strong>. Put the next three steps inside that repeat.</li>
+<li>Add <strong>Get Details of Calendar Events</strong>. Choose <strong>Start Date</strong> from <strong>Repeat Item</strong>. Add <strong>Format Date</strong>, select <strong>ISO 8601</strong> and turn on <strong>Include ISO 8601 Time</strong>.</li>
+<li>Add another <strong>Get Details of Calendar Events</strong>. Select <strong>End Date</strong> and set its input back to <strong>Repeat Item</strong>. Format that date with the same settings.</li>
+<li>Add <strong>Text</strong>. In one line insert the first formatted date, type the character <code>|</code>, then insert the second formatted date. Insert the two date variables from the actions above.</li>
+<li>After <strong>End Repeat</strong>, add <strong>Combine Text</strong>. Choose <strong>Repeat Results</strong> with <strong>New Lines</strong>. Add <strong>URL Encode</strong> for the combined text.</li>
+<li>Add <strong>URL</strong>. Type <code>https://hintofhala21.github.io/alongside/#apple-busy=</code> and insert the encoded text variable immediately after the equals sign. Add <strong>Open URLs</strong> using that URL.</li>
+</ol>
+</details>
+<p>Tap the shortcut and allow Calendar access when Apple asks. Select busy appointments only, then review the results in Alongside. Shortcuts searches appointments starting today, so check overnight events separately.</p>
+</section>
+<section class="panel stack">
+<h2>What gets shared</h2>
+<p>Your selection opens in Alongside as start and end times. Appointment names and locations stay in Apple Calendar and the local picker. Run the check again when your appointments change. Anyone with the generated link can see the selected times, so keep that link private.</p>
+</section>
+</main>
+</body>
+</html>
