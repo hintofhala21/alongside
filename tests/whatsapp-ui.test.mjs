@@ -104,7 +104,7 @@ test('removing snacks preserves shared meal times and waits for WhatsApp before 
   const data={settings:{snacks:true,water:false,discreet:true},times:{morning:'08:00',dinner:'20:00'}};
   const calls=[];let answer,ready;
   const ui={data,profile:{id:'test'},record:()=>data,zone:()=>'Asia/Riyadh',editingReminders:false,
-    whatsappController:{retainSchedule:slots=>{calls.push(Array.from(slots,s=>s.time));return new Promise(resolve=>{answer=resolve;});},render(){}},
+    whatsappController:{reconcileSavedPlan:slots=>{calls.push(Array.from(slots,s=>s.time));return new Promise(resolve=>{answer=resolve;});},render(){}},
     persist:()=>{ready=true;return true;},calendarController:{refresh:async()=>true,isConnected:()=>true}};
   const save=runInNewContext(source('const mealSlots =','const byId =')+source('function activeEatingSlots(', 'function formatTime(')+source('function withinWaterWindow(', 'function renderReminders(')+source('function reminderPlan(', 'function syncReminderPlan(')+';saveReminderChange;',ui);
   const status={};const first=save({settings:{...data.settings,snacks:false}},status);
@@ -133,4 +133,18 @@ test('WhatsApp browser controller narrows active schedules, clears stale pending
     if(variant==='active'){assert.deepEqual(ui.remote.times,['08:00','12:30']);assert.equal(ui.el('stop').hidden,false);}
     if(variant==='unconfirmed'){assert.equal(ui.data.size,1);assert.ok(ui.remote.times.includes('10:30'));assert.match(ui.el('status').textContent,/STOP/);}
   }
+});
+
+test('a confirmed opt-in follows all saved times and snack changes without renewal or another profile receiving them',async()=>{
+  const ui=setup();await ui.controller.refresh();await ui.connect();
+  ui.remote.status='active';await ui.controller.refresh(true);
+  ui.plan.timeZone='Europe/Paris';
+  ui.plan.slots=[{id:'breakfast',time:'09:00'},{id:'lunch',time:'14:00'},{id:'morning',time:'11:00'}];
+  assert.ok(await ui.controller.reconcileSavedPlan(ui.plan.slots));
+  assert.deepEqual(ui.remote.times,['09:00','11:00','14:00']);assert.equal(ui.remote.timeZone,'Europe/Paris');
+  assert.equal(ui.remote.renew,false);
+  ui.plan.slots.splice(2,1);
+  assert.ok(await ui.controller.reconcileSavedPlan(ui.plan.slots));assert.deepEqual(ui.remote.times,['09:00','14:00']);
+  ui.person.id='a-different-profile';const count=ui.requests.length;
+  assert.ok(await ui.controller.reconcileSavedPlan([{id:'breakfast',time:'07:00'}]));assert.equal(ui.requests.length,count);
 });

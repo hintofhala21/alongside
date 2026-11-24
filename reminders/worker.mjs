@@ -103,7 +103,7 @@ async function siteRequest(request,env,path) {
   if (!match || !['GET','PATCH','DELETE'].includes(method)) return err(404,'Not found');
   const token=tokenFrom(request);
   if (!token) return err(404,'Subscription not found');
-  let plan,id,retainTimes;
+  let plan,id,retainTimes,renew=true;
   try {id=env.REMINDERS.idFromString(match[1]);} catch {return err(404,'Subscription not found');}
   if (method==='PATCH') {
     let input;
@@ -112,11 +112,13 @@ async function siteRequest(request,env,path) {
       retainTimes=readTimes(input.retainTimes);
       if(!retainTimes || Object.keys(input).length!==1)return err(400,'Choose valid retained times');
     }else{
+      if(input?.renew!==undefined && typeof input.renew!=='boolean')return err(400,'Invalid renewal option');
+      renew=input?.renew!==false;
       plan=readSchedule(input);
       if(!plan)return err(400,'Choose a valid schedule and confirm consent');
     }
   }
-  return call(env,id,'manage',{method,plan,retainTimes,tokenHash:await hash(token)});
+  return call(env,id,'manage',{method,plan,retainTimes,renew,tokenHash:await hash(token)});
 }
 
 export default {async fetch(request,env) {
@@ -248,9 +250,13 @@ export class ReminderStore {
     }
     if (data.method==='PATCH' && !retain) {
       if (selected!==active) return err(409,'Confirm the number before changing the schedule');
+      const keepDue=selected.next.at<=now && selected.plan.timeZone===data.plan.timeZone &&
+        data.plan.times.includes(selected.next.key.slice(-5));
+      if (selected.plan.times.some(time=>!data.plan.times.includes(time)) || selected.plan.timeZone!==data.plan.timeZone)
+        state.pending=[];
       selected.plan=data.plan;
-      selected.next=nextSlot(data.plan,now,selected.lastKey);
-      selected.expiresAt=now+activeLife;
+      if(!keepDue) selected.next=nextSlot(data.plan,now,selected.lastKey);
+      if(data.renew!==false) selected.expiresAt=now+activeLife;
       await this.save(state);
     }
     return json({status:selected===active?'active':'pending',...selected.plan,expiresAt:selected.expiresAt,lastDelivery:selected.lastDelivery});

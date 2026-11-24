@@ -259,3 +259,11 @@ test('an obsolete pending confirmation cannot turn withdrawn snack times back on
   assert.equal((await(await old.manage('PATCH',{retainTimes:['08:00']})).json()).status,'cancelled');
   await hook({text:old.command});assert.equal((await old.manage()).status,404);
 });
+
+test('automatic schedule changes retain the original expiry when all meal times move',async t=>{
+  let now=Date.parse('2026-11-24T06:00:00Z');t.mock.method(Date,'now',()=>now);
+  const {enroll,hook}=fixture(),e=await enroll();await hook({text:e.command});
+  const original=await (await e.manage()).json(); now+=day;
+  const changed=await (await e.manage('PATCH',{...good,times:['09:00','14:00','19:00'],renew:false})).json();
+  assert.deepEqual(changed.times,['09:00','14:00','19:00']);assert.equal(changed.expiresAt,original.expiresAt);
+});

@@ -572,7 +572,7 @@ function renderRoute(moveFocus) {
   if (page === "today") { renderToday(); renderTasks(); }
   if (page === "care") renderCare();
   if (page === "learn") renderLearning();
-  if (page === "reminders") { if(whatsappController)void reconcileSavedReminders().then(()=>whatsappController.refresh()); calendarController?.refresh(); }
+  if (page === "reminders") { if(whatsappController)void whatsappController.refresh().then(()=>reconcileSavedReminders()); calendarController?.refresh(); }
   document.title = translate(pageNames[page]) + " · Alongside";
   if (moveFocus) {
     window.scrollTo(0, 0);
@@ -1049,7 +1049,7 @@ async function saveReminderChange(patch,status,success='') {
   editingReminders=true;
   try{
     status.textContent='';
-    if(mustNarrow && whatsappController && !await whatsappController.retainSchedule(next)){
+    if(whatsappController && !await whatsappController.reconcileSavedPlan(next)){
       status.textContent='Change not saved. WhatsApp could not confirm the new schedule. Try again or reply STOP in WhatsApp.';
       return false;
     }
@@ -1058,6 +1058,7 @@ async function saveReminderChange(patch,status,success='') {
     Object.assign(original,patch);
     if(!persist(false)){
       Object.assign(original,oldValues);
+      await whatsappController?.reconcileSavedPlan(reminderPlan(original).slots);
       status.textContent='Your changes could not be saved on this device. Please try again.';
       return false;
     }
@@ -1073,6 +1074,7 @@ async function saveReminderChange(patch,status,success='') {
   }finally{editingReminders=false;}
 }
 function syncReminderPlan() {
+  if(whatsappController && !editingReminders)void reconcileSavedReminders();
   whatsappController?.render();
   calendarController?.refresh();
 }
@@ -1098,7 +1100,7 @@ async function reconcileSavedReminders(){
   }
 }
 void reconcileSavedReminders();
-window.addEventListener("focus",()=>{if(location.hash==="#reminders")void whatsappController.refresh(true);});
+window.addEventListener("focus",()=>{if(location.hash==="#reminders")void whatsappController.refresh(true).then(()=>reconcileSavedReminders());});
 initializeRecoveryUpdate();
 initializeFreeFeatures();
 renderSources();

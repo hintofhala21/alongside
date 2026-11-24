@@ -7,7 +7,7 @@
     offline: 'WhatsApp reminders are currently unavailable. You can use calendar reminders.',
     pending: 'Send the prepared message from your number within 15 minutes, then check the status here.',
     active: 'WhatsApp reminders are on. Reply STOP in WhatsApp or turn them off here.',
-    changed: 'Your reminder times have changed. Choose Update times to apply them to WhatsApp.',
+    changed: 'Your reminder times have changed. Choose “Follow my plan and renew for 30 days” to update and renew WhatsApp reminders.',
     ended: 'This connection has ended. You can connect again.',
     error: 'Could not confirm the connection. Try again. To stop reminders, reply STOP in WhatsApp.',
     blocked: 'Phone reminders are unavailable for this profile.'
@@ -49,12 +49,10 @@
       else storage.removeItem(key(current));
       state=next;
     }
-    function plan() {
-      const {timeZone,slots}=getPlan();
+    function plan({timeZone,slots}=getPlan()) {
       return {timeZone, times:[...new Set(slots.filter(s=>s.id!=='checkin').map(s=>s.time))].sort()};
     }
-    function matchesPlan() {
-      const p=plan();
+    function matchesPlan(p=plan()) {
       return state?.timeZone===p.timeZone && JSON.stringify([...state.times].sort())===JSON.stringify(p.times);
     }
     function render() {
@@ -137,7 +135,7 @@
         const url=activationLink(result.activationUrl);
         if(!url || !result.id || !result.token || result.status!=='pending')throw Error('Unexpected response');
         if(!valid() || load(current)){await request(path(result),'DELETE',undefined,result.token);return;}
-        try{save({...requested,id:result.id,token:result.token,status:'pending',activationUrl:url});}
+        try{save({...requested,id:result.id,token:result.token,status:'pending',followPlan:true,activationUrl:url});}
         catch(e){await request(path(result),'DELETE',undefined,result.token);throw e;}
         phone.value='';consent.checked=false;message='pending';
       });
@@ -173,23 +171,31 @@
       });
     }
     async function reconcileSavedPlan(slots) {
+      const id=getProfileId();
       selectProfile();
+      while(busy && working){await working;selectProfile();}
+      if(!id || id!==current)return false;
       if(!state)return true;
-      const wanted=new Set(slots.filter(s=>s.id!=='checkin').map(s=>s.time));
-      return state.times.some(t=>!wanted.has(t)) ? retainSchedule(slots) : true;
+      const requested=plan({...getPlan(),slots});
+      if(matchesPlan(requested))return true;
+      if(state.status==='active' && state.followPlan && canConnect())return updatePlan(requested,false);
+      return state.times.some(t=>!requested.times.includes(t)) ? retainSchedule(slots) : true;
+    }
+    async function updatePlan(requested,renew) {
+      return perform(async valid=>{
+        const token=state.token;
+        const updated=await request(path(state),'PATCH',{...requested,consent:true,renew},token);
+        if(!valid() || load(current)?.token!==token)return false;
+        save({...state,...details(updated),followPlan:true});message='active';
+        return true;
+      });
     }
     async function applyChanges() {
       if(!state || state.status!=='active' || !canConnect())return;
-      await perform(async valid=>{
-        const requested=plan();
-        const token=state.token;
-        const updated=await request(path(state),'PATCH',{...requested,consent:true},token);
-        if(!valid() || load(current)?.token!==token)return;
-        save({...state,...details(updated)});message='active';
-      });
+      return updatePlan(plan(),true);
     }
     form.addEventListener('submit',enroll);phone.addEventListener('input',()=>phone.setCustomValidity(''));
-    check.addEventListener('click',()=>refresh(true));stop.addEventListener('click',disconnect);update.addEventListener('click',applyChanges);
+    check.addEventListener('click',async()=>{await refresh(true);await reconcileSavedPlan(getPlan().slots);});stop.addEventListener('click',disconnect);update.addEventListener('click',applyChanges);
     render();
     return {refresh,render,disconnect,retainSchedule,reconcileSavedPlan};
   }

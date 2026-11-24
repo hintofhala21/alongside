@@ -10,6 +10,8 @@ test('personal meal times follow the calendar across edits and ignore other remi
     {id:'dinner',time:'19:00'},{id:'afternoon',time:'11:05'},{id:'water',time:'11:15'},
     {id:'lunch',time:'13:00'},{id:'breakfast',time:'08:00'}]};
   const record={plan,expires:end,uid:'example',revised:now,sequence:1};
+  assert.equal(nextPersonalMeal(record,now,end).meal,'afternoon');
+  plan.slots=plan.slots.filter(slot=>slot.id!=='afternoon');
   assert.equal(nextPersonalMeal(record,now,end).start,Date.parse('2026-11-24T10:00:00Z'));
   plan.slots.find(slot=>slot.id==='lunch').time='14:30';
   const next=nextPersonalMeal(record,now,end);

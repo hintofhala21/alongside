@@ -1,13 +1,14 @@
 // Owner-only scheduling reads the same event occurrences as the subscribed calendar.
 import {calendarOccurrences} from '../calendar/feed.mjs';
 
-const meals = new Set(['breakfast','lunch','dinner']);
+const labels = new Map([['breakfast','breakfast time'], ['lunch','lunchtime'], ['dinner','dinnertime'],
+  ['morning','time for your morning snack'], ['afternoon','time for your afternoon snack'], ['evening','time for your evening snack']]);
 
 export function nextPersonalMeal(record, now, stopAt, alreadySent = []) {
   if (!record || !Number.isFinite(stopAt) || now >= stopAt) return null;
   let next = null;
   for (const {slot,start,date} of calendarOccurrences(record.plan,record,now,3)) {
-    if (!meals.has(slot.id) || start <= now || start >= stopAt) continue;
+    if (!labels.has(slot.id) || start <= now || start >= stopAt) continue;
     const key = date + '-' + slot.id;
     if (alreadySent.includes(key) || (next && next.start <= start)) continue;
     next = {key, start, meal:slot.id};
@@ -39,9 +40,8 @@ export async function sendPersonalMeal(endpoint, due, plan, fetcher = fetch) {
   headers['MCP-Protocol-Version'] = init.protocolVersion;
   await rpc('notifications/initialized',{});
   const time = new Intl.DateTimeFormat('en',{hour:'numeric',minute:'2-digit',timeZone:plan.timeZone}).format(due.start);
-  const wording = {breakfast:'breakfast time', lunch:'lunchtime', dinner:'dinnertime'};
   const event = plan.discreet ? 'A little reminder from Breeze 🌿' :
-    'A little reminder from Breeze: it’s '+wording[due.meal]+' 🌿';
+    'A little reminder from Breeze: it’s '+labels.get(due.meal)+' 🌿';
   await rpc('tools/call',{name:'execute_zapier_write_action',arguments:{selected_api:'WhatsAppNotificationsCLIAPI',
     action:'send_message',tool_name:'whatsapp_notifications_send_message',params:{template:'calendar_reminder',
       dynamic_properties:{event_name:event,date_and_time:time}}}},2);

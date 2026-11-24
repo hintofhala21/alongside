@@ -1,6 +1,6 @@
 # Alongside WhatsApp reminders
 
-This Worker handles the schedule when the website is closed. It runs separately from Breeze. The browser’s setup form sends the chosen number, time zone and reminder times after consent. The person using that number confirms by sending the prefilled message in WhatsApp. The Worker accepts confirmations and STOP only from signed Meta webhooks for the configured sender.
+This Worker handles the schedule when the website is closed. It runs separately from Breeze. The browser’s setup form sends the chosen number, time zone and reminder times after consent. When a confirmed user agrees to follow their plan, saving the plan updates that subscription without extending its expiry. The person using that number confirms by sending the prefilled message in WhatsApp. The Worker accepts confirmations and STOP only from signed Meta webhooks for the configured sender.
 
 ## Connect the business sender
 
@@ -45,6 +45,6 @@ The command sends once. Check the Send Message entry in Zapier MCP History and t
 
 ## Personal meal reminders during the Zapier trial
 
-The calendar service can attach personal WhatsApp reminders to one explicitly selected calendar subscription. It uses the stored Alongside plan that produces the subscribed calendar. Only breakfast, lunch and dinner create WhatsApp alarms. Saving a new meal time updates the alarm. Stopping calendar sharing or reaching the trial cutoff ends these sends. Discreet calendar settings also hide the meal name in WhatsApp.
+The calendar service can attach personal WhatsApp reminders to one explicitly selected calendar subscription. It uses the stored Alongside plan that produces the subscribed calendar. Breakfast, lunch, dinner and enabled snacks create personal WhatsApp alarms. Saving a new meal time updates the alarm. Stopping calendar sharing or reaching the trial cutoff ends these sends. Discreet calendar settings also hide the meal name in WhatsApp.
 
 The owner configures two secrets and a cutoff on the calendar Worker: `PERSONAL_FEED_ID` (the read ID from the owner's connected Alongside calendar), `PERSONAL_ZAPIER_URL` (the private MCP connection), and `PERSONAL_STOP_AT` (the configured stop time, midnight on December 8, 2026 in Riyadh). After setup, use **Update or renew subscription** on that profile to start the alarms. The personal sender stays inactive without all three settings. Each alarm calls only the WhatsApp Notifications action. The message uses the short local time and Breeze's meal label inside Zapier's template.
