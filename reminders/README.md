@@ -34,3 +34,11 @@ Only distinct scheduled times send a reminder. During daylight-saving changes an
 Run `node --test tests/whatsapp-reminders.test.mjs` from the repository root to test consent, signature validation, phone ownership, cancellation, expiry, time zones and delivery with a simulated sender.
 
 [Meta WhatsApp Cloud API](https://developers.facebook.com/documentation/business-messaging/whatsapp/overview/) · [Meta pricing](https://business.whatsapp.com/products/platform-pricing) · [Cloudflare Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/)
+
+## Personal Zapier WhatsApp test
+
+The project owner can send one reminder to the WhatsApp number linked to their Zapier account. In the Zapier MCP server, configure WhatsApp Notifications → Send Message with the Calendar Reminder template and event name “Meal time”. Check the plan allowance first. Run `python3 reminders/test-zapier.py` from the project root and paste the private connection URL at the hidden prompt. The test also accepts the URL from a private `ZAPIER_MCP_URL` environment variable. Keep it out of the website and repository.
+
+The command sends once. Check the Send Message entry in Zapier MCP History and the linked phone for receipt. If a connection times out after submission, check History before another attempt. The shared website's reminder subscriptions use their own sender. This personal integration can only reach the account owner's phone. Zapier lists WhatsApp Notifications as a premium app.
+
+[Zapier WhatsApp Notifications requirements](https://help.zapier.com/hc/en-us/articles/40852749640589-How-to-get-started-with-WhatsApp-Notifications-on-Zapier)
