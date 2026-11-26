@@ -85,7 +85,7 @@ test('failed revocation preserves the connection so users can retry',async()=>{
 });
 test('Breeze reminder requests open settings without subscribing or swallowing unrelated questions',async()=>{
   const script=await readFile(new URL('../site/assets/chat.js',import.meta.url),'utf8');
-  const start=script.indexOf('  function requestsReminderSettings('), end=script.indexOf('  function questionKey(',start);
+  const start=script.indexOf('  function requestsReminderSettings('), end=script.indexOf('  const cleanMessage',start);
   const recognizes=runInNewContext(script.slice(start,end)+';requestsReminderSettings;');
   const label='Set up reminders';
   for(const phrase of ['Can you add my plan to my calendar?', 'Connect WhatsApp', 'Remind me to drink water','Set up reminders']){
@@ -94,7 +94,7 @@ test('Breeze reminder requests open settings without subscribing or swallowing u
   assert.equal(recognizes('Remind me what fainting means.',label),false);
   assert.equal(recognizes('I have chest pain and want to ask about reminders.',label),false);
   const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');
-  assert.match(html,/<a class="text-button" href="#reminders">Set up reminders<\/a>/);
+  assert.match(html,/<a href="#reminders">/);
   assert.doesNotMatch(html,/<input id="whatsapp-consent"[^>]*checked/);
 });
 

@@ -1,3 +1,5 @@
+import {searchPlaces} from './places.mjs';
+import mealTerms from '../shared/meal-terms.json' with {type:'json'};
 import { accountAllowed } from './account.mjs';
 import publicConfig from '../site/config.json' with { type: 'json' };
 import { supportedLanguage } from '../shared/languages.mjs';
@@ -43,6 +45,12 @@ export class AlongsideHub {
       }
       if(request.method!=='POST')fail('Not found.',404);
       const data=await body(request);
+      if(path==='/places'){
+        if(!this.env.GOOGLE_PLACES_API_KEY)fail('Live Google Places search is not configured.',503);
+        await this.counter([['places:'+today,100,now+DAY]]);
+        try{return json({places:await searchPlaces(data,this.env.GOOGLE_PLACES_API_KEY,this.env.TEST_FETCH||fetch)});}
+        catch(error){fail(error.status?error.message:'Google Places is unavailable. Try again later.',error.status||502);}
+      }
       if(path==='/session') {
         const ip=request.headers.get('X-Demo-Client')||'unknown';await this.counter([['login:'+ip+':'+today,20,now+DAY],['login-total:'+today,500,now+DAY]]);
         if(data.mode!=='guided' && !await accountAllowed(request,publicConfig.firebase))fail('Sign in to Alongside first.',401);
@@ -62,8 +70,17 @@ export class AlongsideHub {
       if(path==='/chat') {
         if(!uuid.test(data.conversationId)||!uuid.test(data.requestId))fail('Invalid conversation.');
         const guided=session.mode==='guided';
-        if(guided && (Object.hasOwn(data,'message') || !Object.hasOwn(starters,data.scenario)))fail('Choose a prepared question.');
-        const message=guided?starters[data.scenario]:session.mode==='synthetic'?scenarios[data.scenario]:data.message;
+        const mealRequest=guided && data.scenario==='mealIdeas';
+        let message;
+        if(mealRequest){
+          if(Object.hasOwn(data,'message') || !Array.isArray(data.ingredients) || data.ingredients.length>16 ||
+            !data.ingredients.every(x=>mealTerms.includes(x)) || !['suggest','another'].includes(data.choice))fail('Choose recognized food preferences.');
+          message=(data.choice==='another'?'Suggest different meal ideas, keeping earlier preferences.':'Suggest meal ideas.')+
+            (data.ingredients.length?' Requested ingredients or preferences: '+data.ingredients.join(', ')+'.':'');
+        }else{
+          if(guided && data.scenario !== undefined && (Object.hasOwn(data,'message') || !Object.hasOwn(starters,data.scenario)))fail('Choose a prepared question.');
+          message=guided && data.scenario !== undefined?starters[data.scenario]:session.mode==='synthetic'?scenarios[data.scenario]:data.message;
+        }
         if(typeof message!=='string'||!message.trim()||message.length>messageLimit)fail('Use a message of up to 800 characters.');
         if(session.mode==='synthetic'&&!Object.hasOwn(scenarios,data.scenario))fail('Choose a fictional scenario.');
         const conversationKey='conversation:'+data.conversationId;let conversation=await this.storage.get(conversationKey);
@@ -107,14 +124,16 @@ export class AlongsideHub {
 
 export default {
   async fetch(request,env) {
-    const url=new URL(request.url);const origin=request.headers.get('Origin');const allowed=origin===env.ALLOWED_ORIGIN;
+    const url=new URL(request.url);const origin=request.headers.get('Origin');const localChat=['http://127.0.0.1:4173','http://127.0.0.1:4174'].includes(origin)
+      && ['/session','/chat'].includes(url.pathname);
+    const allowed=Boolean(origin) && (origin===env.ALLOWED_ORIGIN || localChat);
     const cors=allowed?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}:{};
     const finish=response=>{const headers=new Headers(response.headers);for(const [k,v]of Object.entries(cors))headers.set(k,v);return new Response(response.body,{status:response.status,headers});};
-    if(url.pathname==='/status'&&request.method==='GET')return finish(json({ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.DEMO_ACCESS_CODE&&env.PUBLISHER_CODE&&env.RATE_SALT&&env.HUB),mode:'adult-support-and-competition-demo'}));
+    if(url.pathname==='/status'&&request.method==='GET')return finish(json({placesReady:Boolean(env.GOOGLE_PLACES_API_KEY&&env.HUB),ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.DEMO_ACCESS_CODE&&env.PUBLISHER_CODE&&env.RATE_SALT&&env.HUB),mode:'adult-support-and-competition-demo'}));
     if(!allowed)return json({error:'This website origin is not permitted.'},403);
     if(request.method==='OPTIONS')return finish(new Response(null,{status:204}));
     if(!['GET','POST'].includes(request.method))return finish(json({error:'Method not allowed.'},405));
-    if(env.AI_ENABLED!=='true'||!env.OPENAI_API_KEY||!env.DEMO_ACCESS_CODE||!env.PUBLISHER_CODE||!env.RATE_SALT||!env.HUB)return finish(json({error:'The private AI demo has not been activated yet.'},503));
+    if(url.pathname!=='/places' && (env.AI_ENABLED!=='true'||!env.OPENAI_API_KEY||!env.DEMO_ACCESS_CODE||!env.PUBLISHER_CODE||!env.RATE_SALT||!env.HUB))return finish(json({error:'The private AI demo has not been activated yet.'},503));
     try {
       const client=await hash(env.RATE_SALT+':'+(request.headers.get('CF-Connecting-IP')||'unknown'));
       const headers=new Headers(request.headers);headers.set('X-Demo-Client',client);headers.delete('CF-Connecting-IP');headers.delete('Cookie');

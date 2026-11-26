@@ -1,4 +1,4 @@
-import * as chatPrompt from './prompts/v13.mjs';
+import * as chatPrompt from './prompts/v15.mjs';
 import library from '../shared/library.json' with { type: 'json' };
 
 import { languagePacks } from '../shared/languages.mjs';
@@ -28,7 +28,7 @@ const questions = {
   helped: 'Has anything helped you feel supported in a similar moment?',
   none: ''
 };
-const actions = ['none','checkin','routine','care','human'];
+const actions = ['none','checkin','routine','care','human','week'];
 const information = ['none', ...Object.keys(library.medicalAnswers).filter(k => k !== 'plan')];
 export const scenarios = {
   meal: 'Fictional scenario: Sam has just had a difficult mealtime and wants support.',
@@ -47,7 +47,7 @@ export const starters = Object.freeze({
 });
 const tool = {
   type:'function', name:'prepare_recovery_support', strict:true,
-  description:'Choose a supportive response, a follow-up question, an approved library entry and an optional app action. The application retrieves reviewed facts and prepares the chosen action; it never changes a care plan automatically.',
+  description:'Choose a supportive response, a follow-up question, an approved library entry and an optional app action. The application retrieves reviewed facts and prepares the chosen action; use the week action for requests to fit an existing routine around a calendar. The user reviews any changes in the app.',
   parameters:{type:'object',additionalProperties:false,properties:{
     acknowledgement:{type:'string',enum:Object.keys(support)},
     followup:{type:'string',enum:Object.keys(questions)},
@@ -59,12 +59,12 @@ const tool = {
 const chatTool = {
   ...tool,
   name:'reply_to_visitor',
-  description:'Answer the visitor in your own words or select a sourced health answer.',
+  description:'Choose week to invoke the Mac calendar planner for availability, meal conflicts, or saving a meal schedule. The app runs the calendar tools locally and shows the result. Write food ideas directly in the reply with action none.',
   parameters:{type:'object',additionalProperties:false,properties:{
     reply:{type:'string',description:'The conversational answer itself, or empty for a server-rendered response.'},
     route:{type:'string',enum:['conversation','health','urgent','younger']},
     information:tool.parameters.properties.information,
-    action:{type:'string',enum:[...actions,'meals']}
+    action:{type:'string',enum:actions}
   },required:['reply','route','information','action']}
 };
 
@@ -78,6 +78,7 @@ function renderChat(plan, language) {
     const fallback = 'That question is outside the approved library. You can choose an information topic or bring it to your care team.';
     return {text:localize(entry?.text || fallback),sources:entry?.sources || [],action:plan.action};
   }
+  if(plan.action==='week')return {text:localize('Review your meal times against Mac Calendar below.'),sources:[],action:'week'};
   if (typeof plan.reply !== 'string' || !plan.reply.trim() || plan.reply.length > 4000) throw Error('Invalid reply');
   return {text:plan.reply.trim(), sources:[], action:plan.action};
 }
@@ -92,7 +93,7 @@ export function renderPlan(plan, language='en') {
   const trace = [localize('Breeze selected support and a follow-up using the recent conversation.')];
   if (answer) trace.push(localize('Retrieved approved summary:') + ' ' + localize(answer.title));
   if (plan.action !== 'none') {
-    const label = {checkin:'Check-in',routine:'My plan',care:'Find care',human:'Get human help'}[plan.action];
+    const label = {week:'Review my week',checkin:'Check-in',routine:'My plan',care:'Find care',human:'Get human help'}[plan.action];
     trace.push(localize('Prepared an app action for you to open:') + ' ' + localize(label));
   }
   return {text,sources:answer?.sources||[],action:plan.action,trace,plan};

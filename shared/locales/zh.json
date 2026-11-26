@@ -857,5 +857,22 @@
   "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "在 Apple 日历中打开并保存下载的日程。允许日历发送通知，然后关闭 Alongside 和 WhatsApp。",
   "Save the downloaded event in Calendar before the alert time.": "请在提醒时间之前将下载的日程保存到日历。",
   "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "Alongside 尚未连接 WhatsApp 发送号码。你可以使用下方的日历提醒。",
-  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医疗信息来源和医疗服务目录会在 Alongside 之外打开。各服务自行制定隐私规则、使用条件和收费标准。"
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医疗信息来源和医疗服务目录会在 Alongside 之外打开。各服务自行制定隐私规则、使用条件和收费标准。",
+  "Date of birth (required)": "出生日期（必填）",
+  "Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.": "你的出生日期只保存在此浏览器中。Alongside 仅用它来显示适合你年龄的支持选项。",
+  "Enter a valid date of birth.": "请输入有效的出生日期。",
+  "This account is for people under 18.": "此账户适用于未满 18 岁的用户。",
+  "This account is for people 18 or older.": "此账户适用于 18 岁及以上的用户。",
+  "I agree to send my chat messages.": "我同意发送我的聊天消息。",
+  "If you are in immediate danger or have a medical emergency, call your local emergency number now.": "如果你正处于紧急危险中或遇到医疗紧急情况，请立即拨打当地的紧急电话。",
+  "If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.": "如果你感到很难受，或有伤害自己的想法，免费且保密的危机热线可以帮助你。",
+  "Find a crisis line in your country": "查找你所在国家的危机热线",
+  "Find care near me": "查找我附近的医疗服务",
+  "You can also reach out to your care team or a trusted person. Alongside has no live care team.": "你也可以联系你的护理团队或信任的人。Alongside 没有实时护理团队。",
+  "Add your date of birth to see support options for your age.": "添加你的出生日期，查看适合你年龄的支持选项。",
+  "Add your date of birth": "添加出生日期",
+  "Chat connected. Your messages go to OpenAI for replies.": "聊天已连接。你的消息会发送给 OpenAI 以获取回复。",
+  "Chat connected": "聊天已连接",
+  "This computer sends chat messages to OpenAI. Your profile and check-ins stay on this device.": "这台电脑会将聊天消息发送给 OpenAI。你的个人资料和打卡记录保留在此设备上。",
+  "Water reminders are off.": "饮水提醒已关闭。"
 }

@@ -857,5 +857,22 @@
   "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "ダウンロードした予定をAppleのカレンダーで開いて保存してください。カレンダーの通知を許可したら、AlongsideとWhatsAppを閉じてください。",
   "Save the downloaded event in Calendar before the alert time.": "通知時刻の前に、ダウンロードした予定をカレンダーに保存してください。",
   "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "AlongsideにはWhatsAppの送信元が接続されていません。下のカレンダー通知を利用できます。",
-  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医療情報源や医療機関の一覧は外部サイトで開きます。プライバシーに関する規定、利用条件、料金は各サービスが定めています。"
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "医療情報源や医療機関の一覧は外部サイトで開きます。プライバシーに関する規定、利用条件、料金は各サービスが定めています。",
+  "Date of birth (required)": "生年月日（必須）",
+  "Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.": "生年月日はこのブラウザ内にのみ保存されます。Alongside は年齢に合ったサポートを表示するためだけに使います。",
+  "Enter a valid date of birth.": "正しい生年月日を入力してください。",
+  "This account is for people under 18.": "このアカウントは18歳未満の方向けです。",
+  "This account is for people 18 or older.": "このアカウントは18歳以上の方向けです。",
+  "I agree to send my chat messages.": "チャットメッセージを送信することに同意します。",
+  "If you are in immediate danger or have a medical emergency, call your local emergency number now.": "今すぐ危険がある場合や医療上の緊急事態の場合は、すぐに地域の緊急電話番号に連絡してください。",
+  "If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.": "つらいときや自分を傷つけたいと思うときは、無料で秘密が守られる相談窓口が力になります。",
+  "Find a crisis line in your country": "あなたの国の相談窓口を探す",
+  "Find care near me": "近くの医療機関を探す",
+  "You can also reach out to your care team or a trusted person. Alongside has no live care team.": "ケアチームや信頼できる人に相談することもできます。Alongside にはリアルタイムのケアチームはいません。",
+  "Add your date of birth to see support options for your age.": "生年月日を追加すると、年齢に合ったサポートが表示されます。",
+  "Add your date of birth": "生年月日を追加",
+  "Chat connected. Your messages go to OpenAI for replies.": "チャットに接続しました。返信のためにメッセージが OpenAI に送信されます。",
+  "Chat connected": "チャット接続済み",
+  "This computer sends chat messages to OpenAI. Your profile and check-ins stay on this device.": "このコンピューターはチャットメッセージを OpenAI に送信します。プロフィールとチェックインはこのデバイスに残ります。",
+  "Water reminders are off.": "水分補給のリマインダーはオフです。"
 }

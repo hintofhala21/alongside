@@ -12,6 +12,7 @@ await mkdir(resolve(root, 'build'), { recursive: true });
 // Copy this explicit public folder only. Never copy the repository or environment.
 await cp(resolve(root, 'site'), resolve(root, 'build/site'), { recursive: true });
 const library = JSON.parse(await readFile(resolve(root, 'shared/library.json'), 'utf8'));
+library.mealTerms=JSON.parse(await readFile(resolve(root,'shared/meal-terms.json'),'utf8'));
 await writeFile(resolve(root, 'build/site/assets/library.js'), '"use strict";\nglobalThis.AlongsideLibrary = ' + JSON.stringify(library).replaceAll('<', '\\u003c') + ';\n');
 const runtime = await readFile(resolve(root, 'shared/locale-client.js'), 'utf8');
 // Send the English keys once, even when several languages share the same page.
@@ -43,41 +44,12 @@ if (config.firebase) {
 }
 console.log('Built public files in build/site. No environment variables are included.');
 
-// Serve the same site with isolated, tab-scoped storage for first-visit walkthroughs.
+// Keep previously shared first-visit links working with the regular app.
 const output=resolve(root,'build/site');
-const walkthrough=resolve(output,'first-visit');
-await mkdir(walkthrough,{recursive:true});
+const legacy=resolve(output,'first-visit');
+await mkdir(legacy,{recursive:true});
 for(const name of await readdir(output)){
-  if(name!=='first-visit')await cp(resolve(output,name),resolve(walkthrough,name),{recursive:true});
+  if(!name.endsWith('.html'))continue;
+  const target=name==='index.html'?'../':'../'+name;
+  await writeFile(resolve(legacy,name),'<!doctype html><html lang="en"><meta charset="utf-8"><title>Alongside</title><meta http-equiv="refresh" content="0;url='+target+'"><a href="'+target+'">Open Alongside</a></html>');
 }
-const initializeVisit = `
-(() => {
-  const url=new URL(location.href);
-  const fresh=url.searchParams.has('new');
-  if(fresh || !sessionStorage.getItem('alongside-preview-visit'))
-    sessionStorage.setItem('alongside-preview-visit',crypto.randomUUID());
-  if(fresh){url.searchParams.delete('new');history.replaceState(null,'',url);}
-  const prefix='alongside-preview:'+sessionStorage.getItem('alongside-preview-visit')+':';
-  globalThis.AlongsideVisitStorage={
-    getItem:key=>sessionStorage.getItem(prefix+key),
-    setItem:(key,value)=>sessionStorage.setItem(prefix+key,value),
-    removeItem:key=>sessionStorage.removeItem(prefix+key)
-  };
-})();`;
-// Isolate storage for every shipped browser script, including the locale renderer
-// on the history and privacy pages. Add new features only in the main site.
-const assets=resolve(walkthrough,'assets');
-for(const page of await readdir(walkthrough)){
-  if(!page.endsWith('.html'))continue;
-  const path=resolve(walkthrough,page);
-  const html=await readFile(path,'utf8');
-  if(html.includes('<script '))await writeFile(path,html.replace('<script ', '<script src="./assets/visit-storage.js" defer></script>\n<script '));
-}
-for(const file of await readdir(assets)){
-  if(!file.endsWith('.js'))continue;
-  const path=resolve(assets,file);
-  const source=await readFile(path,'utf8');
-  const scoped='(function(localStorage,sessionStorage){\n'+source+'\n})(AlongsideVisitStorage,AlongsideVisitStorage);';
-  await writeFile(path,scoped);
-}
-await writeFile(resolve(assets,'visit-storage.js'),initializeVisit);

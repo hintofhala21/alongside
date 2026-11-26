@@ -3,7 +3,6 @@
   const screen=document.getElementById('account-screen');
   const card=screen.querySelector('.account-card');
   const isHistory=location.pathname.endsWith('/history.html');
-  const params=new URLSearchParams(location.search);
   const resumeKey='alongside-account-tab';
   const locale=globalThis.AlongsideLocale;
   const preference='alongside-interface-language';
@@ -62,7 +61,7 @@
     card.append(label,button('Continue as an adult',async()=>{
       heading('Sign in to Alongside');notice('Loading…');try{await connect();providers();}catch(e){home();showError(e);}
     }),button('Under 18 · continue on this device',()=>enter(null,crypto.randomUUID()),true));
-    const privacy=item('a','Privacy and pilot limits');privacy.href='./privacy.html';card.append(privacy);
+    const privacy=item('a','Privacy');privacy.href='./privacy.html';card.append(privacy);
   }
   async function connect(){
     if(auth)return;
@@ -109,9 +108,6 @@
       } catch(error){showError(error);}finally{submit.disabled=false;}
     };
     card.append(form);if(!reset&&!create)card.append(button('Reset password',()=>emailForm('reset'),true));card.append(button('Back',providers,true));email.focus();
-  }
-  if(isHistory && (params.get('view')==='showcase'||params.has('demo'))){
-    await loadApp({publicOnly:true,key:name=>'alongside-public:'+name});return;
   }
   try{
     const previous=sessionStorage.getItem(resumeKey);

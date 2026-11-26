@@ -857,5 +857,22 @@
   "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "डाउनलोड किया गया इवेंट Apple Calendar में खोलकर सेव करें। कैलेंडर की सूचनाओं की अनुमति दें, फिर Alongside और WhatsApp बंद कर दें।",
   "Save the downloaded event in Calendar before the alert time.": "अलर्ट के समय से पहले डाउनलोड किया गया इवेंट कैलेंडर में सेव करें।",
   "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "Alongside से कोई WhatsApp प्रेषक नंबर जुड़ा नहीं है। कैलेंडर अलर्ट नीचे उपलब्ध हैं।",
-  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "चिकित्सा स्रोत और देखभाल की निर्देशिकाएँ Alongside के बाहर खुलती हैं। हर सेवा अपनी गोपनीयता नीति, पात्रता और शुल्क तय करती है।"
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "चिकित्सा स्रोत और देखभाल की निर्देशिकाएँ Alongside के बाहर खुलती हैं। हर सेवा अपनी गोपनीयता नीति, पात्रता और शुल्क तय करती है।",
+  "Date of birth (required)": "जन्म तिथि (आवश्यक)",
+  "Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.": "आपकी जन्म तिथि इसी ब्राउज़र में रहती है। Alongside इसका उपयोग केवल आपकी उम्र के अनुसार सहायता विकल्प दिखाने के लिए करता है।",
+  "Enter a valid date of birth.": "कृपया सही जन्म तिथि दर्ज करें।",
+  "This account is for people under 18.": "यह खाता 18 वर्ष से कम उम्र के लोगों के लिए है।",
+  "This account is for people 18 or older.": "यह खाता 18 वर्ष या उससे अधिक उम्र के लोगों के लिए है।",
+  "I agree to send my chat messages.": "मैं अपने चैट संदेश भेजने के लिए सहमत हूँ।",
+  "If you are in immediate danger or have a medical emergency, call your local emergency number now.": "अगर आप तुरंत खतरे में हैं या कोई चिकित्सा आपात स्थिति है, तो अभी अपने स्थानीय आपातकालीन नंबर पर कॉल करें।",
+  "If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.": "अगर आप मुश्किल में हैं या खुद को नुकसान पहुँचाने के बारे में सोच रहे हैं, तो एक मुफ़्त और गोपनीय संकट हेल्पलाइन मदद कर सकती है।",
+  "Find a crisis line in your country": "अपने देश में संकट हेल्पलाइन खोजें",
+  "Find care near me": "मेरे पास देखभाल खोजें",
+  "You can also reach out to your care team or a trusted person. Alongside has no live care team.": "आप अपनी देखभाल टीम या किसी भरोसेमंद व्यक्ति से भी संपर्क कर सकते हैं। Alongside के पास कोई लाइव देखभाल टीम नहीं है।",
+  "Add your date of birth to see support options for your age.": "अपनी उम्र के अनुसार सहायता विकल्प देखने के लिए अपनी जन्म तिथि जोड़ें।",
+  "Add your date of birth": "अपनी जन्म तिथि जोड़ें",
+  "Chat connected. Your messages go to OpenAI for replies.": "चैट जुड़ गई है। जवाब पाने के लिए आपके संदेश OpenAI को भेजे जाते हैं।",
+  "Chat connected": "चैट जुड़ गई",
+  "This computer sends chat messages to OpenAI. Your profile and check-ins stay on this device.": "यह कंप्यूटर चैट संदेश OpenAI को भेजता है। आपकी प्रोफ़ाइल और चेक-इन इसी डिवाइस पर रहते हैं।",
+  "Water reminders are off.": "पानी के रिमाइंडर बंद हैं।"
 }

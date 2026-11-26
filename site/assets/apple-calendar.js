@@ -18,7 +18,7 @@ globalThis.AlongsideAppleCalendar=(()=>{
     });
   }
   function compare(slots,ranges,date,zone,toUTC,now=Date.now()){
-    const occupied=start=>ranges.some(r=>r.start<start+duration && r.end>start);
+    const overlap=(start,slot)=>ranges.find(r=>r.start<start+(slot.minutes||5)*minute && r.end>start);
     const format=new Intl.DateTimeFormat('en-GB',{timeZone:zone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
     const moments=slots.map(s=>({...s,start:+toUTC(date,s.time,zone)}));
     function alternative(slot,direction){
@@ -31,13 +31,23 @@ globalThis.AlongsideAppleCalendar=(()=>{
         const start=+toUTC(date,time,zone);
         if(direction<0 && start<=now)break;
         if(moments.some(other=>other.id!==slot.id && other.start>=Math.min(start,slot.start) && other.start<=Math.max(start,slot.start)))break;
-        if(start>now && format.format(start)===time && !occupied(start))return time;
+        if(start>now && format.format(start)===time && !overlap(start,slot) && !moments.some(m=>m.id!==slot.id && m.start<start+(slot.minutes||5)*minute && m.start+(m.minutes||5)*minute>start))return time;
       }
       return '';
     }
-    return moments.filter(s=>s.start>now && occupied(s.start)).map(s=>({
-      date,id:s.id,time:s.time,earlier:alternative(s,-1),later:alternative(s,1)
+    return moments.filter(s=>s.start>now && overlap(s.start,s)).map(s=>({
+      date,id:s.id,time:s.time,busy:overlap(s.start,s),earlier:alternative(s,-1),later:alternative(s,1)
     }));
   }
-  return {parseFragment,compare};
+  async function readMacBusy(){
+    const response=await fetch('/mac-calendar/busy',{method:'POST',headers:{'X-Alongside-Calendar':'availability'},cache:'no-store'});
+    if(!response.ok)throw Error(response.status===403?'calendar-denied':'calendar-unavailable');
+    return response.json();
+  }
+  async function addMeal(meal,start){
+    const query=new URLSearchParams({meal,when:String(+start/1000)});
+    const response=await fetch('/mac-calendar/add-meal?'+query,{method:'POST',headers:{'X-Alongside-Calendar':'add-meal'}});
+    return response.status===204;
+  }
+  return {parseFragment,compare,readMacBusy,addMeal};
 })();
