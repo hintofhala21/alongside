@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
@@ -100,4 +100,40 @@ test('the Railway server serves the site, health check and API status without se
     assert.notEqual((await fetch(url + '/%2e%2e/package.json')).status, 200);
     assert.equal((await fetch(url + '/api/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: 'x'.repeat(70000) })).status, 413);
   } finally { child.kill('SIGTERM'); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('Breeze works with only the OpenAI key; demo mode and publishing stay locked without their codes', async () => {
+  const db = openDatabase(':memory:');
+  const origin = 'https://alongside.example.up.railway.app';
+  const env = { AI_ENABLED: 'true', OPENAI_API_KEY: 'test', RATE_SALT: 'generated-salt', ALLOWED_ORIGIN: origin,
+    TEST_FETCH: async () => Response.json({ status: 'completed', output: [{ type: 'function_call', name: 'reply_to_visitor', arguments: JSON.stringify({ route: 'conversation', reply: 'Hi there', information: 'none', action: 'none' }) }] }) };
+  env.HUB = new Namespace({ db, name: 'api-hub', ObjectClass: AlongsideHub, env });
+  const call = (path, body, token) => apiWorker.fetch(new Request(origin + path, { method: 'POST',
+    headers: { Origin: origin, 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: JSON.stringify(body) }), env);
+  const status = await (await apiWorker.fetch(new Request(origin + '/status'), env)).json();
+  assert.equal(status.ready, true);
+  const { token } = await (await call('/session', { mode: 'personal', adult: true, consent: true, ageGroup: 'adult' })).json();
+  assert.equal((await call('/chat', { conversationId: crypto.randomUUID(), requestId: crypto.randomUUID(), message: 'Hi', language: 'en' }, token)).status, 200);
+  for (const code of [undefined, '', 'guess']) assert.equal((await call('/session', { code, mode: 'synthetic' })).status, 401);
+  assert.equal((await call('/unpublish', { id: crypto.randomUUID(), publisherCode: '' }, token)).status, 403);
+  db.close();
+});
+
+test('the server creates RATE_SALT once and reuses it after a restart', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const dir = await mkdtemp(join(tmpdir(), 'alongside-'));
+  const start = () => new Promise((ok, fail) => {
+    const port = 20000 + Math.floor(Math.random() * 20000);
+    const child = spawn(process.execPath, ['server/railway.mjs'], { cwd: root, env: { PATH: process.env.PATH, PORT: String(port), DATA_DIR: dir }, stdio: ['ignore', 'pipe', 'pipe'] });
+    child.stdout.on('data', d => { if (String(d).includes('running')) { child.kill('SIGTERM'); child.on('exit', ok); } });
+    setTimeout(() => fail(Error('timeout')), 10000);
+  });
+  try {
+    execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root, stdio: 'ignore' });
+    await start();
+    const first = await readFile(join(dir, 'rate-salt'), 'utf8');
+    assert.ok(first.length >= 64);
+    await start();
+    assert.equal(await readFile(join(dir, 'rate-salt'), 'utf8'), first);
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });

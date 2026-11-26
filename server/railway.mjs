@@ -4,7 +4,8 @@
 //   /calendar/*   -> calendar/worker.mjs
 //   /reminders/*  -> reminders/worker.mjs
 import { createServer } from 'node:http';
-import { readFile, stat, mkdir, access } from 'node:fs/promises';
+import { readFile, writeFile, stat, mkdir, access } from 'node:fs/promises';
+import { randomBytes } from 'node:crypto';
 import { constants } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, sep, extname, join } from 'node:path';
@@ -33,6 +34,17 @@ catch { console.error('build/site is missing. Run "npm run build" before startin
 const dataDir = await dataDirectory();
 if (!env.DATA_DIR && !env.RAILWAY_VOLUME_MOUNT_PATH) console.warn('No volume attached: stored data (rate limits, calendar feeds, showcase) resets on each deploy.');
 const db = openDatabase(join(dataDir, 'alongside.sqlite'));
+
+// RATE_SALT protects chat sessions and usage limits. If it isn't set, make one and keep it on the volume.
+async function rateSalt() {
+  if (env.RATE_SALT) return env.RATE_SALT;
+  const file = join(dataDir, 'rate-salt');
+  try { const saved = (await readFile(file, 'utf8')).trim(); if (saved.length >= 32) return saved; } catch {}
+  const salt = randomBytes(32).toString('hex');
+  await writeFile(file, salt, { mode: 0o600 });
+  return salt;
+}
+env.RATE_SALT = await rateSalt();
 
 // Each worker gets the same settings it had on Cloudflare (wrangler.jsonc), overridable by Railway variables.
 const base = { ...env, ALLOWED_ORIGIN: env.ALLOWED_ORIGIN || publicOrigin };

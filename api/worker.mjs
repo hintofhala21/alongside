@@ -129,11 +129,11 @@ export default {
     const allowed=Boolean(origin) && (origin===env.ALLOWED_ORIGIN || localChat);
     const cors=allowed?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}:{};
     const finish=response=>{const headers=new Headers(response.headers);for(const [k,v]of Object.entries(cors))headers.set(k,v);return new Response(response.body,{status:response.status,headers});};
-    if(url.pathname==='/status'&&request.method==='GET')return finish(json({placesReady:Boolean(env.GOOGLE_PLACES_API_KEY&&env.HUB),ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.DEMO_ACCESS_CODE&&env.PUBLISHER_CODE&&env.RATE_SALT&&env.HUB),mode:'adult-support-and-competition-demo'}));
+    if(url.pathname==='/status'&&request.method==='GET')return finish(json({placesReady:Boolean(env.GOOGLE_PLACES_API_KEY&&env.HUB),ready:env.AI_ENABLED==='true'&&Boolean(env.OPENAI_API_KEY&&env.RATE_SALT&&env.HUB),mode:'adult-support-and-competition-demo'}));
     if(!allowed)return json({error:'This website origin is not permitted.'},403);
     if(request.method==='OPTIONS')return finish(new Response(null,{status:204}));
     if(!['GET','POST'].includes(request.method))return finish(json({error:'Method not allowed.'},405));
-    if(url.pathname!=='/places' && (env.AI_ENABLED!=='true'||!env.OPENAI_API_KEY||!env.DEMO_ACCESS_CODE||!env.PUBLISHER_CODE||!env.RATE_SALT||!env.HUB))return finish(json({error:'The private AI demo has not been activated yet.'},503));
+    if(url.pathname!=='/places' && (env.AI_ENABLED!=='true'||!env.OPENAI_API_KEY||!env.RATE_SALT||!env.HUB))return finish(json({error:'The private AI demo has not been activated yet.'},503));
     try {
       const client=await hash(env.RATE_SALT+':'+(request.headers.get('CF-Connecting-IP')||'unknown'));
       const headers=new Headers(request.headers);headers.set('X-Demo-Client',client);headers.delete('CF-Connecting-IP');headers.delete('Cookie');
