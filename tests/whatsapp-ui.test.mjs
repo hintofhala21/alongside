@@ -5,7 +5,7 @@ import {runInNewContext} from 'node:vm';
 
 const source=await readFile(new URL('../site/assets/whatsapp.js',import.meta.url),'utf8');
 function setup(){
-  const context={URL,AbortSignal};
+  const context={URL,AbortSignal,location:{origin:'https://alongside.example'}};
   runInNewContext(source,context);
   const nodes=new Map(), data=new Map(), requests=[];
   const doc={documentElement:{lang:'en'},getElementById(id){
@@ -21,7 +21,7 @@ function setup(){
   let enabled=true,remote=null,failStop=false;
   const controller=context.AlongsideWhatsApp.mount({document:doc,storage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)},
     canConnect:()=>person.allowed,getProfileId:()=>person.id,getPlan:()=>plan,fetcher:async(url,options)=>{
-      requests.push({url,...options});const path=new URL(url).pathname;
+      requests.push({url,...options});const path=new URL(url).pathname.replace(/^\/reminders/,'');
       if(path==='/status')return Response.json({available:enabled});
       const body=options.body && JSON.parse(options.body);
       if(options.method==='POST'){

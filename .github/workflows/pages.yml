@@ -1,5 +1,7 @@
-name: Check and publish Alongside
+name: Check Alongside
 
+# Railway builds and deploys from this repository (see DEPLOY-RAILWAY.md).
+# This workflow only checks every change; it no longer publishes to GitHub Pages.
 on:
   push:
     branches: [main]
@@ -11,11 +13,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: checks-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     steps:
       - name: Get source
@@ -36,25 +38,3 @@ jobs:
         run: npm run build
       - name: Verify first-visit link matches this release
         run: node scripts/check-first-visit.mjs
-      - name: Configure Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
-      - name: Upload website
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
-        with:
-          path: build/site
-  deploy:
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publish
-        id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

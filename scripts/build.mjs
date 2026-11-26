@@ -26,14 +26,15 @@ await writeFile(resolve(root, 'build/site/assets/locales.js'),
 const config = JSON.parse(await readFile(resolve(root, 'site/config.json'), 'utf8'));
 let connect = "'self'";
 const reminderOrigins = " https://alongside-reminders.alongside-waicy-demo.workers.dev https://alongside-calendar.alongside-waicy-demo.workers.dev";
-if (config.apiBase) {
+const sameOrigin = /^\/[a-z-]+$/.test(config.apiBase || '');
+if (config.apiBase && !sameOrigin) {
   const url = new URL(config.apiBase);
   if (url.protocol !== 'https:' || !url.hostname.endsWith('.workers.dev') || url.username || url.password || url.search || url.hash || url.pathname !== '/') throw new Error('Use only the public HTTPS Worker origin in config.json.');
   connect += ' ' + url.origin;
 }
 for (const page of ['index.html', 'history.html']) {
   const path = resolve(root, 'build/site', page);
-  const html=(await readFile(path, 'utf8')).replace("'self' https://alongside-api.invalid", page === "index.html" ? connect + reminderOrigins : connect);
+  const html=(await readFile(path, 'utf8')).replace("'self' https://alongside-api.invalid", page === "index.html" && !sameOrigin ? connect + reminderOrigins : connect);
   await writeFile(path, accountPage(html,config.firebase));
 }
 if (config.firebase) {

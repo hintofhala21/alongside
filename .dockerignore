@@ -1,0 +1,11 @@
+.git
+.github
+build
+node_modules
+.data
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+*.command
+mac

@@ -45,6 +45,10 @@ WhatsApp stays off until the owner connects a business sender. Once connected, u
 
 Browser storage is a notebook on one device. Cloudflare’s small Durable Object database holds demo conversation memory and controls who can publish a selected demo. It is created automatically by the setup, without a database ID to copy.
 
+## Deploy
+
+Alongside deploys to Railway as one service: website, Breeze API, calendar feeds and reminders. Follow [the Railway guide](DEPLOY-RAILWAY.md).
+
 ## Check or preview
 
 With Node 24 installed:

@@ -1,9 +1,13 @@
 'use strict';
+// The API lives on this site under a path such as /api, or on a separate HTTPS origin.
+function apiUrl(config, path) {
+  return /^\/[a-z-]+$/.test(config.apiBase || '') ? location.origin + config.apiBase + path : new URL(path, config.apiBase).href;
+}
 async function postPlaces(body) {
   let endpoint='/breeze/places';
   if(location.hostname!=='127.0.0.1'){
     const config=await (await fetch('./config.json')).json();
-    endpoint=new URL('/places',config.apiBase).href;
+    endpoint=apiUrl(config,'/places');
   }
   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(18000)});
   const result=await response.json();
@@ -21,7 +25,7 @@ globalThis.alongsidePlacesReady = function() {
     const options={cache:'no-store',signal:AbortSignal.timeout(5000)};
     const config=await (await fetch('./config.json',options)).json();
     if (location.hostname === '127.0.0.1') return config.placesReady === true;
-    const status=await fetch(new URL('/status',config.apiBase),options);
+    const status=await fetch(apiUrl(config,'/status'),options);
     return status.ok && (await status.json()).placesReady === true;
   })().catch(()=>false);
   return placesReady;

@@ -42,7 +42,8 @@
         if(location.hostname==='127.0.0.1' && ['4173','4174','4175'].includes(location.port)) {
           this.localBreeze=c.localBreeze==='live'?'live':'unavailable';
           this.apiBase=location.origin+'/breeze';
-        } else if(c.apiBase) { const u = new URL(c.apiBase); if(u.protocol === 'https:' && u.hostname.endsWith('.workers.dev')) this.apiBase = u.origin; }
+        } else if(/^\/[a-z-]+$/.test(c.apiBase || '')) { this.apiBase = location.origin + c.apiBase; }
+        else if(c.apiBase) { const u = new URL(c.apiBase); if(u.protocol === 'https:' && u.hostname.endsWith('.workers.dev')) this.apiBase = u.origin; }
       } catch {}
       if(this.session?.apiBase !== this.apiBase) this.disconnect();
       this.render();

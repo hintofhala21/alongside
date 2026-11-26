@@ -21,3 +21,4 @@ outputs/
 .setup-tools/
 
 __pycache__/
+.data/

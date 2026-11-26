@@ -1,6 +1,6 @@
 'use strict';
 globalThis.AlongsideCalendar = (() => {
-  const endpoint='https://alongside-calendar.alongside-waicy-demo.workers.dev';
+  const endpoint=(globalThis.location?.origin || '')+'/calendar';
   const hex=buffer=>Array.from(new Uint8Array(buffer),b=>b.toString(16).padStart(2,'0')).join('');
   const kinds={breakfast:'Breakfast',morning:'Morning snack',lunch:'Lunch',afternoon:'Afternoon snack',
     dinner:'Dinner',evening:'Evening snack',water:'Water reminder',checkin:'Daily check-in'};
