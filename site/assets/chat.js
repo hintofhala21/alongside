@@ -70,6 +70,7 @@
     clearLocal() { this.cancel(); store.clear(); this.state={current:null,chats:[]}; this.session=null; this.render(); }
     disconnect() { this.session=null; try { sessionStorage.removeItem(sessionKey); } catch {} }
     status(text) { id('chat-status').textContent=text; }
+    revealLatest() { id('conversation')?.lastElementChild?.scrollIntoView({block:'end'}); }
     render() {
       if(!id('conversation')) return;
       if(this.session && !this.matchesProfile()){this.cancel();this.disconnect();}
@@ -101,7 +102,7 @@
 
 
       const shown=(chat?.messages.length||0)+(this.busy?1:0);
-      if(out.offsetParent && shown!==this.shownCount){
+      if(document.body.classList.contains('chat-view') && out.offsetParent && shown!==this.shownCount){
         if(shown && out.lastElementChild) out.lastElementChild.scrollIntoView({block:'end',behavior:this.shownCount===undefined?'auto':'smooth'});
         this.shownCount=shown;
       }

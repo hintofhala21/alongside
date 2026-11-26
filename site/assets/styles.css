@@ -298,4 +298,4 @@ html.accounts-locked body > :not(#account-screen) {display:none !important}
 .help-actions { gap:10px; }
 .help-actions .action { justify-content:center; text-align:center; }
 .chat-heading .new-chat { display:inline-flex; align-items:center; gap:7px; font-size:.88rem; min-height:40px; padding:7px 14px; }
-@media(max-width:1049px) { .help-mobile { display:inline-flex; } #settings-link { display:none; } }
+@media(max-width:1049px) { .help-mobile { display:inline-flex; } }

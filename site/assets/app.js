@@ -607,8 +607,6 @@ function renderRoute(moveFocus) {
   }
   if (page === "profile") byId("profile-link").setAttribute("aria-current", "page");
   else byId("profile-link").removeAttribute("aria-current");
-  if (page === "settings") byId("settings-link").setAttribute("aria-current", "page");
-  else byId("settings-link").removeAttribute("aria-current");
   byId("section-label").textContent = pageNames[page];
   document.body.classList.toggle("chat-view", page === "support");
   for (const link of document.querySelectorAll(".mobile-dock a")) { if (link.hash === "#" + page) link.setAttribute("aria-current", "page"); else link.removeAttribute("aria-current"); }
@@ -622,6 +620,7 @@ function renderRoute(moveFocus) {
   if (moveFocus) {
     window.scrollTo(0, 0);
     document.querySelector("[data-page=" + page + "] h1").focus({ preventScroll: true });
+    if (page === "support") chatController?.revealLatest();
   }
 }
 
