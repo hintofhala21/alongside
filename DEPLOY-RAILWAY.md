@@ -35,16 +35,16 @@ Set these under **Service → Variables**. Never put them in the repository.
 | --- | --- | --- |
 | `OPENAI_API_KEY` | Yes | Your OpenAI project key |
 | `AI_ENABLED` | Yes | `true` (set `false` to switch Breeze off instantly) |
-| `RATE_SALT` | Yes | A long random string. Keep it the same between deploys, or everyone is signed out of chat |
-| `DEMO_ACCESS_CODE` | Yes | Code for the competition demo mode |
-| `PUBLISHER_CODE` | Yes | Separate code for publishing demos to the judges' page |
+| `RATE_SALT` | No | Protects chat sessions and usage limits. If unset, the server creates one and keeps it on the volume |
+| `DEMO_ACCESS_CODE` | No | Turns on the competition demo mode. Without it, demo mode stays off |
+| `PUBLISHER_CODE` | No | Lets you publish demos to the judges' page. Without it, publishing stays off |
 | `GOOGLE_PLACES_API_KEY` | No | Turns on the nearest-first hospital list in Find care. Without it, Find care links to Google Maps |
 | `OPENAI_MODEL` | No | Defaults to `gpt-6-luna` |
 | `MAX_DAILY_REQUESTS` / `MAX_MONTHLY_REQUESTS` / `MAX_SESSION_REQUESTS` | No | Spending limits. Defaults 60 / 500 / 30 |
 | `PUBLIC_ORIGIN` | Only with a custom domain | e.g. `https://alongside.example.com`. Otherwise the Railway domain is used automatically |
 | `WA_*` | No | WhatsApp sender settings, see `reminders/README.md`. WhatsApp stays off without them |
 
-To make a random value on your computer: `openssl rand -hex 32`.
+Only `OPENAI_API_KEY` and `AI_ENABLED` are needed for a public site. To make a random value for the optional ones: `openssl rand -hex 32`.
 
 ## 4. Check it after deploying
 
@@ -56,7 +56,7 @@ To make a random value on your computer: `openssl rand -hex 32`.
 
 ```sh
 npm run build
-PORT=8080 AI_ENABLED=true OPENAI_API_KEY=… RATE_SALT=… DEMO_ACCESS_CODE=… PUBLISHER_CODE=… npm start
+PORT=8080 AI_ENABLED=true OPENAI_API_KEY=… npm start
 ```
 
 Then open http://localhost:8080. Data is kept in `.data/` (ignored by git).
