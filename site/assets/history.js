@@ -1,42 +1,26 @@
 "use strict";
 (async () => {
   const el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n;};
-  const id=v=>document.getElementById(v);const params=new URLSearchParams(location.search);
-  let view=params.get('view')==='showcase'||params.has('demo')?'showcase':'private', selected=params.get('demo'), apiBase='', entries=[];
-  try {const r=await fetch('./config.json',{cache:'no-store'});const c=await r.json();if(c.apiBase){const u=new URL(c.apiBase);if(u.protocol==='https:'&&u.hostname.endsWith('.workers.dev'))apiBase=u.origin;}}catch{}
-  const publicLink=()=>new URL('./history.html?view=showcase',location.href).href;
-  const status=t=>{id('history-status').textContent=t;};
-  function session(){try{const s=JSON.parse(sessionStorage.getItem(globalThis.AlongsideAccount?.key('alongside-demo-session-v1') ?? 'alongside-demo-session-v1'));return s?.expires>Date.now()&&s.apiBase===apiBase?s:null;}catch{return null;}}
-  async function post(path,data){const s=session();if(!s)throw Error('Reconnect to the demo in Chat before selecting this conversation.');const r=await fetch(apiBase+path,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.token},body:JSON.stringify(data)});const result=await r.json();if(!r.ok)throw Error(result.error||'That action could not be completed.');return result;}
-  async function copy(link){try{await navigator.clipboard.writeText(link);status('Link copied.');}catch{const a=el('a',link);a.href=link;id('history-status').replaceChildren(document.createTextNode('Copy this link: '),a);}}
-  id('copy-judges-link').addEventListener('click',()=>copy(publicLink()));
   function renderMessages(chat,container) {
-    for(const m of chat.messages||[]) {if(!['user','assistant'].includes(m.role)||typeof m.text!=='string')continue;const b=el('div','',m.role==='user'?'bubble user':'bubble');const body=el('p',m.text);body.dataset.userContent='';b.append(el('small',m.role==='user'?'You':'Alongside'),body);
+    for(const m of chat.messages||[]) {if(!['user','assistant'].includes(m.role)||typeof m.text!=='string')continue;const b=el('div','',m.role==='user'?'bubble user':'bubble');const body=el('p',m.text);body.dataset.userContent='';b.append(el('small',m.role==='user'?'You':'Breeze'),body);
       const links=el('div','','source-links');for(const key of m.sources||[]){const s=globalThis.AlongsideLibrary.medicalSources[key];if(!s)continue;const a=el('a',s.organization);a.href=s.url;a.target='_blank';a.rel='noopener noreferrer';links.append(a);}if(links.children.length)b.append(links);
       if(m.trace?.length){const d=el('details','','agent-trace');d.append(el('summary','Agent actions'));for(const t of m.trace)d.append(el('p',String(t)));b.append(d);}container.append(b);
     }
   }
-  async function select(entry){selected=entry.id;id('history-transcript').replaceChildren(el('p','Loading conversation…','muted'));
-    try{let chat=entry;if(view==='showcase'){const r=await fetch(apiBase+'/showcase/'+encodeURIComponent(entry.id),{cache:'no-store'});chat=await r.json();if(!r.ok)throw Error(chat.error||'Demo unavailable.');}
-      const panel=id('history-transcript');const heading=el('h2',chat.title);heading.dataset.userContent='';panel.replaceChildren(heading);panel.append(el('small',view==='showcase'?'Selected fictional Breeze demo · expires '+new Date(chat.expires).toLocaleDateString(document.documentElement.lang):chat.mode==='personal'?'Private Breeze chat':chat.mode==='luna'?'Breeze competition demo · saved on this device':'Approved-library conversation · saved on this device'));
-      renderMessages(chat,panel);const actions=el('div','','history-actions');panel.append(actions);
-      if(view==='showcase'){const b=el('button','Copy this demo link','action');b.type='button';b.addEventListener('click',()=>copy(new URL('./history.html?demo='+chat.id,location.href).href));actions.append(b);addUnpublish(chat,panel);}
-      else if(chat.mode==='luna'&&apiBase){addPublish(chat,panel);}
-      for(const b of id('history-list').querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.id===selected));
-    }catch(e){id('history-transcript').replaceChildren(el('p',e.message,'empty-history'));}
+  const list=document.getElementById('history-list'), panel=document.getElementById('history-transcript');
+  const chats=globalThis.AlongsideChatStore.read().chats.filter(c=>c.mode!=='luna');
+  function select(chat){
+    const heading=el('h2',chat.title);heading.dataset.userContent='';
+    const resume=el('a','Continue this chat','action');
+    resume.href='./#support?chat='+encodeURIComponent(chat.id);
+    panel.replaceChildren(heading,resume);renderMessages(chat,panel);
+    for(const button of list.querySelectorAll('button'))button.setAttribute('aria-pressed',String(button.dataset.id===chat.id));
   }
-  function addPublish(chat,panel){const d=el('details','','history-help');d.append(el('summary','Select this demo for the judges'));const f=el('form','','history-form');const title=el('input');title.required=true;title.maxLength=80;title.value=globalThis.AlongsideLocale.translate('Fictional competition demo',document.documentElement.lang);const titleLabel=el('label','Public title','field');titleLabel.append(title);const code=el('input');code.type='password';code.required=true;code.autocomplete='off';const label=el('label','Publisher code','field');label.append(code);const check=el('input');check.type='checkbox';check.required=true;const confirm=el('label');confirm.append(check,document.createTextNode(' I reviewed every message. It contains fictional details only, and anyone with the judges’ link may read it.'));const submit=el('button','Publish selected demo','action');submit.type='submit';const feedback=el('p','','status');feedback.setAttribute('role','status');f.append(titleLabel,label,confirm,submit,feedback);f.addEventListener('submit',async e=>{e.preventDefault();submit.disabled=true;try{const result=await post('/publish',{conversationId:chat.id,title:title.value,publisherCode:code.value,confirmFictional:check.checked});code.value='';const link=new URL('./history.html?demo='+result.id,location.href).href;feedback.textContent='Demo selected. It expires in seven days.';const a=el('a','Open the shareable demo');a.href=link;feedback.append(' ',a);await copy(link);}catch(error){feedback.textContent=error.message;}finally{submit.disabled=false;}});d.append(f);panel.append(d);}
-  function addUnpublish(chat,panel){const d=el('details','','history-help');d.append(el('summary','Owner: remove from the judges’ page'));const f=el('form','','history-form');const code=el('input');code.type='password';code.required=true;code.autocomplete='off';const label=el('label','Publisher code','field');label.append(code);const b=el('button','Unpublish this demo','action outline');b.type='submit';const feedback=el('p','','status');f.append(label,b,feedback);f.addEventListener('submit',async e=>{e.preventDefault();b.disabled=true;try{await post('/unpublish',{id:chat.id,publisherCode:code.value});code.value='';selected=null;status('Demo unpublished.');await render();}catch(error){feedback.textContent=error.message;}finally{b.disabled=false;}});d.append(f);panel.append(d);}
-  async function render(){id('private-tab').setAttribute('aria-selected',String(view==='private'));id('showcase-tab').setAttribute('aria-selected',String(view==='showcase'));id('history-content').setAttribute('aria-labelledby',view==='private'?'private-tab':'showcase-tab');id('history-description').textContent=view==='private'?'Your conversations stay separate from the public judges’ page.':'Only selected fictional Breeze demos appear here. Private visitor chats are never listed.';id('history-list').replaceChildren();id('history-transcript').replaceChildren();
-    try {if(view==='private')entries=globalThis.AlongsideChatStore.read().chats;else if(apiBase){const r=await fetch(apiBase+'/showcase',{cache:'no-store'});const result=await r.json();if(!r.ok)throw Error(result.error||'The judges’ page is temporarily unavailable.');entries=result.demos||[];}else entries=[];
-      if(!entries.length){id('history-transcript').append(el('div',view==='private'?'Your conversations will appear here after you start a chat.':'No Breeze demos have been selected yet. Once the owner connects the private chatbot, they can review a fictional conversation and publish it here.','empty-history'));return;}
-      for(const c of entries){const b=el('button','','history-item');const title=el('span',c.title);title.dataset.userContent='';b.append(title);b.type='button';b.dataset.id=c.id;b.append(el('small',new Date(c.created).toLocaleDateString(document.documentElement.lang)+' · '+(c.mode==='personal'?'Private Breeze chat':c.mode==='luna'?'Breeze demo':'Approved library')));b.addEventListener('click',()=>select(c));id('history-list').append(b);}const first=entries.find(c=>c.id===selected)||entries[0];await select(first);
-    }catch(e){id('history-transcript').append(el('p',e.message,'empty-history'));}
+  for(const chat of chats){
+    const button=el('button','','history-item'),title=el('span',chat.title);
+    title.dataset.userContent='';button.type='button';button.dataset.id=chat.id;
+    button.append(title,el('small',new Date(chat.created).toLocaleDateString(document.documentElement.lang)));
+    button.onclick=()=>select(chat);list.append(button);
   }
-  if(globalThis.AlongsideAccount?.publicOnly){
-    id('private-tab').addEventListener('click',()=>location.assign('./history.html'));
-    await render();return;
-  }
-  for(const [name,next]of[['private-tab','private'],['showcase-tab','showcase']])id(name).addEventListener('click',()=>{view=next;selected=null;history.replaceState(null,'',next==='showcase'?'?view=showcase':location.pathname);void render();});
-  await render();
+  if(chats.length)select(chats[0]);else panel.append(el('p','Your conversations will appear here after you start a chat.','empty-history'));
 })();

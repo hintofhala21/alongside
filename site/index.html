@@ -8,7 +8,7 @@
 <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f9f6ef">
-<meta name="description" content="Alongside is a recovery support pilot with daily routines, guided reflections and an approved information library.">
+<meta name="description" content="Alongside is a recovery support app with daily routines, guided reflections and an approved information library.">
 <title>Alongside · Recovery companion</title>
 <link rel="stylesheet" href="./assets/styles.css">
 <script src="./assets/locales.js" defer></script>
@@ -36,8 +36,7 @@
     <div id="workspace-nav">
       <p class="nav-label"><small>Recovery companion</small></p>
       <nav class="nav" aria-label="Main menu">
-        <a href="#support"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg> Chat with Alongside</a>
-        <a href="./history.html"><svg class="icon" aria-hidden="true"><use href="#clock"></use></svg> Chat history</a>
+        <a href="#support"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg> Chat with Breeze</a>
         <a href="#today"><svg class="icon" aria-hidden="true"><use href="#today"></use></svg> Today</a>
         <a href="#plan"><svg class="icon" aria-hidden="true"><use href="#plan"></use></svg> My plan</a>
         <a href="#checkins"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg> Check-ins</a>
@@ -54,15 +53,16 @@
   </aside>
   <div class="main-wrap">
     <header class="topbar">
-      <span class="topbar-label" id="section-label">Chat with Alongside</span>
+      <span class="topbar-label" id="section-label">Chat with Breeze</span>
       <a href="#profile" id="profile-link" class="profile" aria-label="Your profile" hidden>
         <span class="avatar" id="profile-letter" aria-hidden="true"></span>
         <bdi id="profile-name" data-user-content>Profile</bdi>
       </a>
-      <div class="header-actions"><a class="action outline" id="settings-link" href="#settings">Settings</a><button class="action outline" type="button" id="open-language">Language</button><button class="action outline help-mobile" type="button" data-help>Get help</button></div>
+      <div class="header-actions"><button class="action outline" type="button" id="open-language">Language</button><button class="action outline help-mobile" type="button" data-help>Get help</button></div>
     </header>
     <p id="language-notice" class="status" role="status" hidden></p>
     <main id="content">
+      <div id="plan-reminder" role="status" hidden></div>
       <section data-page="profile" aria-labelledby="profile-title" hidden>
         <div class="intro page-intro">
           <h1 tabindex="-1" id="profile-title">Set up your profile</h1>
@@ -81,15 +81,10 @@
             <label class="field" for="nickname">Nickname (optional)
               <input type="text" id="nickname" maxlength="32" autocomplete="off" dir="auto">
             </label>
-            <label class="field" for="age-group">Age group (required)
-              <select id="age-group" required aria-describedby="age-purpose">
-                <option value="">Choose your age group</option>
-                <option value="child">Under 13</option>
-                <option value="teen">13–17</option>
-                <option value="adult">18 or older</option>
-              </select>
+            <label class="field" for="birth-date">Date of birth (required)
+              <input type="date" id="birth-date" required aria-describedby="age-purpose" autocomplete="bday">
             </label>
-            <small id="age-purpose">Your age group helps Alongside show relevant support options.</small>
+            <small id="age-purpose">Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.</small>
             <label class="field" for="recovery-stage">Recovery stage (optional)
               <select id="recovery-stage">
                 <option value="">Choose later</option>
@@ -108,8 +103,7 @@
   <label class="field" for="care-team">Do you have a clinician or support team?
     <select id="care-team"><option value="">Choose later</option><option value="yes">Yes</option><option value="no">No — help me find care</option><option value="unsure">I’m not sure where to start</option></select>
   </label>
-  <a href="#care" id="profile-care-link">Find care in your country</a>
-  <div id="guardian-note" class="notice stack" hidden><p>Explore with a parent or trusted adult.</p><small>Guardian contact verification is not connected in this preview. Please use sample details.</small></div>
+  <a href="#care" id="profile-care-link">Find care near you</a>
 </fieldset>
 <fieldset class="stack profile-extra">
   <legend>Your location and time</legend>
@@ -120,7 +114,7 @@
   <button class="action outline" type="button" id="use-device-zone">Use my device’s time zone</button>
 </fieldset>
 <details class="stack health-details"><summary>Optional information for your care team</summary>
-  <p class="muted">These details stay in this browser. Use sample details in this preview. Alongside does not calculate body measurements, nutrient doses, or fluid targets.</p>
+  <p class="muted">These details stay in this browser. Alongside does not calculate body measurements, nutrient doses, or fluid targets.</p>
   <div class="two-columns">
 
 
@@ -148,8 +142,8 @@
         </div>
         <div class="hero">
           <p class="eyebrow"><svg class="icon" aria-hidden="true"><use href="#clock"></use></svg> Next to review</p>
-          <h2 id="next-title">Afternoon snack</h2>
-          <p id="next-time">3:30 PM · Sample reminder</p>
+          <h2 id="next-title">Your next plan item</h2>
+          <p id="next-time"></p>
           <p class="hero-note">You can take the day one moment at a time.</p>
           <div class="hero-actions form-actions">
             <button type="button" class="action light" id="acknowledge">Mark reminder as seen</button>
@@ -160,9 +154,9 @@
         <div class="dashboard-grid">
           <section class="panel" aria-labelledby="day-heading">
             <div class="section-head"><h2 id="day-heading">Today’s schedule</h2><a class="text-link" href="#plan">Full plan <svg class="icon" aria-hidden="true"><use href="#arrow"></use></svg></a></div>
-            <p class="muted"><small>Mark sample reminders as seen. You can undo any check.</small></p>
-            <div id="today-schedule"></div>
+            <p class="muted"><small>Mark reminders as seen. You can undo any check.</small></p>
             <p class="status" role="status" id="today-status"></p>
+            <div id="today-schedule"></div>
           </section>
           <div class="extra">
             <section class="panel support-tile">
@@ -172,7 +166,7 @@
             </section>
             <section class="panel reminder-tile">
               <div class="card-heading"><svg class="icon" aria-hidden="true"><use href="#bell"></use></svg><h3>WhatsApp reminders</h3></div>
-              <p class="muted" id="brief-reminder">Preview a reminder on your lock screen.</p>
+              <p class="muted" id="brief-reminder">Choose where to receive reminders.</p>
               <a class="text-link" href="#reminders">Reminder settings <svg class="icon" aria-hidden="true"><use href="#arrow"></use></svg></a>
             </section>
           </div>
@@ -194,7 +188,7 @@
           <div class="sections">
             <div class="panel stack">
               <h2>About this plan</h2>
-              <p>Use this page to explore a sample schedule and ideas for talking with your support team.</p>
+              <p>Review your routine and adjust it with your support team.</p>
               <small>Follow the plan from your own care team.</small>
               <a href="#profile" class="text-link">Edit your profile or recovery stage</a>
             </div>
@@ -210,27 +204,41 @@
             </div>
           </div>
           <div class="sections">
-            <div class="panel stack"><h2>A day in the plan</h2><small>Example times you can adjust to match your care plan.</small><div id="plan-schedule"></div><a href="#reminders" class="text-link">Edit reminder times</a></div>
+            <div class="panel stack"><h2>A day in the plan</h2><small>Adjust these times to match your care plan.</small><div id="plan-schedule"></div><a href="#reminders" class="text-link">Edit reminder times</a></div>
             <div class="panel stack"><h2>Daily practices</h2><ul class="entries" id="daily-practices"></ul></div>
             <div class="panel stack"><h2>Gentle next step</h2><p id="gentle-step"></p></div>
           </div>
         </div>
+        <section class="layout-2 panel stack" id="week-planner" aria-labelledby="week-title">
+          <h2 tabindex="-1" id="week-title">Plan my week with Breeze</h2>
+          <p>Review the next seven days in your plan’s time zone. Add a busy time below or <a id="week-calendar-picker" href="./apple-calendar.html">choose appointments from your calendar</a>.</p>
+          <div id="mac-calendar-actions" hidden><button type="button" class="action" id="mac-connect">Connect Mac Calendar</button> <button type="button" class="action outline" id="mac-disconnect" hidden>Disconnect</button><p>Check all calendars on this Mac for busy times. Event names stay private. Meal suggestions look for 30 free minutes.</p></div>
+          <form id="week-busy-form" class="stack">
+            <label class="field">Day <select id="week-day"></select></label>
+            <div class="form-actions"><label class="field">Busy from <input type="time" id="week-start" required></label>
+            <label class="field">Until <input type="time" id="week-end" required></label>
+            <button class="action outline">Add busy time</button></div>
+          </form>
+          <ul id="added-busy-times" aria-label="Added busy times" class="entries" hidden></ul>
+          <div class="form-actions"><button class="action outline" id="week-clear" type="button">Clear added times</button></div>
+          <p id="week-status" class="status" role="status"></p>
+          <div id="week-days" class="stack"></div>
+        </section>
         <section class="layout-2 panel stack" id="care-plan-notes"></section>
       </section>
       <section data-page="support" aria-labelledby="support-title">
-        <div class="chat-heading"><div><p class="eyebrow">A little space for you</p><h1 id="support-title" tabindex="-1">Chat with Breeze</h1></div><button class="icon-button" id="new-chat" type="button" aria-label="Start a new chat"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg></button></div>
-        <div class="chat-toolbar"><span id="chat-mode" class="mode-label">Breeze</span><a href="./history.html">Chat history</a></div>
+        <div class="chat-heading"><div><h1 id="support-title" tabindex="-1">Chat with Breeze</h1></div><button class="action outline new-chat" id="new-chat" type="button" title="Start a new chat"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg> New chat</button></div>
+        <div class="chat-toolbar"><span id="chat-mode" class="mode-label" role="status">Breeze</span><a class="action outline history-link" href="./history.html"><svg class="icon" aria-hidden="true"><use href="#clock"></use></svg> Chat history</a></div>
         <div class="chat-layout">
           <div class="chat-main">
-            <div class="chat-welcome" id="chat-welcome"><div class="welcome-copy"><p class="eyebrow">Your pace. Your space.</p><h2>You don’t have to<br>figure it out alone.</h2><p>A place to talk, find a small next step,<br>or simply feel heard.</p></div></div>
+            <div class="chat-welcome" id="chat-welcome"><div class="welcome-copy"><h2>What would help today?</h2><p>Ask Breeze in your own words.</p></div></div>
             <div class="conversation" id="conversation" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with Breeze"></div>
             <p class="chat-status" id="chat-status" role="status"></p>
-            <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" rows="2" maxlength="800" placeholder="Type your own message…" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Breeze uses AI and can make mistakes.</small></form>
-            <button type="button" class="text-button" id="ask-meals">Ask for meal ideas</button><a class="text-button" href="#reminders">Set up reminders</a><div id="meal-ideas-chat" hidden></div>
-            <div class="starter-grid" id="prepared-questions"></div>
+            <form class="chat-compose" id="chat-form"><label class="sr-only" for="chat-message">Your message</label><textarea id="chat-message" aria-describedby="chat-privacy chat-status" rows="2" maxlength="800" placeholder="Type your own message…" enterkeyhint="send" dir="auto"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Send</span></button><small id="chat-privacy">Breeze uses AI and can make mistakes.</small></form>
+            <section class="panel stack" id="breeze-calendar-tools" aria-label="Calendar plan" hidden></section>
             <p class="chat-boundary">Support, not medical care. <button class="text-button" type="button" data-help>Find human help</button></p>
           </div>
-          <aside class="chat-side"><details class="panel stack"><summary>Recent conversations</summary><p class="muted" id="empty-chats">Your conversations will appear here.</p><ul class="chat-history" id="recent-chats"></ul><a href="./history.html">View all chat history</a><small>Saved in this browser. Only selected demos go to the judges’ page.</small></details><details class="panel library-drawer"><summary>Explore approved information</summary><form class="stack" id="learn-form">
+          <aside class="chat-side"><details class="panel stack"><summary>Recent conversations</summary><p class="muted" id="empty-chats">Your conversations will appear here.</p><ul class="chat-history" id="recent-chats"></ul><p class="recent-footer"><a href="./history.html">View all chat history</a><small>Saved in this browser.</small></p></details><details class="panel library-drawer"><summary>Explore approved information</summary><form class="stack" id="learn-form">
               <label class="field" for="approved-topic">Learn from approved sources
                 <select id="approved-topic" required>
                   <option value="">Choose a topic</option>
@@ -256,7 +264,7 @@
                 </select>
               </label>
               <div><button type="submit" class="action outline">Read approved answer</button></div>
-            </form><a href="#sources">Read our medical sources</a></details><div class="garden-card"><p>There’s room<br>to grow gently.</p></div></aside>
+            </form><a href="#sources">Read our medical sources</a></details></aside>
         </div>
       </section>
       <section data-page="checkins" aria-labelledby="checkins-title" hidden>
@@ -271,29 +279,23 @@
       </section>
       <section data-page="reminders" aria-labelledby="reminders-title" hidden>
         <div class="intro page-intro"><h1 tabindex="-1" id="reminders-title">Reminders</h1><p class="muted">Choose where you want to receive your reminders.</p></div>
-        <aside id="walkthrough-reminders" class="panel stack" hidden>
-          <p>This fresh-visit tab is temporary. Before closing it, turn off connected reminders here. For reminders you can manage on your next visit, use a regular profile.</p>
-          <a class="text-link" id="regular-reminders">Open a regular profile</a>
-        </aside>
         <div class="two-columns">
           <section class="panel stack">
             <h2>Reminder preferences</h2>
             <div>
-              <label class="switch-row" for="enabled">Enable reminder previews <input type="checkbox" id="enabled" role="switch"></label>
+              <label class="switch-row" for="inApp">Show plan reminders while Alongside is open <input type="checkbox" id="inApp" role="switch"></label>
               <label class="switch-row" for="meals">Meals (always included) <input type="checkbox" id="meals" role="switch" checked disabled aria-describedby="meal-setting-note"></label>
               <label class="switch-row" for="snacks">Include snacks (optional) <input type="checkbox" id="snacks" role="switch" aria-describedby="meal-setting-note"></label>
               <label class="switch-row" for="water">Include a water reminder <input type="checkbox" id="water" role="switch"></label>
-              <label class="switch-row" for="discreet">Discreet message preview <input type="checkbox" id="discreet" role="switch"></label>
+              <label class="switch-row" for="discreet">Hide plan item names in calendar alerts <input type="checkbox" id="discreet" role="switch"></label>
             </div>
             <p id="reminder-change-status" class="status" role="status"></p>
             <small id="meal-setting-note">Breakfast, lunch, and dinner stay in your routine. Turn snacks on or off here.</small>
             <small id="water-settings-note"></small>
-            <small>Message previews stay on this device. Connecting WhatsApp is a separate choice.</small>
           </section>
           <section class="panel stack">
-            <h2>Message preview</h2>
-            <div class="previews" id="message-preview" role="status"></div>
-            <div class="form-actions"><button type="button" class="action" id="test-preview">Preview a test nudge</button><button type="button" class="action outline" id="advance-preview">Preview next reminder</button></div>
+            <h2>Today’s reminders</h2>
+            <ul class="entries" id="message-preview"></ul>
           </section>
         </div>
 
@@ -317,14 +319,11 @@
         </form>
         <section class="layout-2 panel stack">
           <h2>Calendar reminders</h2>
-          <div><button type="button" class="action outline" id="test-calendar">Test a calendar alert in 5 minutes</button></div>
-          <p class="muted">Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.</p>
-          <p id="test-calendar-status" class="status" role="status"></p>
           <div id="calendar-connect" class="stack"></div>
           <section class="stack" aria-labelledby="apple-busy-heading">
             <h3 id="apple-busy-heading">Check today’s plan against Apple Calendar</h3>
-            <p>Use the Calendar helper on Mac or Shortcuts on iPhone to check today’s appointment times. You choose which calendar to share. Run a fresh check after an appointment changes.</p>
-            <div><a class="action outline" href="./apple-calendar.html" target="_blank" rel="noopener noreferrer">Set up an Apple Calendar check</a></div>
+            <p>Choose the appointments you want Breeze to check. Only their start and end times are shared.</p>
+            <div><a class="action outline" href="./apple-calendar.html">Choose appointments from my calendar</a></div>
             <div id="apple-busy-review" class="stack"></div>
             <p id="apple-busy-status" class="status" role="status"></p>
           </section>
@@ -336,11 +335,11 @@
         </section>
         <form class="panel stack" id="times-form">
           <h2>Reminder times</h2>
-          <p class="muted">Saved meal and snack times appear on Today and in the sample plan.</p>
+          <p class="muted">Saved meal and snack times appear on Today and in My Plan.</p>
           <div class="time-grid" id="meal-times"></div>
           <fieldset class="stack" id="water-window">
             <legend>Water reminder window</legend>
-            <small>Include the sample water reminder in the message preview only during this window.</small>
+            <small>Choose when to include water reminders.</small>
             <div class="time-grid">
               <label class="field" for="water-start">From <input id="water-start" type="time" required></label>
               <label class="field" for="water-end">Until <input id="water-end" type="time" required></label>
@@ -361,7 +360,6 @@
             <h2>Your profile</h2>
             <p>Choose your own details and update them whenever you need.</p>
             <div class="form-actions"><a class="action outline" href="#profile" id="settings-profile">Edit profile</a><button class="action outline" type="button" data-update-recovery>Update my recovery details</button></div>
-            <a href="https://hintofhala21.github.io/alongside/first-visit/?new=1">Preview Alongside from the beginning</a>
           </section>
           <section class="panel stack">
             <h2>Language</h2>
@@ -383,15 +381,24 @@
         </div>
       </section>
 <section data-page="care" aria-labelledby="care-title" hidden>
-  <div class="intro page-intro"><h1 id="care-title" tabindex="-1">Find care</h1><p class="muted">Start with an official directory, wherever you live.</p></div>
-  <form class="panel stack" id="care-form">
-    <label class="field" for="care-country">Country or territory <input id="care-country" type="search" list="country-options" autocomplete="off" required dir="auto"></label>
-    <label class="field" for="care-city">City, town, or area <input id="care-city" maxlength="100" dir="auto" autocomplete="off"></label>
+  <div class="intro page-intro"><h1 id="care-title" tabindex="-1">Find care</h1><p class="muted">Find the psychiatric hospitals and hospital psychiatry services closest to you, or search by country and city.</p></div>
+  <div class="panel stack" id="care-panel">
+  <form class="stack" id="care-near-form">
     <label><input type="checkbox" id="care-public"> Prioritize public or lower-cost care</label>
-    <button class="action" type="submit">Show official directories</button>
-    <small>Your location is not detected or sent automatically. Open a directory to search your area there.</small>
+    <button class="action" type="submit" id="care-near">Find care near me</button>
+    <small>Alongside asks for your location only when you tap this button. An approximate position (about 1 km) is sent to Google Maps to find the closest hospitals. It isn’t saved.</small>
   </form>
-  <div class="sections" id="care-results" aria-live="polite"></div>
+  <p id="care-child-note" hidden>Ask a parent, carer or another trusted adult to help you find care near you. You can also look up hospitals by country and city below.</p>
+  <details class="stack health-details" id="care-city-search"><summary>Or search by country and city</summary>
+  <form class="stack" id="care-form">
+    <label class="field" for="care-country">Country or territory <input id="care-country" type="search" list="country-options" autocomplete="off" required dir="auto"></label>
+    <label class="field" for="care-city">City, town, or area <input id="care-city" value="" maxlength="100" dir="auto" autocomplete="off"></label>
+    <button class="action outline" type="submit">Find hospital locations</button>
+    <small>This search stays on this device until you choose a Google Maps search or open an external link.</small>
+  </form>
+  </details>
+  </div>
+  <div class="sections" id="care-results" tabindex="-1" aria-label="Directory results" role="region" aria-live="polite"></div>
   <div class="panel stack"><h2>Questions to ask a provider</h2><ul><li>Do you assess eating concerns for someone my age?</li><li>Do I need a referral, insurance, or proof of eligibility?</li><li>What would an appointment or tests cost? Is reduced-cost care available?</li><li>Can you help with nutrition, physical health, and emotional support together?</li></ul><small>A public hospital is not automatically free for everyone. Confirm fees, eligibility, opening hours, and available services directly.</small></div>
 </section>
 <section data-page="learn" aria-labelledby="learn-title" hidden>
@@ -415,8 +422,8 @@
         </div>
       </section>
     </main>
-    <nav class="mobile-dock" aria-label="Quick navigation"><a href="#support"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Chat</span></a><a href="#today"><svg class="icon" aria-hidden="true"><use href="#today"></use></svg><span>Today</span></a><a href="#checkins"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg><span>Check-in</span></a><a href="./history.html"><svg class="icon" aria-hidden="true"><use href="#clock"></use></svg><span>History</span></a></nav>
-    <footer><span>Alongside · Recovery companion</span><a href="#care">Find care</a><a href="#learn">Learn</a><a href="#sources">Medical sources</a><a href="./credits.html">Photo credits</a><a href="./privacy.html">Privacy and pilot limits</a></footer>
+    <nav class="mobile-dock" aria-label="Quick navigation"><a href="#support"><svg class="icon" aria-hidden="true"><use href="#chat"></use></svg><span>Chat</span></a><a href="#today"><svg class="icon" aria-hidden="true"><use href="#today"></use></svg><span>Today</span></a><a href="#checkins"><svg class="icon" aria-hidden="true"><use href="#note"></use></svg><span>Check-in</span></a><a href="#care"><svg class="icon" aria-hidden="true"><use href="#heart"></use></svg><span>Find care</span></a></nav>
+    <footer><span>Alongside · Recovery companion</span><a href="#care">Find care</a><a href="#learn">Learn</a><a href="#sources">Medical sources</a><a href="./credits.html">Photo credits</a><a href="./privacy.html">Privacy</a></footer>
   </div>
 </div>
 <dialog id="recovery-dialog" aria-labelledby="recovery-update-title" aria-describedby="recovery-update-description">
@@ -434,13 +441,18 @@
 <dialog id="help-dialog" aria-labelledby="help-title">
   <div class="stack">
     <h2 id="help-title">Get human help</h2>
-    <p>Reach out to your care team or a trusted person if you need support. For immediate danger or a medical emergency, contact your local emergency services.</p>
-    <p class="muted">Alongside has no live care team.</p>
+    <p><strong>If you are in immediate danger or have a medical emergency, call your local emergency number now.</strong></p>
+    <p>If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.</p>
+    <div class="stack help-actions">
+      <a class="action" href="https://findahelpline.com" target="_blank" rel="noopener noreferrer">Find a crisis line in your country</a>
+      <a class="action outline" href="#care">Find care near me</a>
+    </div>
+    <p class="muted">You can also reach out to your care team or a trusted person. Alongside has no live care team.</p>
     <div class="stack">
       <p class="muted" id="younger-support" hidden>Your care team or a trusted adult can help you find support for your age.</p>
       <div class="stack" id="age-needed">
-        <p>Add your age group to see relevant support options.</p>
-        <div><a class="action outline" href="#profile" id="therapy-profile-link">Add your age group</a></div>
+        <p>Add your date of birth to see support options for your age.</p>
+        <div><a class="action outline" href="#profile" id="therapy-profile-link">Add your date of birth</a></div>
       </div>
     </div>
     <form method="dialog"><button class="action" type="submit">Close</button></form>
@@ -449,7 +461,7 @@
 <dialog id="reset-dialog" aria-labelledby="reset-title">
   <form method="dialog" class="stack">
     <h2 id="reset-title">Reset reminder times?</h2>
-    <p>This restores the example meal and snack times and the water reminder window.</p>
+    <p>This restores the default meal and snack times and the water reminder window.</p>
     <div class="form-actions"><button class="action outline" value="cancel" autofocus>Cancel</button><button class="action" value="reset">Reset times</button></div>
   </form>
 </dialog>
@@ -472,7 +484,7 @@
 </dialog>
 <datalist id="country-options"></datalist>
 <datalist id="timezone-options"></datalist>
-<script id="country-registry" type="application/json">[["AA", "Private use"], ["AC", "Ascension Island"], ["AD", "Andorra"], ["AE", "United Arab Emirates"], ["AF", "Afghanistan"], ["AG", "Antigua and Barbuda"], ["AI", "Anguilla"], ["AL", "Albania"], ["AM", "Armenia"], ["AO", "Angola"], ["AQ", "Antarctica"], ["AR", "Argentina"], ["AS", "American Samoa"], ["AT", "Austria"], ["AU", "Australia"], ["AW", "Aruba"], ["AX", "Åland Islands"], ["AZ", "Azerbaijan"], ["BA", "Bosnia and Herzegovina"], ["BB", "Barbados"], ["BD", "Bangladesh"], ["BE", "Belgium"], ["BF", "Burkina Faso"], ["BG", "Bulgaria"], ["BH", "Bahrain"], ["BI", "Burundi"], ["BJ", "Benin"], ["BL", "Saint Barthélemy"], ["BM", "Bermuda"], ["BN", "Brunei Darussalam"], ["BO", "Bolivia"], ["BQ", "Bonaire, Sint Eustatius and Saba"], ["BR", "Brazil"], ["BS", "Bahamas"], ["BT", "Bhutan"], ["BV", "Bouvet Island"], ["BW", "Botswana"], ["BY", "Belarus"], ["BZ", "Belize"], ["CA", "Canada"], ["CC", "Cocos (Keeling) Islands"], ["CD", "The Democratic Republic of the Congo"], ["CF", "Central African Republic"], ["CG", "Congo"], ["CH", "Switzerland"], ["CI", "Côte d'Ivoire"], ["CK", "Cook Islands"], ["CL", "Chile"], ["CM", "Cameroon"], ["CN", "China"], ["CO", "Colombia"], ["CP", "Clipperton Island"], ["CQ", "Sark"], ["CR", "Costa Rica"], ["CU", "Cuba"], ["CV", "Cabo Verde"], ["CW", "Curaçao"], ["CX", "Christmas Island"], ["CY", "Cyprus"], ["CZ", "Czechia"], ["DE", "Germany"], ["DG", "Diego Garcia"], ["DJ", "Djibouti"], ["DK", "Denmark"], ["DM", "Dominica"], ["DO", "Dominican Republic"], ["DZ", "Algeria"], ["EA", "Ceuta, Melilla"], ["EC", "Ecuador"], ["EE", "Estonia"], ["EG", "Egypt"], ["EH", "Western Sahara"], ["ER", "Eritrea"], ["ES", "Spain"], ["ET", "Ethiopia"], ["FI", "Finland"], ["FJ", "Fiji"], ["FK", "Falkland Islands (Malvinas)"], ["FM", "Federated States of Micronesia"], ["FO", "Faroe Islands"], ["FR", "France"], ["GA", "Gabon"], ["GB", "United Kingdom"], ["GD", "Grenada"], ["GE", "Georgia"], ["GF", "French Guiana"], ["GG", "Guernsey"], ["GH", "Ghana"], ["GI", "Gibraltar"], ["GL", "Greenland"], ["GM", "Gambia"], ["GN", "Guinea"], ["GP", "Guadeloupe"], ["GQ", "Equatorial Guinea"], ["GR", "Greece"], ["GS", "South Georgia and the South Sandwich Islands"], ["GT", "Guatemala"], ["GU", "Guam"], ["GW", "Guinea-Bissau"], ["GY", "Guyana"], ["HK", "Hong Kong"], ["HM", "Heard Island and McDonald Islands"], ["HN", "Honduras"], ["HR", "Croatia"], ["HT", "Haiti"], ["HU", "Hungary"], ["IC", "Canary Islands"], ["ID", "Indonesia"], ["IE", "Ireland"], ["IM", "Isle of Man"], ["IN", "India"], ["IO", "British Indian Ocean Territory"], ["IQ", "Iraq"], ["IR", "Islamic Republic of Iran"], ["IS", "Iceland"], ["IT", "Italy"], ["JE", "Jersey"], ["JM", "Jamaica"], ["JO", "Jordan"], ["JP", "Japan"], ["KE", "Kenya"], ["KG", "Kyrgyzstan"], ["KH", "Cambodia"], ["KI", "Kiribati"], ["KM", "Comoros"], ["KN", "Saint Kitts and Nevis"], ["KP", "Democratic People's Republic of Korea"], ["KR", "Republic of Korea"], ["KW", "Kuwait"], ["KY", "Cayman Islands"], ["KZ", "Kazakhstan"], ["LA", "Lao People's Democratic Republic"], ["LB", "Lebanon"], ["LC", "Saint Lucia"], ["LI", "Liechtenstein"], ["LK", "Sri Lanka"], ["LR", "Liberia"], ["LS", "Lesotho"], ["LT", "Lithuania"], ["LU", "Luxembourg"], ["LV", "Latvia"], ["LY", "Libya"], ["MA", "Morocco"], ["MC", "Monaco"], ["MD", "Moldova"], ["ME", "Montenegro"], ["MF", "Saint Martin (French part)"], ["MG", "Madagascar"], ["MH", "Marshall Islands"], ["MK", "North Macedonia"], ["ML", "Mali"], ["MM", "Myanmar"], ["MN", "Mongolia"], ["MO", "Macao"], ["MP", "Northern Mariana Islands"], ["MQ", "Martinique"], ["MR", "Mauritania"], ["MS", "Montserrat"], ["MT", "Malta"], ["MU", "Mauritius"], ["MV", "Maldives"], ["MW", "Malawi"], ["MX", "Mexico"], ["MY", "Malaysia"], ["MZ", "Mozambique"], ["NA", "Namibia"], ["NC", "New Caledonia"], ["NE", "Niger"], ["NF", "Norfolk Island"], ["NG", "Nigeria"], ["NI", "Nicaragua"], ["NL", "Netherlands"], ["NO", "Norway"], ["NP", "Nepal"], ["NR", "Naoero"], ["NU", "Niue"], ["NZ", "New Zealand"], ["OM", "Oman"], ["PA", "Panama"], ["PE", "Peru"], ["PF", "French Polynesia"], ["PG", "Papua New Guinea"], ["PH", "Philippines"], ["PK", "Pakistan"], ["PL", "Poland"], ["PM", "Saint Pierre and Miquelon"], ["PN", "Pitcairn"], ["PR", "Puerto Rico"], ["PS", "State of Palestine"], ["PT", "Portugal"], ["PW", "Palau"], ["PY", "Paraguay"], ["QA", "Qatar"], ["RE", "Réunion"], ["RO", "Romania"], ["RS", "Serbia"], ["RU", "Russian Federation"], ["RW", "Rwanda"], ["SA", "Saudi Arabia"], ["SB", "Solomon Islands"], ["SC", "Seychelles"], ["SD", "Sudan"], ["SE", "Sweden"], ["SG", "Singapore"], ["SH", "Saint Helena, Ascension and Tristan da Cunha"], ["SI", "Slovenia"], ["SJ", "Svalbard and Jan Mayen"], ["SK", "Slovakia"], ["SL", "Sierra Leone"], ["SM", "San Marino"], ["SN", "Senegal"], ["SO", "Somalia"], ["SR", "Suriname"], ["SS", "South Sudan"], ["ST", "Sao Tome and Principe"], ["SV", "El Salvador"], ["SX", "Sint Maarten (Dutch part)"], ["SY", "Syrian Arab Republic"], ["SZ", "Eswatini"], ["TA", "Tristan da Cunha"], ["TC", "Turks and Caicos Islands"], ["TD", "Chad"], ["TF", "French Southern Territories"], ["TG", "Togo"], ["TH", "Thailand"], ["TJ", "Tajikistan"], ["TK", "Tokelau"], ["TL", "Timor-Leste"], ["TM", "Turkmenistan"], ["TN", "Tunisia"], ["TO", "Tonga"], ["TR", "Türkiye"], ["TT", "Trinidad and Tobago"], ["TV", "Tuvalu"], ["TW", "Taiwan, Province of China"], ["TZ", "United Republic of Tanzania"], ["UA", "Ukraine"], ["UG", "Uganda"], ["UM", "United States Minor Outlying Islands"], ["US", "United States"], ["UY", "Uruguay"], ["UZ", "Uzbekistan"], ["VA", "Holy See (Vatican City State)"], ["VC", "Saint Vincent and the Grenadines"], ["VE", "Venezuela"], ["VG", "British Virgin Islands"], ["VI", "U.S. Virgin Islands"], ["VN", "Viet Nam"], ["VU", "Vanuatu"], ["WF", "Wallis and Futuna"], ["WS", "Samoa"], ["YE", "Yemen"], ["YT", "Mayotte"], ["ZA", "South Africa"], ["ZM", "Zambia"], ["ZW", "Zimbabwe"], ["ZZ", "Private use"], ["XK", "Kosovo"]]</script>
+<script id="country-registry" type="application/json">[["AC", "Ascension Island"], ["AD", "Andorra"], ["AE", "United Arab Emirates"], ["AF", "Afghanistan"], ["AG", "Antigua and Barbuda"], ["AI", "Anguilla"], ["AL", "Albania"], ["AM", "Armenia"], ["AO", "Angola"], ["AQ", "Antarctica"], ["AR", "Argentina"], ["AS", "American Samoa"], ["AT", "Austria"], ["AU", "Australia"], ["AW", "Aruba"], ["AX", "Åland Islands"], ["AZ", "Azerbaijan"], ["BA", "Bosnia and Herzegovina"], ["BB", "Barbados"], ["BD", "Bangladesh"], ["BE", "Belgium"], ["BF", "Burkina Faso"], ["BG", "Bulgaria"], ["BH", "Bahrain"], ["BI", "Burundi"], ["BJ", "Benin"], ["BL", "Saint Barthélemy"], ["BM", "Bermuda"], ["BN", "Brunei Darussalam"], ["BO", "Bolivia"], ["BQ", "Bonaire, Sint Eustatius and Saba"], ["BR", "Brazil"], ["BS", "Bahamas"], ["BT", "Bhutan"], ["BV", "Bouvet Island"], ["BW", "Botswana"], ["BY", "Belarus"], ["BZ", "Belize"], ["CA", "Canada"], ["CC", "Cocos (Keeling) Islands"], ["CD", "The Democratic Republic of the Congo"], ["CF", "Central African Republic"], ["CG", "Congo"], ["CH", "Switzerland"], ["CI", "Côte d'Ivoire"], ["CK", "Cook Islands"], ["CL", "Chile"], ["CM", "Cameroon"], ["CN", "China"], ["CO", "Colombia"], ["CP", "Clipperton Island"], ["CQ", "Sark"], ["CR", "Costa Rica"], ["CU", "Cuba"], ["CV", "Cabo Verde"], ["CW", "Curaçao"], ["CX", "Christmas Island"], ["CY", "Cyprus"], ["CZ", "Czechia"], ["DE", "Germany"], ["DG", "Diego Garcia"], ["DJ", "Djibouti"], ["DK", "Denmark"], ["DM", "Dominica"], ["DO", "Dominican Republic"], ["DZ", "Algeria"], ["EA", "Ceuta, Melilla"], ["EC", "Ecuador"], ["EE", "Estonia"], ["EG", "Egypt"], ["EH", "Western Sahara"], ["ER", "Eritrea"], ["ES", "Spain"], ["ET", "Ethiopia"], ["FI", "Finland"], ["FJ", "Fiji"], ["FK", "Falkland Islands (Malvinas)"], ["FM", "Federated States of Micronesia"], ["FO", "Faroe Islands"], ["FR", "France"], ["GA", "Gabon"], ["GB", "United Kingdom"], ["GD", "Grenada"], ["GE", "Georgia"], ["GF", "French Guiana"], ["GG", "Guernsey"], ["GH", "Ghana"], ["GI", "Gibraltar"], ["GL", "Greenland"], ["GM", "Gambia"], ["GN", "Guinea"], ["GP", "Guadeloupe"], ["GQ", "Equatorial Guinea"], ["GR", "Greece"], ["GS", "South Georgia and the South Sandwich Islands"], ["GT", "Guatemala"], ["GU", "Guam"], ["GW", "Guinea-Bissau"], ["GY", "Guyana"], ["HK", "Hong Kong"], ["HM", "Heard Island and McDonald Islands"], ["HN", "Honduras"], ["HR", "Croatia"], ["HT", "Haiti"], ["HU", "Hungary"], ["IC", "Canary Islands"], ["ID", "Indonesia"], ["IE", "Ireland"], ["IM", "Isle of Man"], ["IN", "India"], ["IO", "British Indian Ocean Territory"], ["IQ", "Iraq"], ["IR", "Islamic Republic of Iran"], ["IS", "Iceland"], ["IT", "Italy"], ["JE", "Jersey"], ["JM", "Jamaica"], ["JO", "Jordan"], ["JP", "Japan"], ["KE", "Kenya"], ["KG", "Kyrgyzstan"], ["KH", "Cambodia"], ["KI", "Kiribati"], ["KM", "Comoros"], ["KN", "Saint Kitts and Nevis"], ["KP", "Democratic People's Republic of Korea"], ["KR", "Republic of Korea"], ["KW", "Kuwait"], ["KY", "Cayman Islands"], ["KZ", "Kazakhstan"], ["LA", "Lao People's Democratic Republic"], ["LB", "Lebanon"], ["LC", "Saint Lucia"], ["LI", "Liechtenstein"], ["LK", "Sri Lanka"], ["LR", "Liberia"], ["LS", "Lesotho"], ["LT", "Lithuania"], ["LU", "Luxembourg"], ["LV", "Latvia"], ["LY", "Libya"], ["MA", "Morocco"], ["MC", "Monaco"], ["MD", "Moldova"], ["ME", "Montenegro"], ["MF", "Saint Martin (French part)"], ["MG", "Madagascar"], ["MH", "Marshall Islands"], ["MK", "North Macedonia"], ["ML", "Mali"], ["MM", "Myanmar"], ["MN", "Mongolia"], ["MO", "Macao"], ["MP", "Northern Mariana Islands"], ["MQ", "Martinique"], ["MR", "Mauritania"], ["MS", "Montserrat"], ["MT", "Malta"], ["MU", "Mauritius"], ["MV", "Maldives"], ["MW", "Malawi"], ["MX", "Mexico"], ["MY", "Malaysia"], ["MZ", "Mozambique"], ["NA", "Namibia"], ["NC", "New Caledonia"], ["NE", "Niger"], ["NF", "Norfolk Island"], ["NG", "Nigeria"], ["NI", "Nicaragua"], ["NL", "Netherlands"], ["NO", "Norway"], ["NP", "Nepal"], ["NR", "Naoero"], ["NU", "Niue"], ["NZ", "New Zealand"], ["OM", "Oman"], ["PA", "Panama"], ["PE", "Peru"], ["PF", "French Polynesia"], ["PG", "Papua New Guinea"], ["PH", "Philippines"], ["PK", "Pakistan"], ["PL", "Poland"], ["PM", "Saint Pierre and Miquelon"], ["PN", "Pitcairn"], ["PR", "Puerto Rico"], ["PS", "State of Palestine"], ["PT", "Portugal"], ["PW", "Palau"], ["PY", "Paraguay"], ["QA", "Qatar"], ["RE", "Réunion"], ["RO", "Romania"], ["RS", "Serbia"], ["RU", "Russian Federation"], ["RW", "Rwanda"], ["SA", "Saudi Arabia"], ["SB", "Solomon Islands"], ["SC", "Seychelles"], ["SD", "Sudan"], ["SE", "Sweden"], ["SG", "Singapore"], ["SH", "Saint Helena, Ascension and Tristan da Cunha"], ["SI", "Slovenia"], ["SJ", "Svalbard and Jan Mayen"], ["SK", "Slovakia"], ["SL", "Sierra Leone"], ["SM", "San Marino"], ["SN", "Senegal"], ["SO", "Somalia"], ["SR", "Suriname"], ["SS", "South Sudan"], ["ST", "Sao Tome and Principe"], ["SV", "El Salvador"], ["SX", "Sint Maarten (Dutch part)"], ["SY", "Syrian Arab Republic"], ["SZ", "Eswatini"], ["TA", "Tristan da Cunha"], ["TC", "Turks and Caicos Islands"], ["TD", "Chad"], ["TF", "French Southern Territories"], ["TG", "Togo"], ["TH", "Thailand"], ["TJ", "Tajikistan"], ["TK", "Tokelau"], ["TL", "Timor-Leste"], ["TM", "Turkmenistan"], ["TN", "Tunisia"], ["TO", "Tonga"], ["TR", "Türkiye"], ["TT", "Trinidad and Tobago"], ["TV", "Tuvalu"], ["TW", "Taiwan, Province of China"], ["TZ", "United Republic of Tanzania"], ["UA", "Ukraine"], ["UG", "Uganda"], ["UM", "United States Minor Outlying Islands"], ["US", "United States"], ["UY", "Uruguay"], ["UZ", "Uzbekistan"], ["VA", "Holy See (Vatican City State)"], ["VC", "Saint Vincent and the Grenadines"], ["VE", "Venezuela"], ["VG", "British Virgin Islands"], ["VI", "U.S. Virgin Islands"], ["VN", "Viet Nam"], ["VU", "Vanuatu"], ["WF", "Wallis and Futuna"], ["WS", "Samoa"], ["YE", "Yemen"], ["YT", "Mayotte"], ["ZA", "South Africa"], ["ZM", "Zambia"], ["ZW", "Zimbabwe"], ["XK", "Kosovo"]]</script>
 <script src="./assets/library.js" defer></script>
 <script src="./assets/meal-ideas.js" defer></script>
 
@@ -480,6 +492,7 @@
 <script src="./assets/calendar.js" defer></script>
 <script src="./assets/whatsapp.js" defer></script>
 <script src="./assets/chat.js" defer></script>
+<script src="./assets/places.js" defer></script>
 <script src="./assets/app.js" defer></script>
 </body>
 </html>

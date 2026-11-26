@@ -857,5 +857,22 @@
   "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "افتح الحدث الذي نزّلته في تقويم Apple واحفظه. اسمح بإشعارات التقويم، ثم أغلق Alongside وواتساب.",
   "Save the downloaded event in Calendar before the alert time.": "احفظ الحدث في التقويم قبل موعد التنبيه.",
   "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "لا يوجد رقم إرسال واتساب متصل بـ Alongside. تنبيهات التقويم متاحة أدناه.",
-  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "تُفتح المصادر الطبية وأدلة الرعاية خارج Alongside. لكل خدمة قواعدها الخاصة للخصوصية والأهلية والرسوم."
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "تُفتح المصادر الطبية وأدلة الرعاية خارج Alongside. لكل خدمة قواعدها الخاصة للخصوصية والأهلية والرسوم.",
+  "Date of birth (required)": "تاريخ الميلاد (مطلوب)",
+  "Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.": "يبقى تاريخ ميلادك في هذا المتصفح. يستخدمه Alongside فقط لعرض خيارات دعم تناسب عمرك.",
+  "Enter a valid date of birth.": "أدخل تاريخ ميلاد صحيحًا.",
+  "This account is for people under 18.": "هذا الحساب مخصص لمن هم دون 18 عامًا.",
+  "This account is for people 18 or older.": "هذا الحساب مخصص لمن تبلغ أعمارهم 18 عامًا أو أكثر.",
+  "I agree to send my chat messages.": "أوافق على إرسال رسائلي.",
+  "If you are in immediate danger or have a medical emergency, call your local emergency number now.": "إذا كنت في خطر مباشر أو لديك حالة طبية طارئة، اتصل برقم الطوارئ المحلي الآن.",
+  "If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.": "إذا كنت تمر بوقت صعب أو تفكر في إيذاء نفسك، يمكن لخط دعم مجاني وسري أن يساعدك.",
+  "Find a crisis line in your country": "ابحث عن خط دعم في بلدك",
+  "Find care near me": "ابحث عن رعاية قريبة مني",
+  "You can also reach out to your care team or a trusted person. Alongside has no live care team.": "يمكنك أيضًا التواصل مع فريق رعايتك أو شخص تثق به. لا يوجد لدى Alongside فريق رعاية مباشر.",
+  "Add your date of birth to see support options for your age.": "أضف تاريخ ميلادك لترى خيارات الدعم المناسبة لعمرك.",
+  "Add your date of birth": "أضف تاريخ ميلادك",
+  "Chat connected. Your messages go to OpenAI for replies.": "المحادثة متصلة. تُرسل رسائلك إلى OpenAI للحصول على ردود.",
+  "Chat connected": "المحادثة متصلة",
+  "This computer sends chat messages to OpenAI. Your profile and check-ins stay on this device.": "يرسل هذا الجهاز رسائل المحادثة إلى OpenAI. يبقى ملفك الشخصي وتسجيلاتك على هذا الجهاز.",
+  "Water reminders are off.": "تذكيرات الماء متوقفة."
 }

@@ -857,5 +857,22 @@
   "Open the downloaded event in Apple Calendar and save it. Allow Calendar notifications, then close Alongside and WhatsApp.": "Abra o evento baixado no Calendário da Apple e salve-o. Permita as notificações do Calendário e depois feche o Alongside e o WhatsApp.",
   "Save the downloaded event in Calendar before the alert time.": "Salve o evento no Calendário antes do horário do alerta.",
   "Alongside has no WhatsApp sender connected. Calendar alerts are available below.": "O Alongside não tem um remetente do WhatsApp conectado. Os alertas do calendário estão disponíveis abaixo.",
-  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "As fontes médicas e os diretórios de atendimento abrem fora do Alongside. Cada serviço define suas regras de privacidade, critérios de acesso e tarifas."
+  "Medical sources and care directories open outside Alongside. Each service sets its own privacy rules, eligibility and fees.": "As fontes médicas e os diretórios de atendimento abrem fora do Alongside. Cada serviço define suas regras de privacidade, critérios de acesso e tarifas.",
+  "Date of birth (required)": "Data de nascimento (obrigatório)",
+  "Your date of birth stays in this browser. Alongside uses it only to show support options suited to your age.": "Sua data de nascimento fica neste navegador. O Alongside a usa apenas para mostrar opções de apoio adequadas à sua idade.",
+  "Enter a valid date of birth.": "Digite uma data de nascimento válida.",
+  "This account is for people under 18.": "Esta conta é para menores de 18 anos.",
+  "This account is for people 18 or older.": "Esta conta é para pessoas com 18 anos ou mais.",
+  "I agree to send my chat messages.": "Concordo em enviar minhas mensagens do chat.",
+  "If you are in immediate danger or have a medical emergency, call your local emergency number now.": "Se você estiver em perigo imediato ou tiver uma emergência médica, ligue agora para o número de emergência local.",
+  "If you are struggling or thinking about harming yourself, a free, confidential crisis line can help.": "Se você está passando por um momento difícil ou pensando em se machucar, uma linha de apoio gratuita e confidencial pode ajudar.",
+  "Find a crisis line in your country": "Encontre uma linha de apoio no seu país",
+  "Find care near me": "Encontrar atendimento perto de mim",
+  "You can also reach out to your care team or a trusted person. Alongside has no live care team.": "Você também pode falar com sua equipe de cuidado ou com uma pessoa de confiança. O Alongside não tem equipe de cuidado ao vivo.",
+  "Add your date of birth to see support options for your age.": "Adicione sua data de nascimento para ver opções de apoio para sua idade.",
+  "Add your date of birth": "Adicionar data de nascimento",
+  "Chat connected. Your messages go to OpenAI for replies.": "Chat conectado. Suas mensagens vão para a OpenAI para gerar respostas.",
+  "Chat connected": "Chat conectado",
+  "This computer sends chat messages to OpenAI. Your profile and check-ins stay on this device.": "Este computador envia as mensagens do chat para a OpenAI. Seu perfil e seus check-ins ficam neste dispositivo.",
+  "Water reminders are off.": "Os lembretes de água estão desativados."
 }

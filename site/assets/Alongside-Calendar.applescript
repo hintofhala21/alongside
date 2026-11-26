@@ -8,14 +8,18 @@ on run argv
 	if argv is {"--self-test"} then
 		set sample to current date
 		set sample's time to 3600
-		return my reviewURL({sample}, {sample + 1800}, {1})
+		return my reviewURL({sample}, {sample + 1800}, {1}, "apple-busy")
 	end if
-	display dialog "Choose which of today's appointments to compare with your Alongside plan. Only the times you select will open in Alongside." with title "Alongside Calendar" buttons {"Cancel", "Choose calendars"} default button 2 cancel button 1
+	set periodChoice to button returned of (display dialog "Which days would you like to check? Next, you’ll choose calendars and appointments." with title "Choose appointments for Alongside" buttons {"Cancel", "Today", "Next seven days"} default button 3 cancel button 1)
 	set dayStart to current date
 	set dayStart's time to 0
 	set dayEnd to dayStart + 36 * hours
 	set dayEnd's time to 0
-	tell application id "com.apple.iCal" to set calendarNames to name of calendars
+	if periodChoice is "Next seven days" then
+		set dayEnd to dayStart + (7 * days) + (6 * hours)
+		set dayEnd's time to 0
+	end if
+	tell application "/System/Applications/Calendar.app" to set calendarNames to name of calendars
 	set calendarOptions to {}
 	set calendarIndexes to {}
 	repeat with i from 1 to count calendarNames
@@ -29,7 +33,7 @@ on run argv
 		display dialog "There are no appointment calendars to choose from." buttons {"OK"} default button 1
 		return
 	end if
-	set selectedCalendars to choose from list calendarOptions with title "Alongside Calendar" with prompt "Choose your appointment calendars. Leave the Alongside reminder calendar out." with multiple selections allowed
+	set selectedCalendars to choose from list calendarOptions with title "Choose appointments for Alongside" with prompt "Which calendars contain your appointments? Hold Command to select more than one." with multiple selections allowed
 	if selectedCalendars is false then return
 	set starts to {}
 	set ends to {}
@@ -37,7 +41,7 @@ on run argv
 	repeat with chosenCalendar in selectedCalendars
 		set calIndex to my indexOf(chosenCalendar as text, calendarOptions)
 		set calIndex to item calIndex of calendarIndexes
-		tell application id "com.apple.iCal"
+		tell application "/System/Applications/Calendar.app"
 			set matchingEvents to every event of calendar calIndex whose start date < dayEnd and end date > dayStart and allday event is false
 			repeat with appt in matchingEvents
 				if status of appt is not cancelled then
@@ -49,22 +53,29 @@ on run argv
 					if eventName is missing value then set eventName to "Appointment"
 					set end of starts to s
 					set end of ends to e
-					set end of options to ((n + 1) as text) & ". " & (time string of s) & " – " & (time string of e) & "   " & eventName
+					set end of options to ((n + 1) as text) & ". " & (short date string of s) & " " & (time string of s) & " – " & (time string of e) & "   " & eventName
 				end if
 			end repeat
 		end tell
 	end repeat
+	if options is {} then
+		display dialog "No timed appointments were found in those calendars for the days you chose." buttons {"Done"} default button 1
+		return
+	end if
 	set indexes to {}
 	if options is not {} then
-		set picked to choose from list options with title "Choose busy appointments" with prompt "Choose the appointments that keep you busy. Leave free time and Alongside reminders unchecked. Titles stay on this Mac." with multiple selections allowed and empty selection allowed
+		set picked to choose from list options with title "Choose busy appointments" with prompt "Select the appointments you want your plan to work around. Hold Command to select more than one. Only their times go to Alongside." with multiple selections allowed and empty selection allowed
 		if picked is false then return
+		if picked is {} then return
 		repeat with choice in picked
 			set end of indexes to my indexOf(choice as text, options)
 		end repeat
 	end if
 	set n to count indexes
-	display dialog "Open Alongside with " & n & " selected time blocks for today?" with title "Alongside Calendar" buttons {"Cancel", "Open Alongside"} default button 2 cancel button 1
-	open location my reviewURL(starts, ends, indexes)
+	display dialog "Open Alongside with " & n & " selected time blocks?" with title "Choose appointments for Alongside" buttons {"Cancel", "Open Alongside"} default button 2 cancel button 1
+	set fragmentName to "apple-busy"
+	if periodChoice is "Next seven days" then set fragmentName to "week-busy"
+	open location my reviewURL(starts, ends, indexes, fragmentName)
 end run
 
 on indexOf(needle, haystack)
@@ -74,7 +85,7 @@ on indexOf(needle, haystack)
 	error "The chosen appointment list changed. Run the check again."
 end indexOf
 
-on reviewURL(starts, ends, indexes)
+on reviewURL(starts, ends, indexes, fragmentName)
 	set formatter to current application's NSDateFormatter's new()
 	formatter's setLocale:(current application's NSLocale's localeWithLocaleIdentifier:"en_US_POSIX")
 	formatter's setTimeZone:(current application's NSTimeZone's timeZoneWithAbbreviation:"UTC")
@@ -87,5 +98,5 @@ on reviewURL(starts, ends, indexes)
 	end repeat
 	set payload to spans's componentsJoinedByString:linefeed
 	set encoded to payload's stringByAddingPercentEncodingWithAllowedCharacters:(current application's NSCharacterSet's alphanumericCharacterSet())
-	return "https://hintofhala21.github.io/alongside/#apple-busy=" & (encoded as text)
+	return "https://hintofhala21.github.io/alongside/#" & fragmentName & "=" & (encoded as text)
 end reviewURL

@@ -5,7 +5,7 @@ import {runInNewContext} from 'node:vm';
 
 const source=await readFile(new URL('../site/assets/whatsapp.js',import.meta.url),'utf8');
 function setup(){
-  const context={URL,AbortSignal};
+  const context={URL,AbortSignal,location:{origin:'https://alongside.example'}};
   runInNewContext(source,context);
   const nodes=new Map(), data=new Map(), requests=[];
   const doc={documentElement:{lang:'en'},getElementById(id){
@@ -21,7 +21,7 @@ function setup(){
   let enabled=true,remote=null,failStop=false;
   const controller=context.AlongsideWhatsApp.mount({document:doc,storage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)},
     canConnect:()=>person.allowed,getProfileId:()=>person.id,getPlan:()=>plan,fetcher:async(url,options)=>{
-      requests.push({url,...options});const path=new URL(url).pathname;
+      requests.push({url,...options});const path=new URL(url).pathname.replace(/^\/reminders/,'');
       if(path==='/status')return Response.json({available:enabled});
       const body=options.body && JSON.parse(options.body);
       if(options.method==='POST'){
@@ -85,7 +85,7 @@ test('failed revocation preserves the connection so users can retry',async()=>{
 });
 test('Breeze reminder requests open settings without subscribing or swallowing unrelated questions',async()=>{
   const script=await readFile(new URL('../site/assets/chat.js',import.meta.url),'utf8');
-  const start=script.indexOf('  function requestsReminderSettings('), end=script.indexOf('  function questionKey(',start);
+  const start=script.indexOf('  function requestsReminderSettings('), end=script.indexOf('  const cleanMessage',start);
   const recognizes=runInNewContext(script.slice(start,end)+';requestsReminderSettings;');
   const label='Set up reminders';
   for(const phrase of ['Can you add my plan to my calendar?', 'Connect WhatsApp', 'Remind me to drink water','Set up reminders']){
@@ -94,7 +94,7 @@ test('Breeze reminder requests open settings without subscribing or swallowing u
   assert.equal(recognizes('Remind me what fainting means.',label),false);
   assert.equal(recognizes('I have chest pain and want to ask about reminders.',label),false);
   const html=await readFile(new URL('../site/index.html',import.meta.url),'utf8');
-  assert.match(html,/<a class="text-button" href="#reminders">Set up reminders<\/a>/);
+  assert.match(html,/<a href="#reminders">/);
   assert.doesNotMatch(html,/<input id="whatsapp-consent"[^>]*checked/);
 });
 

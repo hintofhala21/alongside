@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-  const origin = 'https://alongside-reminders.alongside-waicy-demo.workers.dev';
+  const origin = (globalThis.location?.origin || '') + '/reminders';
   const statusText = {
     idle: 'WhatsApp reminders are off.',
     checking: 'Checking the WhatsApp connection…',

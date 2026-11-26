@@ -83,11 +83,11 @@ export function* calendarOccurrences(plan, {expires}, now, days = 28) {
 
 export function calendarFeed(plan, {uid, revised, sequence, expires}, now) {
   const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alongside//Plan//EN','CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH','X-WR-CALNAME:Alongside reminders','REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H'];
+    'METHOD:PUBLISH','COLOR:ForestGreen','X-APPLE-CALENDAR-COLOR:#228B22','X-WR-CALNAME:Alongside reminders','REFRESH-INTERVAL;VALUE=DURATION:PT6H','X-PUBLISHED-TTL:PT6H'];
   for (const {slot,start,date} of calendarOccurrences(plan,{expires},now)) {
     const title = plan.discreet ? 'Reminder' : names[slot.id];
     lines.push('BEGIN:VEVENT', 'UID:'+uid+'-'+date+'-'+Object.keys(names).indexOf(slot.id)+'@alongside', 'DTSTAMP:'+stamp(revised),
-        'SEQUENCE:'+sequence,'DTSTART:'+stamp(start),'DTEND:'+stamp(start+5*60000),'SUMMARY:'+title,'TRANSP:TRANSPARENT',
+        'SEQUENCE:'+sequence,'DTSTART:'+stamp(start),'DTEND:'+stamp(start+5*60000),'COLOR:ForestGreen','SUMMARY:'+title,'TRANSP:TRANSPARENT',
         'BEGIN:VALARM','ACTION:DISPLAY','TRIGGER:PT0S','DESCRIPTION:'+title,'END:VALARM','END:VEVENT');
   }
   return [...lines,'END:VCALENDAR',''].join('\r\n');

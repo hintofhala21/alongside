@@ -31,6 +31,15 @@ test('an inactive backend and an unapproved origin cannot spend API credits',asy
   const s=server({AI_ENABLED:'false'});assert.equal((await s.call('/session',{code:'test',mode:'synthetic'})).status,503);assert.equal(s.requests.length,0);
   const active=server();assert.equal((await active.call('/session',{code:active.env.DEMO_ACCESS_CODE,mode:'synthetic'},null,'https://other.example')).status,403);assert.equal(active.requests.length,0);
 });
+test('Mac preview can start guided chat while unrelated origins and routes remain restricted',async()=>{
+  const s=server();
+  const origin='http://127.0.0.1:4174';
+  const r=await s.call('/session',{mode:'guided',ageGroup:'teen'},null,origin);
+  assert.equal(r.status,200);
+  assert.equal(r.headers.get('Access-Control-Allow-Origin'),origin);
+  assert.equal((await s.call('/publish',{},null,origin)).status,403);
+  assert.equal((await s.call('/session',{},null,'http://127.0.0.1:8181')).status,403);
+});
 test('demo sessions require a code; free-text requires adult attestation',async()=>{
   const s=server();assert.equal((await s.call('/session',{code:'wrong',mode:'synthetic'})).status,401);
   assert.equal((await s.call('/session',{code:s.env.DEMO_ACCESS_CODE,mode:'interactive',adult:false})).status,403);
@@ -85,7 +94,7 @@ test('the local profile migration removes old measurements without losing check-
 test('a verified provider reply identifies the prompt and a rejected key returns a safe diagnostic',async()=>{
   const s=server(); const token=await s.session('synthetic');
   const ok=await s.call('/chat',message(undefined,{scenario:'support'}),token);
-  assert.equal(ok.body.reply.promptVersion,'v13');
+  assert.equal(ok.body.reply.promptVersion,'v15');
   const rejected=server({TEST_FETCH:async()=>Response.json({error:'private provider details'},{status:401})});
   const t=await rejected.session('synthetic');
   const r=await rejected.call('/chat',message(undefined,{scenario:'support'}),t);
@@ -110,7 +119,7 @@ test('personal chat requires consent, remembers the conversation and cannot be s
   const {token}= (await s.call('/session',consent)).body;
   const first=message(undefined,{message:'I want to ask a friend for support.'});
   const reply=await s.call('/chat',first,token);
-  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v13');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
+  assert.equal(reply.status,200);assert.equal(reply.body.mode,'personal');assert.equal(reply.body.reply.promptVersion,'v15');assert.doesNotMatch(reply.body.reply.text,/ignore generated/);assert.ok(reply.body.reply.sources.length);
   await s.call('/chat',message(first.conversationId,{message:'How do I start that conversation?'}),token);
   assert.equal(requests.length,2);assert.equal(requests[1].input[0].content,first.message);
   const share={conversationId:first.conversationId,publisherCode:s.env.PUBLISHER_CODE,confirmFictional:true,title:'Example'};
@@ -126,14 +135,14 @@ test('a younger disclosure in adult chat ends access and offers local support',a
   assert.equal((await s.call('/chat',message(),token)).status,401);
 });
 
-test('one agent uses age from the session and accepts only prepared questions for younger users',async()=>{
+test('one agent uses age from the session and also accepts legacy prepared questions for younger users',async()=>{
   const s=server();
   for(const [ageGroup,guide] of [['child','familiar words'],['teen','Speak plainly']]){
     const {token}= (await s.call('/session',{mode:'guided',ageGroup})).body;
     const turn={conversationId:crypto.randomUUID(),requestId:crypto.randomUUID(),scenario:'note'};
     assert.equal((await s.call('/chat',{...turn,message:'private text'},token)).status,400);
     const reply=await s.call('/chat',{...turn,ageGroup:'adult'},token);
-    assert.equal(reply.status,200);assert.equal(reply.body.reply.promptVersion,'v13');
+    assert.equal(reply.status,200);assert.equal(reply.body.reply.promptVersion,'v15');
     const sent=s.requests.at(-1).body;assert.ok(sent.instructions.includes(guide));assert.equal(sent.tool_choice.name,'reply_to_visitor');
     assert.match(sent.input[0].content,/texture/);
     assert.equal((await s.call('/publish',{},token)).status,403);
@@ -146,7 +155,7 @@ test('a changed profile cannot reuse an adult session for younger personal writi
   runInNewContext(src,vm);const chat=Object.create(vm.AlongsideChat.prototype);
   let age='adult',consent=0;Object.assign(chat,{options:{getAgeGroup:()=>age,translateText:text=>text},openPersonal:()=>consent++});
   await chat.send(input.value);assert.equal(consent,1);
-  age='teen';chat.session={mode:'personal',expires:Date.now()+10000};
+  age='teen';chat.connectGuided=async()=>false;chat.session={mode:'personal',expires:Date.now()+10000};
   await chat.send(input.value);assert.equal(chat.session,null);assert.equal(input.value,'My unsent draft');
 });
 
@@ -166,4 +175,56 @@ test('free-text chat delivers original everyday answers and carries the topic in
     assert.equal(r.status,200);assert.equal(r.body.reply.text,answers[index]);assert.deepEqual(r.body.reply.sources,[]);assert.equal(r.body.reply.action,'none');
   }
   assert.equal(turns[1][1].content,answers[0]);
+});
+
+test('history resumes the selected thread across local replies and live reconnection',async()=>{
+  const old={id:crypto.randomUUID(),mode:'personal',title:'Earlier chat',messages:[],sessionExpires:10};
+  const other={...old,id:crypto.randomUUID(),title:'Another chat'};
+  let saved=JSON.stringify({current:other.id,chats:[other,old]});
+  const scope={crypto,URLSearchParams,location:{hash:'#support?chat='+old.id},
+    history:{replaceState(_state,_title,hash){scope.location.hash=hash;}},
+    localStorage:{getItem:()=>saved,setItem:(_key,value)=>{saved=value;}},
+    sessionStorage:{getItem:()=>null,removeItem(){}},window:{addEventListener(){}},
+    document:{getElementById:()=>null}};
+  runInNewContext(await readFile(new URL('../site/assets/chat.js',import.meta.url),'utf8'),scope);
+  const chat=new scope.AlongsideChat({});
+  await chat.ready;
+  assert.equal(chat.current().id,old.id);
+  chat.session={mode:'personal',expires:10};
+  assert.equal(chat.liveConversationId(chat.current()),old.id);
+  chat.session={mode:'personal',expires:20};
+  const newServerId=chat.liveConversationId(chat.current());
+  assert.notEqual(newServerId,old.id);
+  assert.equal(chat.liveConversationId(chat.current()),newServerId);
+  chat.append('user','Continue here',{mode:'library'});
+  const restored=JSON.parse(saved);
+  assert.equal(restored.current,old.id);
+  assert.equal(restored.chats.length,2);
+  assert.equal(restored.chats[1].messages[0].text,'Continue here');
+  assert.equal(restored.chats[0].messages.length,0);
+});
+
+test('guided meal ideas come from the model with server-validated ingredients and prior turns',async()=>{
+  const s=server();
+  const {token}=(await s.call('/session',{mode:'guided',ageGroup:'teen'})).body;
+  const turn={conversationId:crypto.randomUUID(),requestId:crypto.randomUUID(),scenario:'mealIdeas',ingredients:['Apple','Cinnamon'],choice:'suggest'};
+  assert.equal((await s.call('/chat',{...turn,ingredients:['private text']},token)).status,400);
+  const a=await s.call('/chat',turn,token);
+  assert.equal(a.status,200);assert.equal(a.body.reply.text,'What would you like to say to your friend?');
+  assert.match(s.requests[0].body.instructions,/generate them yourself/);
+  assert.match(s.requests[0].body.input.at(-1).content,/Apple, Cinnamon/);
+  await s.call('/chat',{...turn,requestId:crypto.randomUUID(),choice:'another',ingredients:[]},token);
+  assert.equal(s.requests[1].body.input.length,3);
+});
+
+test('teen meal chat passes ordinary wording and follow-up context to Luna', async()=>{
+  const s=server();
+  const {token}=(await s.call('/session',{mode:'guided',ageGroup:'teen'})).body;
+  const conversationId=crypto.randomUUID();
+  for(const text of ['What can I cook with rice and eggs?', 'Can I pack that for school?']){
+    const reply=await s.call('/chat',message(conversationId,{message:text}),token);
+    assert.equal(reply.status,200);
+    assert.equal(s.requests.at(-1).body.input.at(-1).content,text);
+  }
+  assert.equal(s.requests[1].body.input[0].content,'What can I cook with rice and eggs?');
 });

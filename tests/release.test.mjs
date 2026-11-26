@@ -95,13 +95,6 @@ test('failed check-in saves roll back instead of falsely claiming success', () =
   assert.ok(status.textContent.includes('couldn’t be saved'));
 });
 
-test('the calendar test downloads one real alarm five minutes ahead without using a meal plan', () => {
-  const now=new Date('2026-11-24T23:58:10Z');
-  const content=runInNewContext(section('function calendarTestEvent(', 'function downloadFile(')
-    + ';calendarTestEvent(now);', {now,crypto,translate:key=>key});
-  assert.equal((content.match(/BEGIN:VEVENT/g) || []).length,1);
-  assert.ok(content.includes('DTSTART:20261125T000310Z\r\n'));
-  assert.ok(content.includes('BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:PT0S\r\n'));
-  assert.ok(content.endsWith('END:VEVENT\r\nEND:VCALENDAR\r\n'));
-  assert.match(html,/id="test-calendar"/);
+test('visitor pages omit competition and sample reminder controls', () => {
+  assert.doesNotMatch(html,/id="(?:week-demo|test-calendar|test-preview)"|waicy-conversation|For the judges/);
 });

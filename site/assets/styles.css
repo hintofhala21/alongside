@@ -92,7 +92,7 @@ button { min-height: 42px; }
 .two-columns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 15px; align-items: start; }
 .stack { display: grid; gap: 13px; }
 .field { display: grid; gap: 7px; font-weight: 650; }
-select,textarea,input[type="time"],input[type="text"],input[type="search"] { border: 1px solid #b7bfad; border-radius: 8px; color: var(--ink); background: #fffefa; min-height: 44px; padding: 8px 10px; width: 100%; min-width: 0; }
+select,textarea,input[type="time"],input[type="date"],input[type="text"],input[type="search"] { border: 1px solid #b7bfad; border-radius: 8px; color: var(--ink); background: #fffefa; min-height: 44px; padding: 8px 10px; width: 100%; min-width: 0; }
 textarea { min-height: 105px; width: 100%; resize: vertical; }
 .form-actions,.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .chips .action[aria-pressed="true"] { background: var(--sage); color: white; border-color: var(--sage); }
@@ -190,9 +190,9 @@ input[type="checkbox"] { accent-color:var(--sage); width:18px; height:18px; vert
 .task-row { justify-content:space-between; padding-block:10px; border-bottom:1px solid var(--line); }
 .task-label { min-width:0; overflow-wrap:anywhere; }
 #task-list { list-style:none; padding:0; margin:0; }
-#care-results { margin-block:20px; }
+#care-results { margin-block:20px; scroll-margin-block-start:5rem; }
 #guided-fields { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
-#care-form,#learn-cards,.wide-content { max-width:950px; }
+#care-panel,#learn-cards,.wide-content { max-width:950px; }
 #daily-prompt { margin-top:20px; }
 .notice { background:var(--pale); padding:16px; border-radius:12px; }
 #care-results a { width:fit-content; }
@@ -229,7 +229,7 @@ h1 { font-size:clamp(2rem,7vw,3.8rem); }
 .chat-heading h1 { font-size:clamp(1.65rem,5.7vw,2.5rem); letter-spacing:-.045em; }
 .icon-button { display:grid; place-items:center; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--paper); flex:none; }
 .chat-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; margin-bottom:18px; font-size:.8rem; }
-.chat-toolbar a { margin-inline-start:auto; }.mode-label { padding:5px 9px; border-radius:8px; background:var(--pale); color:var(--deep); }
+.chat-toolbar a { margin-inline-start:auto; }.chat-toolbar .history-link { display:inline-flex; align-items:center; gap:7px; font-size:.88rem; padding:8px 14px; }.chat-toolbar .history-link .icon { width:17px; height:17px; }.mode-label { padding:5px 9px; border-radius:8px; background:var(--pale); color:var(--deep); }
 .text-button { padding:0; min-height:30px; background:transparent; border:0; color:var(--sage); font-size:inherit; text-decoration:underline; text-underline-offset:3px; }
 .chat-layout { display:flex; flex-direction:column; gap:22px; }
 .chat-main { width:100%; min-width:0; }
@@ -265,3 +265,37 @@ html.accounts-locked body > :not(#account-screen) {display:none !important}
 .account-card {width:min(27rem,100%);margin:0 auto;padding:clamp(1.5rem,5vw,2.5rem)}
 .account-card h1 {font-size:clamp(1.9rem,6vw,2.5rem)}
 .basic-setup #profile-form :is(.profile-extra,.health-details,#recovery-stage),.basic-setup #profile-form label[for="recovery-stage"],.basic-setup .mobile-dock,.basic-setup .sidebar nav {display:none}
+
+#plan-reminder, #message-preview {
+  background: #e7f4e9;
+  color: #174b2c;
+  border-inline-start: 4px solid #338449;
+}
+#plan-reminder {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 650;
+  margin-block-end: 12px;
+}
+
+.calendar-guide {max-width:720px}
+.calendar-guide-head {background:#edf5eb;border-radius:20px;padding:clamp(20px,5vw,38px)}
+.calendar-guide-head h1 {max-width:16ch;line-height:1.08;margin-bottom:.4em}
+.calendar-guide-head p {max-width:52ch}
+.calendar-steps {padding-inline-start:1.5rem;display:grid;gap:1rem}
+.calendar-steps li::marker {color:#326a47;font-weight:bold}
+.calendar-time {display:flex;align-items:center;gap:.8rem;border:1px solid var(--line);border-radius:10px;padding:.7rem 1rem;cursor:pointer}
+.calendar-time input {accent-color:#326a47}
+
+.breeze-actions { display:flex; flex-wrap:wrap; gap:8px; margin-block:16px; }
+#added-busy-times li { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+
+/* Usability fixes */
+:is(h1,h2,section,div)[tabindex="-1"]:focus { outline:none; }
+#message-preview { padding:12px 16px; border-radius:10px; }
+#conversation > * { scroll-margin-bottom:200px; }
+.recent-footer { display:grid; gap:4px; margin-top:12px; }
+.help-actions { gap:10px; }
+.help-actions .action { justify-content:center; text-align:center; }
+.chat-heading .new-chat { display:inline-flex; align-items:center; gap:7px; font-size:.88rem; min-height:40px; padding:7px 14px; }
+@media(max-width:1049px) { .help-mobile { display:inline-flex; } }

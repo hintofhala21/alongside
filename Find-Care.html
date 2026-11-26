@@ -1,0 +1,608 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Find care · Alongside</title><style>:root {
+  color-scheme: light;
+  --cream: #f9f6ef;
+  --paper: #fffcf6;
+  --sidebar: #f4efe4;
+  --ink: #28382a;
+  --muted: #5a6657;
+  --line: #e4ded1;
+  --sage: #526d4a;
+  --deep: #3b5336;
+  --pale: #e8eee2;
+  --hero: #acb99f;
+  --white: #fffaf1;
+  --sans: "DM Sans", system-ui, sans-serif;
+  --serif: "Georgia", serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cream); color: var(--ink); font: 16px/1.5 var(--sans); }
+button,select,textarea,input { font: inherit; }
+button,a,select { -webkit-tap-highlight-color: transparent; }
+button { color: inherit; cursor: pointer; }
+a { color: var(--sage); }
+:focus-visible { outline: 3px solid #627d58; outline-offset: 4px; }
+[hidden] { display: none !important; }
+h1,h2,h3,p { margin: 0; }
+h1,h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.045em; line-height: 1.08; }
+h1 { font-size: clamp(2.5rem,5vw,4.35rem); }
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1rem; }
+small,.muted { color: var(--muted); }
+small { font-size: .85rem; }
+button { min-height: 42px; }
+.layout { display: grid; grid-template-columns: 242px minmax(0,1fr); min-height: 100vh; }
+.sidebar { background: var(--sidebar); border-right: 1px solid var(--line); padding: 32px 20px 23px; display: flex; flex-direction: column; gap: 36px; position: sticky; top: 0; height: 100dvh; }
+.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); padding: 0 6px; width: fit-content; }
+.brand-text { font: 1.92rem/1 var(--serif); letter-spacing: -.065em; }
+.brand-mark { display: grid; place-items: center; width: 37px; height: 37px; border-radius: 50%; background: var(--sage); color: var(--white); }
+.brand-mark svg { width: 23px; height: 23px; }
+.nav-label { color: var(--muted); margin: 0 0 9px 13px; }
+.nav { display: grid; gap: 4px; }
+.nav a,.nav button { display: flex; align-items: center; gap: 11px; text-decoration: none; min-height: 45px; border: 0; border-radius: 9px; background: transparent; text-align: start; padding: 9px 12px; color: var(--ink); font-weight: 600; }
+.nav a:hover,.nav button:hover { background: #ebe5d8; }
+.nav a[aria-current] { background: #e0e8d7; color: #3b5336; }
+.icon { width: 19px; height: 19px; flex: none; stroke: currentColor; stroke-width: 1.65; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.sidebar-bottom { margin-top: auto; display: grid; gap: 13px; }
+.sidebar-bottom p { margin: 0 12px; font-size: .81rem; color: var(--muted); }
+.main-wrap { width: min(100%, 1310px); margin-inline: auto; padding: 26px clamp(24px, 4.75vw, 68px) 44px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 21px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+.topbar-label { font-weight: 650; }
+.profile { display: flex; align-items: center; gap: 9px; color: var(--ink); text-decoration: none; background: transparent; border: 1px solid var(--line); border-radius: 30px; padding: 4px 11px 4px 5px; min-width: 0; max-width: 100%; }
+.profile:hover { background: var(--pale); }
+.avatar { display: grid; place-items: center; width: 30px; height: 30px; color: #3f5939; background: #dfe7d6; border-radius: 50%; font-weight: 700; flex: none; }
+#profile-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.help-mobile { display: none; }
+.intro { display: grid; gap: 8px; margin-bottom: 22px; }
+.page-intro { margin-bottom: 25px; }
+.hero { position: relative; isolation: isolate; overflow: hidden; background: var(--hero); color: var(--ink); border-radius: 20px; padding: 23px clamp(22px,4vw,38px) 26px; min-height: 193px; }
+.hero::after { content: ""; position: absolute; z-index: -1; width: 410px; aspect-ratio: 1; right: -50px; top: -115px; border-radius: 50%; background: repeating-radial-gradient(circle at center, transparent 0 23px, #3b53362e 24px 25px); mask-image: linear-gradient(90deg,transparent,black 45%); pointer-events: none; }
+.hero .eyebrow { color: #31482d; margin-bottom: 8px; }
+.eyebrow { display: flex; align-items: center; gap: 8px; font-size: .74rem; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
+.hero h2 { font-size: clamp(2rem,4vw,3.15rem); }
+.hero p:not(.eyebrow) { color: var(--ink); margin-top: 6px; }
+.hero-actions { margin-top: 15px; }
+.action { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 8px 14px; border-radius: 8px; border: 1px solid transparent; background: var(--sage); color: white; text-decoration: none; font-weight: 650; }
+.action:hover { background: var(--deep); }
+.action.light { background: var(--white); color: var(--deep); }
+.action.light:hover { background: #e3eadc; }
+.action.outline { border-color: var(--line); background: transparent; color: var(--sage); }
+.action.outline:hover { background: var(--pale); border-color: var(--pale); }
+.hero .action.outline { color: var(--ink); border-color: #3b53369e; }
+.hero .action.outline:hover { background: var(--deep); color: var(--white); border-color: var(--deep); }
+.action[disabled] { opacity: .55; cursor: default; }
+.dashboard-grid { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(245px,1fr); align-items: start; gap: 20px; margin-top: 20px; }
+.panel { padding: 19px 21px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); min-width: 0; }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.text-link { display: inline-flex; gap: 5px; align-items: center; font-weight: 650; text-underline-offset: 4px; }
+.section-head .text-link { flex-shrink: 0; white-space: nowrap; }
+.text-link .icon { width: 16px; height: 16px; }
+.timeline { list-style: none; padding: 0; margin: 8px 0 0; }
+.timeline li { display: flex; gap: 10px; align-items: center; min-height: 52px; border-bottom: 1px solid var(--line); padding: 5px 0; }
+.timeline li:last-child { border-bottom: 0; }
+.timeline li.current { margin-inline: -6px; padding-inline: 6px; background: #edf1e8; border-radius: 7px; border-color: transparent; }
+.tile-icon { width: 32px; height: 32px; display: grid; place-items: center; background: var(--pale); color: var(--sage); border-radius: 8px; flex: none; }
+.tile-icon .icon { width: 16px; height: 16px; }
+.entry-name { flex: 1; font-weight: 600; }
+.extra { display: grid; gap: 12px; }
+.support-tile { background: #eaf0e3; border-color: #dce5d2; }
+.support-tile p,.reminder-tile p { margin-block: 6px 11px; }
+.card-heading { display: flex; align-items: center; gap: 9px; }
+.card-heading .icon { color: var(--sage); }
+.sections { display: grid; gap: 15px; }
+.two-columns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 15px; align-items: start; }
+.stack { display: grid; gap: 13px; }
+.field { display: grid; gap: 7px; font-weight: 650; }
+select,textarea,input[type="time"],input[type="text"],input[type="search"] { border: 1px solid #b7bfad; border-radius: 8px; color: var(--ink); background: #fffefa; min-height: 44px; padding: 8px 10px; width: 100%; min-width: 0; }
+textarea { min-height: 105px; width: 100%; resize: vertical; }
+.form-actions,.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chips .action[aria-pressed="true"] { background: var(--sage); color: white; border-color: var(--sage); }
+.entries { display: grid; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.entries li { border-bottom: 1px solid var(--line); padding-bottom: 10px; display: grid; gap: 5px; }
+.entries li:last-child { border-bottom: 0; padding-bottom: 0; }
+.entries p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.entry-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.delete { background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; font-size: .85rem; padding: 5px; }
+.conversation { display: grid; gap: 12px; min-height: 120px; max-height: 420px; overflow: auto; padding: 4px 3px; }
+.bubble { width: fit-content; max-width: 90%; padding: 10px 13px; border-radius: 13px; background: var(--pale); overflow-wrap: anywhere; }
+.bubble.user { justify-self: end; background: var(--sidebar); }
+.bubble small { display: block; }
+.source-links { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: .85rem; }
+.source-links a { text-underline-offset: 3px; }
+#approved-sources { display: grid; gap: 15px; }
+#approved-sources h2 { font-size: 1.5rem; letter-spacing: -.02em; }
+footer { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 47px; border-bottom: 1px solid var(--line); }
+.switch-row:last-child { border: 0; }
+.switch-row input { width: 20px; height: 20px; accent-color: var(--sage); flex: none; cursor: pointer; }
+.previews { padding: 12px 14px; border-radius: 10px; background: var(--pale); }
+.previews p { margin-block: 4px; }
+footer { color: var(--muted); font-size: .8rem; margin-top: 24px; }
+dialog { width: min(480px,calc(100% - 28px)); border: 1px solid var(--line); border-radius: 16px; background: var(--paper); color: var(--ink); padding: 24px; }
+dialog::backdrop { background: #28382a90; }
+.status { min-height: 1.5em; color: var(--muted); font-size: .88rem; }
+.status:empty { display: none; }
+.section-group + .section-group { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--line); }
+.entry-copy { flex: 1; min-width: 0; }
+.entry-copy small { display: block; }
+.review-control { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 44px; min-height: 44px; font-size: .82rem; cursor: pointer; }
+.review-control input { accent-color: var(--sage); width: 17px; height: 17px; }
+.focus-note { background: var(--pale); border-color: #dce5d2; }
+.plan-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.profile-sections { max-width: 620px; }
+.action.danger { color: #963434; border-color: #dfbcba; }
+.action.danger:hover { background: #faece9; }
+#today-title { overflow-wrap: anywhere; }
+.time-grid,.starter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+.starter-grid .action { text-align: start; justify-content: flex-start; }
+.chat-layout { display: grid; grid-template-columns: minmax(175px, .55fr) minmax(0, 1.45fr); gap: 15px; align-items: start; }
+.chat-history { list-style: none; padding: 0; margin: 0; display: grid; gap: 5px; }
+.chat-history .action { width: 100%; justify-content: flex-start; text-align: start; }
+.chat-history [aria-pressed="true"] { background: var(--pale); }
+.chat-compose textarea { min-height: 72px; }
+.chat-compose .action { justify-self: start; }
+.hero .hero-note { max-width: 45ch; }
+#times-form { margin-top: 15px; }
+#water-window { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px 12px; min-width: 0; margin: 0; }
+#water-window legend { padding: 0 5px; font-weight: 650; }
+.language-choice { margin: 0; border: 0; border-bottom: 1px solid var(--line); padding: 0 0 15px; min-width: 0; }
+.header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+@media(max-width: 700px) {
+  .chat-layout { grid-template-columns: minmax(0,1fr); }
+  .chat-history { grid-template-columns: repeat(auto-fit, minmax(min(170px,100%),1fr)); }
+}
+@media(max-width: 390px) {
+  .time-grid,.starter-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media(max-width: 900px) {
+  .layout { grid-template-columns: 188px minmax(0,1fr); }
+  .sidebar { padding-inline: 13px; }
+  .dashboard-grid { grid-template-columns: minmax(0,1.25fr) minmax(200px,1fr); gap: 12px; }
+  .panel { padding: 16px; }
+}
+@media(max-width: 760px) {
+  .layout { display: block; }
+  .sidebar { height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--line); padding: 14px 16px 7px; gap: 13px; }
+  .brand { padding: 0; }
+  .sidebar-bottom,.nav-label { display: none; }
+  .nav { display: flex; flex-wrap: wrap; gap: 3px; }
+  .nav a { min-height: 42px; padding: 6px 9px; gap: 5px; font-size: .85rem; }
+  .nav a .icon { width: 15px; }
+  .help-mobile { display: inline-flex; }
+  .main-wrap { padding: 14px 16px 23px; }
+  .topbar { padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+}
+@media(max-width: 560px) {
+  .dashboard-grid,.two-columns { grid-template-columns: minmax(0,1fr); }
+  .hero::after { right: -240px; }
+  .profile { padding-right: 8px; }
+  .topbar-label { font-size: .86rem; }
+}
+@media(prefers-reduced-motion: no-preference) { .action,.nav a,.profile { transition: background-color .14s ease; } }
+
+.profile-extra { border: 0; border-top: 1px solid var(--line); padding: 22px 0 0; min-width: 0; }
+.profile-extra legend { font-family: var(--serif); font-size: 1.5rem; padding-block: 12px; }
+.health-details { border-top: 1px solid var(--line); padding-top: 16px; }
+.health-details summary { cursor: pointer; color: var(--sage); font-weight: 650; }
+.health-details[open] > * + * { margin-top: 14px; }
+input:not([type]),input[type="tel"],input[type="number"] { width:100%; background:var(--paper); border:1px solid var(--line); border-radius:8px; color:var(--ink); min-height:46px; padding:10px 12px; }
+input[type="checkbox"] { accent-color:var(--sage); width:18px; height:18px; vertical-align:middle; }
+.task-row,.task-label { display:flex; align-items:center; gap:12px; }
+.task-row { justify-content:space-between; padding-block:10px; border-bottom:1px solid var(--line); }
+.task-label { min-width:0; overflow-wrap:anywhere; }
+#task-list { list-style:none; padding:0; margin:0; }
+#care-results { margin-block:20px; scroll-margin-block-start:5rem; }
+#guided-fields { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+#care-panel,#learn-cards,.wide-content { max-width:950px; }
+#daily-prompt { margin-top:20px; }
+.notice { background:var(--pale); padding:16px; border-radius:12px; }
+#care-results a { width:fit-content; }
+.health-details fieldset { border:1px solid var(--line); border-radius:10px; padding:16px; }
+@media(max-width:760px) { .sidebar { height:auto; } .nav { font-size:.9rem; } }
+.layout-1 { position:absolute; }
+.layout-2 { margin-top:20px; }
+.layout-3 { margin-bottom:20px; }
+.legal-page { max-width: 850px; margin: 48px auto; padding: 0 24px; }
+.legal-page h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); }
+
+/* Chat-first layout: phone defaults, with a roomier desktop rail. */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.layout { display:block; }
+.sidebar { position:relative; height:auto; padding:15px 18px 0; border:0; background:var(--cream); gap:12px; }
+.brand { padding:0; }.brand-text { font-size:1.8rem; }.brand-mark { width:33px; height:33px; }
+.sidebar-bottom,.nav-label { display:none; }
+#workspace-nav { overflow:auto; scrollbar-width:none; }
+.nav { display:flex; flex-wrap:nowrap; width:max-content; padding-bottom:12px; }
+.nav a { min-height:44px; white-space:nowrap; padding:9px 12px; font-size:.9rem; }
+.main-wrap { width:100%; max-width:1400px; padding:10px 18px calc(96px + env(safe-area-inset-bottom)); }
+.topbar { min-height:44px; margin:0 0 20px; padding-bottom:12px; gap:8px; flex-wrap:wrap; }
+.topbar-label { display:none; }.header-actions { margin-inline-start:auto; gap:6px; }.header-actions .action { font-size:.86rem; min-height:42px; padding:7px 10px; }
+.help-mobile { display:none; }.profile { font-size:.85rem; }
+h1 { font-size:clamp(2rem,7vw,3.8rem); }
+.action { min-height:46px; border-radius:12px; }
+.panel { background:#fffdf7f5; border-radius:18px; padding:20px; }
+.mobile-dock { display:grid; grid-template-columns:repeat(4,1fr); position:fixed; z-index:20; bottom:0; inset-inline:0; padding:7px 10px calc(7px + env(safe-area-inset-bottom)); background:#fffdf8f5; backdrop-filter:blur(16px); border-top:1px solid var(--line); }
+.mobile-dock a { display:grid; justify-items:center; gap:3px; padding:6px; color:var(--muted); font-size:.78rem; text-decoration:none; min-height:50px; border-radius:12px; }
+.mobile-dock a[aria-current] { color:var(--deep); background:var(--pale); font-weight:700; }
+.mobile-dock .icon { width:21px; height:21px; }
+.chat-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.chat-heading .eyebrow { color:var(--sage); margin-bottom:7px; font-size:.73rem; }
+.chat-heading h1 { font-size:clamp(1.65rem,5.7vw,2.5rem); letter-spacing:-.045em; }
+.icon-button { display:grid; place-items:center; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--paper); flex:none; }
+.chat-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; margin-bottom:18px; font-size:.8rem; }
+.chat-toolbar a { margin-inline-start:auto; }.mode-label { padding:5px 9px; border-radius:8px; background:var(--pale); color:var(--deep); }
+.text-button { padding:0; min-height:30px; background:transparent; border:0; color:var(--sage); font-size:inherit; text-decoration:underline; text-underline-offset:3px; }
+.chat-layout { display:flex; flex-direction:column; gap:22px; }
+.chat-main { width:100%; min-width:0; }
+.chat-welcome { min-height:228px; border-radius:24px; padding:24px; position:relative; overflow:hidden; isolation:isolate; background:#d4dccc; margin-bottom:20px; }
+.chat-welcome::before { content:""; position:absolute; inset:0; z-index:-2; background:url('./flowers.jpg') center 75%/cover; }
+.chat-welcome::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,#f6f4e9f5 0%,#f6f4e9dc 48%,#f6f4e911 100%); }
+.welcome-copy { max-width:360px; }.welcome-copy .eyebrow { color:#435c3b; font-size:.7rem; margin-bottom:14px; }.welcome-copy h2 { font-size:clamp(2rem,8vw,3rem); line-height:1.05; }.welcome-copy p:last-child { margin-top:14px; font-size:.88rem; color:#42513c; line-height:1.55; }
+.conversation { display:grid; gap:18px; min-height:0; max-height:none; overflow:visible; padding:0; }
+.conversation:empty { display:none; }.bubble { max-width:94%; padding:16px 18px; border-radius:20px 20px 20px 5px; background:#edf1e7; box-shadow:0 3px 18px #28382a05; }.bubble.user { background:#ede8dd; border-radius:20px 20px 5px 20px; }.bubble small { margin-bottom:6px; font-size:.75rem; font-weight:650; color:#617058; }.bubble p { white-space:pre-wrap; line-height:1.7; font-size:.96rem; }.bubble .action { margin-top:13px; font-size:.85rem; }.bubble .source-links { margin-top:14px; padding-top:10px; border-top:1px solid #526d4a20; }.agent-trace { font-size:.78rem; margin-top:12px; color:var(--muted); }.agent-trace summary { cursor:pointer; }.agent-trace p { font-size:.78rem; margin-top:7px; }.thinking { padding:14px; font-size:.9rem; color:var(--muted); }
+.starter-grid { margin:16px 0; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }.starter-grid button { min-height:68px; text-align:start; padding:12px 14px; border:1px solid #d6ddcf; border-radius:15px; background:#fffdf8; color:var(--ink); font-size:.88rem; line-height:1.4; }.starter-grid button:hover { background:var(--pale); }
+.chat-compose { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; position:sticky; z-index:10; bottom:calc(78px + env(safe-area-inset-bottom)); margin-top:20px; padding:10px; border:1px solid #cbd4c2; border-radius:20px; background:#fffefaf7; box-shadow:0 8px 30px #28382a0d; backdrop-filter:blur(14px); }
+.chat-compose textarea { border:0; background:transparent; min-height:60px; max-height:180px; padding:10px 8px; resize:vertical; font-size:1rem; line-height:1.4; }.chat-compose textarea:focus-visible { outline-offset:0; }.chat-compose small { grid-column:1/-1; padding:0 8px 3px; font-size:.71rem; line-height:1.4; }.send-button { display:grid; gap:1px; place-items:center; align-self:center; min-width:53px; height:53px; border-radius:15px; border:0; background:var(--sage); color:white; font-size:.73rem; }.send-button:disabled { opacity:.5; }.send-button .icon { width:21px; height:21px; }
+.chat-status { font-size:.87rem; color:var(--deep); margin-top:12px; }.chat-status:empty { display:none; }.chat-boundary { font-size:.75rem; text-align:center; color:var(--muted); margin:9px 0; }.chat-side { display:grid; gap:14px; width:100%; }.chat-side summary { font-weight:650; color:var(--sage); cursor:pointer; min-height:30px; }.chat-side details[open] summary { margin-bottom:14px; }.chat-side h2 { font-size:1.3rem; }.chat-history .action { font-size:.85rem; }.library-drawer form { margin-block:15px; }.garden-card { display:none; min-height:220px; border-radius:22px; overflow:hidden; background:linear-gradient(0deg,#20371cbb,transparent 90%),url('./garden.jpg') center/cover; padding:24px; align-items:end; color:#fffdf3; }.garden-card p { font:2rem/1.12 var(--serif); letter-spacing:-.04em; }
+.synthetic-scenarios { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }.synthetic-scenarios small { width:100%; }.synthetic-scenarios .action { font-size:.85rem; }
+#demo-connection { width:min(510px,calc(100% - 28px)); }#demo-connection > * + * { margin-top:18px; }#demo-connection input[type=password],.history-form input { min-height:48px; width:100%; border:1px solid #b7bfad; border-radius:9px; padding:10px; background:#fffefa; }#demo-connection label:has(input[type=checkbox]) { font-weight:400; }#demo-connection input[type=checkbox] { margin-inline-end:7px; }
+.chat-view footer { font-size:.73rem; gap:8px 14px; }.chat-view .main-wrap { padding-top:5px; }
+.history-shell { max-width:1120px; margin:auto; padding:20px 18px 50px; }.history-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:18px; }.history-header .brand-text { font-size:1.65rem; }.history-hero { position:relative; isolation:isolate; overflow:hidden; border-radius:24px; padding:28px 24px; background:#dce4d5; margin:12px 0 22px; }.history-hero::before {content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#f6f4e9f2,#f6f4e9ac 60%,#f6f4e955),url('./garden.jpg') center 50%/cover; }.history-hero h1 { font-size:clamp(2rem,6vw,3rem); margin:8px 0 12px; }.history-hero p { max-width:55ch; }.history-tabs { display:flex; gap:8px; margin-bottom:18px; }.history-tabs .action { font-size:.87rem; }.history-tabs [aria-selected=true] { background:var(--sage); color:white; }.history-grid { display:grid; gap:18px; }.history-list { display:grid; align-content:start; gap:10px; }.history-item { width:100%; text-align:start; padding:16px; background:var(--paper); border:1px solid var(--line); border-radius:15px; }.history-item small { display:block; margin-top:6px; }.history-item[aria-pressed=true] { border-color:var(--sage); background:var(--pale); }.history-transcript { min-width:0; }.history-transcript .bubble { margin-block:12px; }.history-transcript .bubble.user { margin-inline-start:auto; }.history-form { display:grid; gap:14px; margin-top:20px; padding:18px; border:1px solid var(--line); border-radius:16px; }.history-actions { display:flex; flex-wrap:wrap; gap:10px; margin-block:14px; }.empty-history { padding:30px 22px; border:1px dashed #bac6ae; border-radius:18px; background:#fffdf7b3; }.history-help { margin-top:25px; font-size:.87rem; }.history-help summary { color:var(--sage); cursor:pointer; }
+@media(min-width:760px) { .main-wrap {padding-inline:34px;}.chat-welcome {min-height:280px;padding:35px;}.welcome-copy h2 {font-size:3rem;}.conversation {max-width:850px;}.chat-side {grid-template-columns:repeat(2,minmax(0,1fr));}.history-grid {grid-template-columns:280px minmax(0,1fr);}.history-shell {padding-inline:32px;}.chat-compose {bottom:90px;} }
+@media(min-width:1050px) { .layout {display:grid;grid-template-columns:230px minmax(0,1fr);}.sidebar {position:sticky;top:0;height:100dvh;padding:30px 20px;background:var(--sidebar);border-inline-end:1px solid var(--line);gap:35px;}.brand-text {font-size:1.95rem;}.brand-mark {width:36px;height:36px;}#workspace-nav {overflow:visible;}.nav {display:grid;width:auto;padding:0;gap:6px;}.nav a {min-height:46px;}.sidebar-bottom {display:grid;}.sidebar-bottom .nav {display:grid;}.nav-label {display:block;}.main-wrap {padding:24px clamp(26px,3.5vw,55px) 35px;}.topbar {margin-bottom:25px;}.topbar-label {display:block;font-size:.9rem;}.mobile-dock {display:none;}.chat-layout {display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:24px;}.chat-main {max-width:850px;}.chat-side {display:grid;grid-template-columns:1fr;}.garden-card {display:grid;min-height:300px;}.chat-welcome {min-height:280px;}.chat-compose {bottom:18px;}.chat-view .main-wrap {padding-top:24px;}.bubble {max-width:90%;}.history-shell {padding-top:26px;} }
+@media(prefers-reduced-motion:reduce) { * {scroll-behavior:auto!important;} }
+.sidebar-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.menu-toggle {font-size:.83rem;min-height:40px;padding:6px 12px;}
+@media(max-width:1049px) { .sidebar #workspace-nav {display:none;} .sidebar.menu-open #workspace-nav {display:block;overflow:visible;} .sidebar.menu-open .nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:auto;} .sidebar.menu-open .nav a {white-space:normal;} .chat-view .topbar {margin-bottom:15px;} }
+@media(max-width:600px) { .chat-welcome {min-height:190px;padding:22px;}.welcome-copy h2 {font-size:2.15rem;}.welcome-copy .eyebrow {margin-bottom:10px;}.welcome-copy p:last-child {margin-top:12px;font-size:.85rem;}.chat-toolbar {margin-bottom:14px;} }
+@media(min-width:1050px) { .menu-toggle {display:none;} }
+
+#kids-dialog {width:min(38rem,94vw);max-height:90dvh;overflow:auto;}
+.kids-log {max-height:40dvh;overflow:auto;}
+.kids-log:empty {display:none;}
+html.accounts-locked body > :not(#account-screen) {display:none !important}
+.account-screen {min-height:100dvh;display:grid;place-items:center;padding:1.25rem;background:linear-gradient(90deg,#f4f2e4eb,#f4f2e482),url('./garden.jpg') center/cover}
+.account-screen[hidden] {display:none}
+.account-card {width:min(27rem,100%);margin:0 auto;padding:clamp(1.5rem,5vw,2.5rem)}
+.account-card h1 {font-size:clamp(1.9rem,6vw,2.5rem)}
+.basic-setup #profile-form :is(.profile-extra,.health-details,#recovery-stage),.basic-setup #profile-form label[for="recovery-stage"],.basic-setup .mobile-dock,.basic-setup .sidebar nav {display:none}
+
+#plan-reminder, #message-preview {
+  background: #e7f4e9;
+  color: #174b2c;
+  border-inline-start: 4px solid #338449;
+}
+#plan-reminder {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 650;
+  margin-block-end: 12px;
+}
+
+.calendar-guide {max-width:720px}
+.calendar-guide-head {background:#edf5eb;border-radius:20px;padding:clamp(20px,5vw,38px)}
+.calendar-guide-head h1 {max-width:16ch;line-height:1.08;margin-bottom:.4em}
+.calendar-guide-head p {max-width:52ch}
+.calendar-steps {padding-inline-start:1.5rem;display:grid;gap:1rem}
+.calendar-steps li::marker {color:#326a47;font-weight:bold}
+.calendar-time {display:flex;align-items:center;gap:.8rem;border:1px solid var(--line);border-radius:10px;padding:.7rem 1rem;cursor:pointer}
+.calendar-time input {accent-color:#326a47}
+
+.breeze-actions { display:flex; flex-wrap:wrap; gap:8px; margin-block:16px; }
+#added-busy-times li { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; }
+ main{max-width:850px;margin:auto;padding:24px}</style></head><body><main><section data-page="care" aria-labelledby="care-title">
+  <div class="intro page-intro"><h1 id="care-title" tabindex="-1">Find care</h1><p class="muted">Find the psychiatric hospitals and hospital psychiatry services closest to you, or search by country and city.</p></div>
+  <div class="panel stack" id="care-panel">
+  <form class="stack" id="care-near-form">
+    <label><input type="checkbox" id="care-public"> Prioritize public or lower-cost care</label>
+    <button class="action" type="submit" id="care-near">Find care near me</button>
+    <small>Alongside asks for your location only when you tap this button. An approximate position (about 1 km) is sent to Google Maps to find the closest hospitals. It isn’t saved.</small>
+  </form>
+  <p id="care-child-note" hidden>Ask a parent, carer or another trusted adult to help you find care near you. You can also look up hospitals by country and city below.</p>
+  <details class="stack health-details" id="care-city-search"><summary>Or search by country and city</summary>
+  <form class="stack" id="care-form">
+    <label class="field" for="care-country">Country or territory <input id="care-country" value="Russia" type="search" list="country-options" autocomplete="off" required dir="auto"></label>
+    <label class="field" for="care-city">City, town, or area <input id="care-city" value="" maxlength="100" dir="auto" autocomplete="off"></label>
+    <button class="action outline" type="submit">Find hospital locations</button>
+    <small>This search stays on this device until you choose a Google Maps search or open an external link.</small>
+  </form>
+  </details>
+  </div>
+  <div class="sections" id="care-results" tabindex="-1" aria-label="Directory results" role="region" aria-live="polite"></div>
+  <div class="panel stack"><h2>Questions to ask a provider</h2><ul><li>Do you assess eating concerns for someone my age?</li><li>Do I need a referral, insurance, or proof of eligibility?</li><li>What would an appointment or tests cost? Is reduced-cost care available?</li><li>Can you help with nutrition, physical health, and emotional support together?</li></ul><small>A public hospital is not automatically free for everyone. Confirm fees, eligibility, opening hours, and available services directly.</small></div>
+</section>
+<datalist id="country-options"></datalist></main><script id="country-registry" type="application/json">[["AC", "Ascension Island"], ["AD", "Andorra"], ["AE", "United Arab Emirates"], ["AF", "Afghanistan"], ["AG", "Antigua and Barbuda"], ["AI", "Anguilla"], ["AL", "Albania"], ["AM", "Armenia"], ["AO", "Angola"], ["AQ", "Antarctica"], ["AR", "Argentina"], ["AS", "American Samoa"], ["AT", "Austria"], ["AU", "Australia"], ["AW", "Aruba"], ["AX", "Åland Islands"], ["AZ", "Azerbaijan"], ["BA", "Bosnia and Herzegovina"], ["BB", "Barbados"], ["BD", "Bangladesh"], ["BE", "Belgium"], ["BF", "Burkina Faso"], ["BG", "Bulgaria"], ["BH", "Bahrain"], ["BI", "Burundi"], ["BJ", "Benin"], ["BL", "Saint Barthélemy"], ["BM", "Bermuda"], ["BN", "Brunei Darussalam"], ["BO", "Bolivia"], ["BQ", "Bonaire, Sint Eustatius and Saba"], ["BR", "Brazil"], ["BS", "Bahamas"], ["BT", "Bhutan"], ["BV", "Bouvet Island"], ["BW", "Botswana"], ["BY", "Belarus"], ["BZ", "Belize"], ["CA", "Canada"], ["CC", "Cocos (Keeling) Islands"], ["CD", "The Democratic Republic of the Congo"], ["CF", "Central African Republic"], ["CG", "Congo"], ["CH", "Switzerland"], ["CI", "Côte d'Ivoire"], ["CK", "Cook Islands"], ["CL", "Chile"], ["CM", "Cameroon"], ["CN", "China"], ["CO", "Colombia"], ["CP", "Clipperton Island"], ["CQ", "Sark"], ["CR", "Costa Rica"], ["CU", "Cuba"], ["CV", "Cabo Verde"], ["CW", "Curaçao"], ["CX", "Christmas Island"], ["CY", "Cyprus"], ["CZ", "Czechia"], ["DE", "Germany"], ["DG", "Diego Garcia"], ["DJ", "Djibouti"], ["DK", "Denmark"], ["DM", "Dominica"], ["DO", "Dominican Republic"], ["DZ", "Algeria"], ["EA", "Ceuta, Melilla"], ["EC", "Ecuador"], ["EE", "Estonia"], ["EG", "Egypt"], ["EH", "Western Sahara"], ["ER", "Eritrea"], ["ES", "Spain"], ["ET", "Ethiopia"], ["FI", "Finland"], ["FJ", "Fiji"], ["FK", "Falkland Islands (Malvinas)"], ["FM", "Federated States of Micronesia"], ["FO", "Faroe Islands"], ["FR", "France"], ["GA", "Gabon"], ["GB", "United Kingdom"], ["GD", "Grenada"], ["GE", "Georgia"], ["GF", "French Guiana"], ["GG", "Guernsey"], ["GH", "Ghana"], ["GI", "Gibraltar"], ["GL", "Greenland"], ["GM", "Gambia"], ["GN", "Guinea"], ["GP", "Guadeloupe"], ["GQ", "Equatorial Guinea"], ["GR", "Greece"], ["GS", "South Georgia and the South Sandwich Islands"], ["GT", "Guatemala"], ["GU", "Guam"], ["GW", "Guinea-Bissau"], ["GY", "Guyana"], ["HK", "Hong Kong"], ["HM", "Heard Island and McDonald Islands"], ["HN", "Honduras"], ["HR", "Croatia"], ["HT", "Haiti"], ["HU", "Hungary"], ["IC", "Canary Islands"], ["ID", "Indonesia"], ["IE", "Ireland"], ["IM", "Isle of Man"], ["IN", "India"], ["IO", "British Indian Ocean Territory"], ["IQ", "Iraq"], ["IR", "Islamic Republic of Iran"], ["IS", "Iceland"], ["IT", "Italy"], ["JE", "Jersey"], ["JM", "Jamaica"], ["JO", "Jordan"], ["JP", "Japan"], ["KE", "Kenya"], ["KG", "Kyrgyzstan"], ["KH", "Cambodia"], ["KI", "Kiribati"], ["KM", "Comoros"], ["KN", "Saint Kitts and Nevis"], ["KP", "Democratic People's Republic of Korea"], ["KR", "Republic of Korea"], ["KW", "Kuwait"], ["KY", "Cayman Islands"], ["KZ", "Kazakhstan"], ["LA", "Lao People's Democratic Republic"], ["LB", "Lebanon"], ["LC", "Saint Lucia"], ["LI", "Liechtenstein"], ["LK", "Sri Lanka"], ["LR", "Liberia"], ["LS", "Lesotho"], ["LT", "Lithuania"], ["LU", "Luxembourg"], ["LV", "Latvia"], ["LY", "Libya"], ["MA", "Morocco"], ["MC", "Monaco"], ["MD", "Moldova"], ["ME", "Montenegro"], ["MF", "Saint Martin (French part)"], ["MG", "Madagascar"], ["MH", "Marshall Islands"], ["MK", "North Macedonia"], ["ML", "Mali"], ["MM", "Myanmar"], ["MN", "Mongolia"], ["MO", "Macao"], ["MP", "Northern Mariana Islands"], ["MQ", "Martinique"], ["MR", "Mauritania"], ["MS", "Montserrat"], ["MT", "Malta"], ["MU", "Mauritius"], ["MV", "Maldives"], ["MW", "Malawi"], ["MX", "Mexico"], ["MY", "Malaysia"], ["MZ", "Mozambique"], ["NA", "Namibia"], ["NC", "New Caledonia"], ["NE", "Niger"], ["NF", "Norfolk Island"], ["NG", "Nigeria"], ["NI", "Nicaragua"], ["NL", "Netherlands"], ["NO", "Norway"], ["NP", "Nepal"], ["NR", "Naoero"], ["NU", "Niue"], ["NZ", "New Zealand"], ["OM", "Oman"], ["PA", "Panama"], ["PE", "Peru"], ["PF", "French Polynesia"], ["PG", "Papua New Guinea"], ["PH", "Philippines"], ["PK", "Pakistan"], ["PL", "Poland"], ["PM", "Saint Pierre and Miquelon"], ["PN", "Pitcairn"], ["PR", "Puerto Rico"], ["PS", "State of Palestine"], ["PT", "Portugal"], ["PW", "Palau"], ["PY", "Paraguay"], ["QA", "Qatar"], ["RE", "Réunion"], ["RO", "Romania"], ["RS", "Serbia"], ["RU", "Russian Federation"], ["RW", "Rwanda"], ["SA", "Saudi Arabia"], ["SB", "Solomon Islands"], ["SC", "Seychelles"], ["SD", "Sudan"], ["SE", "Sweden"], ["SG", "Singapore"], ["SH", "Saint Helena, Ascension and Tristan da Cunha"], ["SI", "Slovenia"], ["SJ", "Svalbard and Jan Mayen"], ["SK", "Slovakia"], ["SL", "Sierra Leone"], ["SM", "San Marino"], ["SN", "Senegal"], ["SO", "Somalia"], ["SR", "Suriname"], ["SS", "South Sudan"], ["ST", "Sao Tome and Principe"], ["SV", "El Salvador"], ["SX", "Sint Maarten (Dutch part)"], ["SY", "Syrian Arab Republic"], ["SZ", "Eswatini"], ["TA", "Tristan da Cunha"], ["TC", "Turks and Caicos Islands"], ["TD", "Chad"], ["TF", "French Southern Territories"], ["TG", "Togo"], ["TH", "Thailand"], ["TJ", "Tajikistan"], ["TK", "Tokelau"], ["TL", "Timor-Leste"], ["TM", "Turkmenistan"], ["TN", "Tunisia"], ["TO", "Tonga"], ["TR", "Türkiye"], ["TT", "Trinidad and Tobago"], ["TV", "Tuvalu"], ["TW", "Taiwan, Province of China"], ["TZ", "United Republic of Tanzania"], ["UA", "Ukraine"], ["UG", "Uganda"], ["UM", "United States Minor Outlying Islands"], ["US", "United States"], ["UY", "Uruguay"], ["UZ", "Uzbekistan"], ["VA", "Holy See (Vatican City State)"], ["VC", "Saint Vincent and the Grenadines"], ["VE", "Venezuela"], ["VG", "British Virgin Islands"], ["VI", "U.S. Virgin Islands"], ["VN", "Viet Nam"], ["VU", "Vanuatu"], ["WF", "Wallis and Futuna"], ["WS", "Samoa"], ["YE", "Yemen"], ["YT", "Mayotte"], ["ZA", "South Africa"], ["ZM", "Zambia"], ["ZW", "Zimbabwe"], ["XK", "Kosovo"]]</script><script>'use strict';
+async function postPlaces(body) {
+  let endpoint='/breeze/places';
+  if(location.hostname!=='127.0.0.1'){
+    const config=await (await fetch('./config.json')).json();
+    endpoint=new URL('/places',config.apiBase).href;
+  }
+  const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(18000)});
+  const result=await response.json();
+  if(!response.ok)throw Error(result.error||'Live search is unavailable.');
+  return result;
+}
+globalThis.AlongsidePlaces = (country, city, publicFirst) => postPlaces({country,city,publicFirst});
+globalThis.AlongsidePlacesNear = (latitude, longitude, publicFirst) => postPlaces({near:{latitude,longitude},publicFirst});
+
+// Probe capabilities without sending the visitor's search area.
+let placesReady;
+globalThis.alongsidePlacesReady = function() {
+  if (location.protocol === 'file:') return Promise.resolve(false);
+  if (!placesReady) placesReady = (async () => {
+    const options={cache:'no-store',signal:AbortSignal.timeout(5000)};
+    const config=await (await fetch('./config.json',options)).json();
+    if (location.hostname === '127.0.0.1') return config.placesReady === true;
+    const status=await fetch(new URL('/status',config.apiBase),options);
+    return status.ok && (await status.json()).placesReady === true;
+  })().catch(()=>false);
+  return placesReady;
+};
+
+// Google Maps directions from the visitor's current position (Maps asks for it, not Alongside).
+globalThis.alongsideDirectionsUrl = function(destination, placeId) {
+  const url=new URL('https://www.google.com/maps/dir/');
+  url.searchParams.set('api','1');url.searchParams.set('destination',destination);
+  if(placeId)url.searchParams.set('destination_place_id',placeId);
+  return url.href;
+};
+
+// "Find care near me": reads the device location only after a tap and rounds it to about 1 km.
+globalThis.AlongsideNearby = function(out, publicFirst, onFallback = () => {}) {
+  const make=(tag,text,className)=>{const node=document.createElement(tag);if(className)node.className=className;node.textContent=text;return node;};
+  const link=(label,href)=>{const a=make('a',label,'action outline');a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a;};
+  const kind=publicFirst?'public psychiatric hospitals':'psychiatric hospitals';
+  out.replaceChildren();
+  const panel=make('article','','panel stack');
+  const status=make('p','Finding your location…');status.setAttribute('role','status');
+  const listings=make('div','','stack');
+  panel.append(make('h2','Care near you'),status,listings);
+  out.append(panel);
+  if(!navigator.geolocation){status.textContent='This browser cannot share your location. Search by country and city instead.';onFallback();return;}
+  navigator.geolocation.getCurrentPosition(async position=>{
+    const latitude=Math.round(position.coords.latitude*100)/100, longitude=Math.round(position.coords.longitude*100)/100;
+    const mapsSearch=new URL('https://www.google.com/maps/search/');
+    mapsSearch.searchParams.set('api','1');mapsSearch.searchParams.set('query',kind+' near '+latitude+','+longitude);
+    const fallback=make('div','','stack');
+    fallback.append(link('Open nearby hospitals in Google Maps',mapsSearch.href),make('small','Opening Google Maps shares your approximate location with Google. Confirm services and age eligibility with the hospital.'));
+    if(!await globalThis.alongsidePlacesReady()){
+      status.textContent='Live nearby search is not available here. Google Maps can show hospitals around you.';
+      listings.append(fallback);onFallback();return;
+    }
+    status.textContent='Searching for the nearest hospitals…';
+    try{
+      const {places}=await globalThis.AlongsidePlacesNear(latitude,longitude,publicFirst);
+      if(!places.length){status.textContent='No hospitals were found within about 50 km. Try Google Maps or search by city.';listings.append(fallback);onFallback();return;}
+      status.textContent='Nearest first. Distances are straight-line and approximate.';
+      const credit=make('strong','Google Maps');credit.setAttribute('translate','no');listings.append(credit);
+      for(const hospital of places){
+        const item=make('div','','panel stack');
+        item.append(make('h3',hospital.name),make('p',hospital.address));
+        if(Number.isFinite(hospital.distanceKm))item.append(make('small',hospital.distanceKm+' km away'));
+        item.append(link('Get directions',globalThis.alongsideDirectionsUrl(hospital.name+', '+hospital.address,hospital.placeId)));
+        if(/^https:\/\//.test(hospital.url))item.append(link('View on Google Maps',hospital.url));
+        for(const a of hospital.attributions||[])if(a.name)item.append(/^https:\/\//.test(a.uri)?link(a.name,a.uri):make('small',a.name));
+        listings.append(item);
+      }
+      listings.append(make('small','Map listings can be incomplete. Confirm services and age eligibility directly with the provider.'));
+    }catch(error){
+      status.textContent=error instanceof SyntaxError?'Live search is unavailable on this version of Alongside.':error.message;
+      listings.append(fallback);onFallback();
+    }
+  },error=>{
+    status.textContent=error.code===1
+      ?'Location access is turned off for this site. Allow it in your browser settings, or search by country and city.'
+      :'Your location could not be found. Try again, or search by country and city.';
+    onFallback();
+  },{enableHighAccuracy:false,timeout:15000,maximumAge:300000});
+};
+const byId=id=>document.getElementById(id);
+const interfaceLocale=()=>'en';
+const countryRegistry=JSON.parse(byId('country-registry').textContent);
+const countryAliases=new Map();
+function normalizeLanguageName(value) {
+  return value.normalize("NFKC").trim().toLocaleLowerCase();
+}
+
+function element(tag, content, className) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.textContent = content;
+  return node;
+}
+
+const careDirectories = {
+ SA: [ ['Saudi Ministry of Health', 'https://www.moh.gov.sa/en/eservices/interactive-maps/pages/default.aspx', 'Search by region, city, and facility type across Saudi Arabia.'], ['Johns Hopkins Aramco Healthcare', 'https://www.jhah.com/en/contact-us/visit-us', 'Locations include Dhahran, Al-Hasa, Abqaiq, Ras Tanura, and Udhailiyah. Confirm eligibility and costs.'] ],
+ US: [ ['HRSA Find a Health Center', 'https://findahealthcenter.hrsa.gov/', 'Search health centers by your location. Ask the center about available services and fees.'] ],
+ GB: [ ['NHS service finder', 'https://www.nhs.uk/nhs-services/services-near-you/', 'Search NHS services in England by area. Other UK nations use their own NHS directories.'] ],
+ AU: [ ['Healthdirect service finder', 'https://www.healthdirect.gov.au/australian-health-services', 'Search health services by location and service type.'] ],
+ IE: [ ['HSE Find a GP', 'https://www2.hse.ie/services/find-a-gp/', 'Search by place, name, or address in Ireland.'] ],
+ AE: [ ['UAE Ministry of Health and Prevention', 'https://mohap.gov.ae/en/about-us/medical-facilities-directory', 'Search the official medical facilities directory. Confirm services and eligibility.'], ['Abu Dhabi Department of Health', 'https://stem.doh.gov.ae/publicmap/', 'Public health facility map for the emirate of Abu Dhabi.'] ]
+};
+const researchedCareSources = {
+  AT: [["List of medical facilities in Austria", "https://www.gov.uk/government/publications/austria-doctors/list-of-medical-facilities-in-austria", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  AU: [["Australian mental health services", "https://www.healthdirect.gov.au/healthcare-and-services/mental-health/australian-mental-health-services", ""]],
+  AZ: [["Ministry of Health mental health center", "https://sehiyye.gov.az/en/nazirliyin-qurumlari/psixi-saglamliq-m-rk-zi/", ""]],
+  BB: [["Barbados mental health services directory", "https://www.health.gov.bb/For-Public/Mental-Health-Care", ""]],
+  BE: [["Belgian federal guide to psychiatric hospitals", "https://www.health.belgium.be/en/themes/health/organisatie-gezondheidszorg/healthcare-facilities-belgium", ""]],
+  BF: [["Burkina Faso: list of doctors and medical facilities", "https://www.gov.uk/government/publications/burkina-faso-doctors-and-medical-facilities/burkina-faso-list-of-doctors-and-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BG: [["List of medical facilities in Bulgaria", "https://www.gov.uk/government/publications/bulgaria-list-of-medical-facilities/bulgaria-doctors", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BH: [["Psychiatric Hospital, Bahrain", "https://www.moh.gov.bh/HealthInstitution/PsychiatricHospital?lang=en", ""]],
+  BI: [["Burundi: List of Medical Facilities", "https://www.gov.uk/government/publications/burundi-list-of-medical-facilitiespractitioners/burundi-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BN: [["Brunei Ministry of Health psychiatric services", "https://moh.gov.bn/services/psychiatric-services/", ""]],
+  BR: [["List of medical facilities/practitioners in Brazil", "https://www.gov.uk/government/publications/list-of-doctors--2/list-of-doctors-in-brazil", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BS: [["The Bahamas: medical facilities", "https://www.gov.uk/government/publications/list-of-medical-facilitiespractitioners-in-bahamas/bahamas-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BT: [["Jigme Dorji Wangchuck National Referral Hospital · Psychiatry", "https://jdwnrh.gov.bt/clinical-departments/psychiatry-2/", ""]],
+  BY: [["List of medical facilities in Belarus", "https://www.gov.uk/government/publications/belarus-list-of-medical-facilities/list-of-medical-facilities-in-belarus", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  BZ: [["Belize: medical facilities", "https://www.gov.uk/government/publications/belize-list-of-medical-facilities/belize-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  CF: [["CAR: List of English medical facilities and practitioners", "https://www.gov.uk/government/publications/central-african-republic-medical-facilities-and-practitioners/list-of-medical-facilities-and-practitioners-in-car", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  CH: [["Geneva University Hospitals · Psychiatric Hospital", "https://www.hug.ch/en/lhopital-de-psychiatrie", ""]],
+  CN: [["Shanghai Mental Health Center", "https://www.smhc.org.cn/english/ABOUTUS/ABOUT_US.htm", ""]],
+  CO: [["Colombia: medical facilities", "https://www.gov.uk/government/publications/colombia-list-of-medical-facilities/list-of-medical-facilities-in-colombia", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  CU: [["Cuba: medical facilities", "https://www.gov.uk/government/publications/cuba-list-of-medical-facilitiespractitioners/list-of-medical-facilities-cuba", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  CY: [["List of hospitals in Cyprus", "https://www.gov.uk/government/publications/cyprus-hospitals/list-of-hospitals-in-cyprus", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  CZ: [["Czechia: medical facilities and practitioners", "https://www.gov.uk/government/publications/czech-republic-list-of-medical-facilitiespractitioners/list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  DE: [["German national hospital search", "https://gesund.bund.de/en/service/krankenhaussuche", ""]],
+  DO: [["List of medical facilities and practitioners in Dominican Republic", "https://www.gov.uk/government/publications/dominican-republic-list-of-medical-facilities-and-practitioners/dominican-republic-medical-facilities-and-practitioners", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  DZ: [["Algeria: doctors", "https://www.gov.uk/government/publications/algeria-doctors/algeria-doctors--2", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  EC: [["Ecuador: hospitals", "https://www.gov.uk/government/publications/ecuador-hospitals-and-doctors/ecuador-list-of-hospitals", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  EE: [["List of medical facilities in Estonia", "https://www.gov.uk/government/publications/estonia-doctors/estonia-doctors", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  ER: [["List of English speaking medical facilities in Eritrea", "https://www.gov.uk/government/publications/eritrea-doctors/eritrea-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  ET: [["Ethiopia Ministry of Health facility register", "https://mfrpublic.moh.gov.et/", ""]],
+  FI: [["HUS psychiatry services in Uusimaa", "https://www.hus.fi/en/about-us/departments/psychiatry", ""]],
+  FJ: [["Fiji Ministry of Health facility map", "https://www.health.gov.fj/interactive-map", ""]],
+  GB: [["Newham Centre for Mental Health, London", "https://www.elft.nhs.uk/services/newham-centre-mental-health", ""]],
+  GD: [["Grenada: medical facilities", "https://www.gov.uk/government/publications/grenada-list-of-medical-facilities-practitioners/grenada-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  GH: [["Ghana: List of Medical Facilities", "https://www.gov.uk/government/publications/ghana-list-of-medical-facilities/ghana-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  GY: [["National Psychiatric Hospital, Guyana", "https://portal.gov.gy/agencies/national-psychiatric-hospital", ""]],
+  HN: [["Honduras: medical facilities", "https://www.gov.uk/government/publications/list-of-medical-facilities-in-honduras/honduras-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  HR: [["Croatia: medical facilities", "https://www.gov.uk/government/publications/medical-facilities-in-croatia/croatia-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  IE: [["Mental Health Commission · Approved centres", "https://www.mhcirl.ie/what-we-do/regulation/office-inspector-mental-health-services/overview-mental-health-services", ""]],
+  IM: [["Manannan Court acute mental health services", "https://www.gov.im/categories/caring-and-support/mental-health-service/manannan-court-acute-services/", ""]],
+  IN: [["India · Government mental hospitals by state (2022 report, section 6.2.7)", "https://cbhidghs.mohfw.gov.in/sites/default/files/2024-09/national-health-profile-2022.pdf", ""]],
+  IS: [["Iceland: medical facilities", "https://www.gov.uk/government/publications/iceland-list-of-medical-facilitiespractitioners/iceland-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  JE: [["Jersey inpatient mental health services", "https://www.gov.je/Health/Mental/AdultMentalHealth/HospitalCare/Pages/home.aspx", ""]],
+  JM: [["Jamaica Ministry of Health facility locations", "https://www.moh.gov.jm/location-of-hospitals-and-health-centres/", ""]],
+  JO: [["Jordan Ministry of Health hospital directory", "https://www.moh.gov.jo/EN/List/Hospitals", ""]],
+  JP: [["Japan’s national medical directory (NAVII)", "https://www.iryou.teikyouseido.mhlw.go.jp/znk-web/juminkanja/S2300/initialize", "Choose a prefecture and search for Psychiatry (精神科)."]],
+  KG: [["List of medical facilities in Kyrgyzstan", "https://www.gov.uk/government/publications/kyrgyzstan-list-of-medical-facilitiespractitioners/list-of-medical-facilities-in-kyrgyzstan", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  KM: [["Comoros: List of medical facilities", "https://www.gov.uk/government/publications/comoros-doctors/comoros-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  KR: [["Ajou University Hospital · Psychiatry", "https://hosp.ajoumc.or.kr/en/hospital/deptView.do?deptCd=PSY&deptNo=22", ""]],
+  LK: [["National Institute of Mental Health · Inpatient services", "https://nimh.health.gov.lk/en/in-patient-services/", ""]],
+  ME: [["Montenegro government directory of specialist hospitals", "https://www.gov.me/en/article/specialised-hospitals-in-montenegro", ""]],
+  MK: [["North Macedonia Ministry of Health · Health center addresses", "https://zdravstvo.gov.mk/en-GB/ustanovi/adresi-na-zd", ""]],
+  MM: [["List of medical facilities/practitioners in Myanmar", "https://www.gov.uk/government/publications/myanmar-list-of-medical-facilitiespractitioners/list-of-medical-facilitiespractitioners-in-myanmar", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  MR: [["Mauritania: List of Medical Facilities", "https://www.gov.uk/government/publications/mauritania-doctors/mauritania-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  NI: [["Nicaragua: medical facilities", "https://www.gov.uk/government/publications/hospitals-in-nicaragua/nicaragua-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  NL: [["Netherlands: list of medical facilities", "https://www.gov.uk/government/publications/the-netherlands-list-of-medical-facilitiespractitioners/netherlands-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  NP: [["Patan Academy of Health Sciences · Psychiatry", "https://web.pahs.edu.np/hospital-services/in-patient-department/department-of-psychiatry/", ""]],
+  OM: [["Al Masarra Hospital", "https://moh.gov.om/en/hospitals-directorates/hospitals/al-masarra-hospital/", ""]],
+  PG: [["Port Moresby General Hospital · Psychiatry", "https://pomgen.gov.pg/psychiatry/", ""]],
+  PL: [["List of medical facilities in Poland", "https://www.gov.uk/government/publications/poland-list-of-medical-facilities/poland-doctors", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  QA: [["Qatar Ministry of Public Health facility finder", "https://hukoomi.gov.qa/en/categories/business-registration-licenses/find-health-facility-in-qatar", ""]],
+  RO: [["Romania: medical facilities", "https://www.gov.uk/government/publications/medical-facilities-list-romania/romania-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  RS: [["Serbia: medical facilities", "https://www.gov.uk/government/publications/serbia-list-of-medical-facilitiespractitioners/serbia-list-of-medical-facilities--2", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  RW: [["Rwanda Ministry of Health hospital directory", "https://www.moh.gov.rw/affiliates-teaching-hospitals/hospitals", ""]],
+  SC: [["Seychelles Ministry of Health hospital directory", "https://www.health.gov.sc/seychelles-hospitals/", ""]],
+  SI: [["Slovenia: medical facilities and pharmacies", "https://www.gov.uk/government/publications/slovenia-list-of-medical-facilities/list-of-medical-facilities-and-practitioners-in-slovenia", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  SK: [["Slovakia: medical facilities", "https://www.gov.uk/government/publications/slovakia-list-of-medical-facilitiespractitioners/slovakia-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  SS: [["South Sudan: medical facilities", "https://www.gov.uk/government/publications/south-sudan-doctors/south-sudan-medical-facilities--2", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  TG: [["Togo: list of medical facilities", "https://www.gov.uk/government/publications/togo-doctors/togo-list-of-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  TH: [["Thailand government dataset of mental health and psychiatric service locations", "https://data.go.th/th/dataset/service-dmh", ""]],
+  TJ: [["List of medical facilities/practitioners in Tajikistan", "https://www.gov.uk/government/publications/tajikistan-doctors/list-of-medical-facilitiespractitioners-in-tajikistan", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  TL: [["List of medical facilities in Timor-Leste", "https://www.gov.uk/government/publications/timor-leste-medical-facilities/list-of-medical-facilities-in-timor-leste", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  TR: [["List of medical facilities in Turkey", "https://www.gov.uk/government/publications/turkey-list-of-medical-practitioners/list-of-medical-facilities-in-turkey", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  TT: [["Trinidad and Tobago Ministry of Health facility directory", "https://health.gov.tt/health-facilities", ""]],
+  UZ: [["Uzbekistan: medical facilities", "https://www.gov.uk/government/publications/uzbekistan-list-of-medical-facilitiespractitioners/uzbekistan-medical-facilities", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  VE: [["List of medical facilities in Venezuela", "https://www.gov.uk/government/publications/venezuela-list-of-medical-facilities-practitioners/list-of-medical-facilities-in-venezuela", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+  XK: [["Kosovo: medical facilities", "https://www.gov.uk/government/publications/kosovo-list-of-medical-facilitiespractitioners/list-of-medical-facilities-in-kosovo", "UK government directory for visitors. It includes general medical facilities. Check psychiatry services with the provider."]],
+};
+function userText(tag, text) { const node = element(tag, text); node.dataset.userContent = ''; return node; }
+function countryLabel(code) { if (!code || !countryRegistry.some(r=>r[0]===code)) return code || ''; try { return new Intl.DisplayNames([interfaceLocale()],{type:'region'}).of(code); } catch { return countryRegistry.find(r=>r[0]===code)?.[1] || code; } }
+function prepareCountryOptions() {
+ const list=byId('country-options'); list.replaceChildren();
+ for (const [code, name] of countryRegistry) {
+  const label=countryLabel(code); countryAliases.set(normalizeLanguageName(code),code); countryAliases.set(normalizeLanguageName(name),code); countryAliases.set(normalizeLanguageName(label),code);
+  const option=element('option',''); option.value=label; list.append(option);
+ }
+}
+function resolveCountry(value) { return countryAliases.get(normalizeLanguageName(value)) || value.trim().slice(0,100); }
+function renderCare() {
+ const country=resolveCountry(byId('care-country').value); const city=byId('care-city').value.trim(); const out=byId('care-results'); out.replaceChildren();
+ if(!country)return;
+ const publicFirst=byId('care-public').checked;
+ const rows=[...(Object.hasOwn(researchedCareSources,country) ? researchedCareSources[country] : []), ...(Object.hasOwn(careDirectories,country) ? careDirectories[country] : [])].filter(row=>!publicFirst || country!=='SA' || row[0]!=='Johns Hopkins Aramco Healthcare');
+ if(country==='SA' && /^(?:dammam|ad[ -]dammam|الدمام|دمام)$/iu.test(city)){
+   rows.unshift(['Dammam health center locations', 'https://www.moh.gov.sa/en/ministry/projects/with-you/pages/eastern-province.aspx', 'The Ministry of Health lists Al-Faisaliah and Al-Hamra in Dammam. Open the directory for location links. Contact the center to ask about eating concerns, age eligibility and appointments.']);
+ }
+ const heading=element('h2','Directory results');
+ const context=element('div','','stack');
+ context.append(heading,userText('p',[city,countryLabel(country)].filter(Boolean).join(' · ')));
+ if(publicFirst)context.append(element('small','Ask the provider about fees and eligibility.'));
+ out.append(context);
+ const facilities = {
+   KW: [['Kuwait Center for Mental Health','Shuwaikh Medical, Sabah Health Region, Kuwait','https://kuwaitpsych.com/KCMH/', ['kuwait','kuwait city','shuwaikh','shuwaikh medical','الكويت','مدينة الكويت','الشويخ']]],
+   RU: [['Bekhterev National Medical Research Center for Psychiatry and Neurology','3 Bekhtereva Street, Saint Petersburg 192019, Russia','https://bekhterev.ru/contacts/',['saint petersburg','st petersburg','st. petersburg','санкт-петербург']]],
+   JP: [
+     ['Tokyo Metropolitan Matsuzawa Hospital', '2-1-1 Kamikitazawa, Setagaya-ku, Tokyo', 'https://www.tmhp.jp/matsuzawa/en/overview.html', ['tokyo','tokio','東京','東京都','setagaya','世田谷区']],
+     ['National Center Hospital, National Center of Neurology and Psychiatry', '4-1-1 Ogawa-Higashi, Kodaira, Tokyo 187-8551', 'https://hsp.ncnp.go.jp/EN/', ['tokyo','tokio','東京','東京都','kodaira','小平市']]
+   ],
+   NZ: [['Waiatarau Inpatient Mental Health Unit','75 Lincoln Road, Henderson, Auckland 0610','https://www.health.govt.nz/regulation-legislation/certification-of-health-care-services/certified-providers/public-hospitals/waiatarau-inpatient-mental-health-unit',['auckland','henderson']]],
+   UG: [['Butabika Hospital','Plot 2, Kirombe – Butabika Road, Kampala','https://butabikahospital.go.ug/',['kampala','butabika']]],
+   SN: [['Hôpital Principal de Dakar · Psychiatry','Rue du Dr Guillet, Dakar','https://cild.gouv.sn/ova_sev/national-planning-9/',['dakar']]]
+ };
+ function mapUrl(query){
+   const url=new URL('https://www.google.com/maps/search/');
+   url.searchParams.set('api','1');url.searchParams.set('query',query);
+   return url.href;
+ }
+ function link(label,url){
+   const a=element('a',label,'action outline');
+   a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;
+ }
+ const place=[city,countryLabel(country)].filter(Boolean).join(', ');
+ const matches=(Object.hasOwn(facilities,country) ? facilities[country] : []).filter(row=>!city || row[3].includes(normalizeLanguageName(city).normalize('NFD').replace(/[\u0300-\u036f]/g,'')));
+ for(const [name,address,source] of matches){
+   const card=element('article','','panel stack');
+   card.append(element('h3',name),element('p',address),link('Hospital information',source),link('Get directions',globalThis.alongsideDirectionsUrl(name+', '+address+', '+countryLabel(country))),link('View address on Google Maps',mapUrl(name+', '+address+', '+countryLabel(country))));
+   out.append(card);
+ }
+ const live=element('article','','panel stack');
+ live.append(element('h3','Live hospital search'),element('small','Search sends the city, country and type of care to Google Maps. Confirm services and age eligibility directly with the provider.'));
+ if(location.protocol==='file:'){
+   live.append(element('p','Start Open-Find-Care.command on your Mac for live search.'));
+ }else{
+   const button=element('button','Search Google Maps here','action');
+   button.type='button';
+   const feedback=element('p','');feedback.setAttribute('role','status');
+   const listings=element('div','','stack');
+   button.onclick=async()=>{
+     button.disabled=true;feedback.textContent='Searching Google Maps…';listings.replaceChildren();
+     try{
+       const result=await globalThis.AlongsidePlaces(countryLabel(country),city,publicFirst);
+       if(!result.places.length){feedback.textContent='Google Maps returned no matches. Try a nearby city or a broader area.';return;}
+       feedback.textContent='';
+       const credit=element('strong','Google Maps');credit.setAttribute('translate','no');listings.append(credit);
+       for(const hospital of result.places){
+         const item=element('div','','panel stack');
+         item.append(element('h4',hospital.name),element('p',hospital.address));
+         item.append(link('Get directions',globalThis.alongsideDirectionsUrl(hospital.name+', '+hospital.address,hospital.placeId)));
+         if(/^https:\/\//.test(hospital.url))item.append(link('View on Google Maps',hospital.url));
+         for(const a of hospital.attributions||[])if(a.name)item.append(/^https:\/\//.test(a.uri)?link(a.name,a.uri):element('small',a.name));
+         listings.append(item);
+       }
+     }catch(error){feedback.textContent=error instanceof SyntaxError?'Live search is unavailable on this version of Alongside.':error.message;}
+     finally{button.disabled=false;}
+   };
+   live.append(button,feedback,listings);
+ }
+ live.hidden=true;
+ out.append(live);
+ globalThis.alongsidePlacesReady().then(ready=>{live.hidden=!ready;});
+ const mapCard=element('article','','panel stack');
+ mapCard.append(userText('h3','Search hospital locations in '+place));
+ if(!matches.length)mapCard.append(element('p','Alongside has no individually checked hospital address for this area yet.'));
+ mapCard.append(element('small','Opening Google Maps shares this search area with Google. Map listings can be incomplete. Confirm services and age eligibility with the hospital.'));
+ mapCard.append(link('Search Google Maps',mapUrl((publicFirst?'public psychiatric hospitals in ':'psychiatric hospitals in ')+place)));
+ out.append(mapCard);
+ for (const [name,url,note] of rows) {
+   const card=element('div','','panel stack');card.append(element('h3',name));
+   if(note)card.append(element('p',note));
+   card.append(link('View source',url));out.append(card);
+ }
+}
+byId('care-near-form').addEventListener('submit',event=>{
+   event.preventDefault();
+   const results=byId('care-results');
+   globalThis.AlongsideNearby(results,byId('care-public').checked,()=>{byId('care-city-search').open=true;});
+   results.focus({preventScroll:true});
+   results.scrollIntoView({block:'start'});
+ });
+ byId('care-form').addEventListener('submit',event=>{
+   event.preventDefault();
+   renderCare();
+   const results=byId('care-results');
+   results.focus({preventScroll:true});
+   results.scrollIntoView({block:'start'});
+ });
+ prepareCountryOptions();</script></body></html>
